@@ -9,6 +9,7 @@ struct ReportView: View {
     /// nil はいまのネットワーク（切り替わったら追従する）
     @State private var scope: NetworkFilter?
     @State private var copied = false
+    @Environment(\.openSettings) private var openSettings
 
     var body: some View {
         let rows = Report.hourly(records, filter: filter)
@@ -90,6 +91,13 @@ struct ReportView: View {
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
                 networkPicker
+                Button {
+                    SettingsTab.select(.networks)
+                    openSettings()
+                } label: {
+                    Label("Manage Networks…", systemImage: "square.and.pencil")
+                }
+                .help("Rename networks, or merge networks that were recorded separately")
                 Picker("Scope", selection: $hours) {
                     Text("All Records").tag(Int?.none)
                     Text("Last 24 Hours").tag(Int?.some(24))
@@ -113,13 +121,20 @@ struct ReportView: View {
             }
         }
         .task(id: "\(hours ?? -1)-\(String(describing: effectiveScope))-\(model.monitor.minuteRevision)-\(model.speedTest.history.count)-\(model.loadTest.history.count)") {
-            let h = hours, n = effectiveScope
-            records = await Task.detached(priority: .utility) { RecordSet.load(hours: h, network: n) }.value
+            let h = hours, n = effectiveScope, nets = model.monitor.networks
+            records = await Task.detached(priority: .utility) { RecordSet.load(hours: h, network: n, networks: nets) }.value
         }
         .onChange(of: records.minutes.count) { copied = false }
     }
 
-    private var effectiveScope: NetworkFilter { scope ?? model.monitor.network.map(NetworkFilter.network) ?? .all }
+    private var effectiveScope: NetworkFilter {
+        switch scope {
+        // まとめた先が変わっても、選んだネットワークの代表を見る
+        case .network(let id): .network(model.monitor.networks.canonical(id))
+        case .all: .all
+        case nil: model.monitor.currentNetwork.map(NetworkFilter.network) ?? .all
+        }
+    }
 
     private func name(_ id: String) -> String {
         model.monitor.networks[id]?.displayName ?? String(localized: "Unknown Network")
@@ -134,10 +149,8 @@ struct ReportView: View {
 
     /// 既定はいまのネットワーク。ほかの場所で計測した記録もここから選んで見られる
     private var networkPicker: some View {
-        let current = model.monitor.network
-        let others = model.monitor.networks.values
-            .filter { $0.id != current }
-            .sorted { $0.first > $1.first }
+        let current = model.monitor.currentNetwork
+        let others = model.monitor.networks.representatives.filter { $0.id != current }
         return Picker("Network", selection: $scope) {
             Text(current.map { String(localized: "This Network (\(name($0)))") } ?? String(localized: "This Network"))
                 .tag(NetworkFilter?.none)

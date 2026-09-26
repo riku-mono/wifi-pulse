@@ -10,8 +10,8 @@ struct DevicesView: View {
     var body: some View {
         let scanner = model.monitor.devices
         // 別の場所（ネットワーク）で見た機器は出さない
-        let network = model.monitor.network
-        let all = scanner.devices.filter { $0.net == network }
+        let network = model.monitor.network, networks = model.monitor.networks
+        let all = scanner.devices.filter { $0.net != nil && networks.same($0.net, network) }
         let list = all.filter { d in
             (showOffline || d.online == true)
                 && (search.isEmpty || [d.displayName, d.ip ?? "", d.mac, d.vendor ?? ""]

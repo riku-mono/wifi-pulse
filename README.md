@@ -93,8 +93,8 @@ Strings live in String Catalogs (`.xcstrings`) — see [docs/localization.md](do
 <!-- l10n-coverage:start -->
 | Language | Translated | Coverage | Needs review | Untranslated |
 |---|---:|---|---:|---:|
-| `en` (source) | 542 / 542 | ██████████ 100.0% | 0 | 0 |
-| `ja` | 542 / 542 | ██████████ 100.0% | 0 | 0 |
+| `en` (source) | 553 / 553 | ██████████ 100.0% | 0 | 0 |
+| `ja` | 553 / 553 | ██████████ 100.0% | 0 | 0 |
 
 Catalogs: `apps/macos/WiFiPulse/InfoPlist.xcstrings`, `apps/macos/WiFiPulse/Localizable.xcstrings` (excluding 32 strings marked “don't translate” and 0 stale strings)
 <!-- l10n-coverage:end -->

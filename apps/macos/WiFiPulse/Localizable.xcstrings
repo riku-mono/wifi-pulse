@@ -84,6 +84,16 @@
         }
       }
     },
+    "%@ (router address unknown)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@（ルーターのアドレス不明）"
+          }
+        }
+      }
+    },
     "%@ Internet%@" : {
       "localizations" : {
         "ja" : {
@@ -1693,6 +1703,16 @@
         }
       }
     },
+    "First Recorded" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "計測を始めた日時"
+          }
+        }
+      }
+    },
     "First Seen" : {
       "localizations" : {
         "ja" : {
@@ -1969,6 +1989,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "直近10分に見えたものも表示"
+          }
+        }
+      }
+    },
+    "Includes records of %@" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ の記録を含む"
           }
         }
       }
@@ -2456,6 +2486,16 @@
         }
       }
     },
+    "Manage Networks…" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ネットワークを管理…"
+          }
+        }
+      }
+    },
     "Manufacturer" : {
       "localizations" : {
         "ja" : {
@@ -2575,6 +2615,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "1分ごとの記録を時刻別にまとめた中央値。特定の時間帯だけ悪いなら回線側（ISPの輻輳）が疑われます。"
+          }
+        }
+      }
+    },
+    "Merge Into" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まとめる先"
           }
         }
       }
@@ -2745,6 +2795,26 @@
         }
       }
     },
+    "Networks" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ネットワーク"
+          }
+        }
+      }
+    },
+    "Networks appear here once the app has measured them." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "計測したネットワークがここに表示されます。"
+          }
+        }
+      }
+    },
     "Networks: %lld · Access points: %lld" : {
       "localizations" : {
         "ja" : {
@@ -2821,6 +2891,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "まだ測っていません"
+          }
+        }
+      }
+    },
+    "No Networks Yet" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ネットワークはまだありません"
           }
         }
       }
@@ -3435,6 +3515,16 @@
         }
       }
     },
+    "Records are kept for each router. If the same network was recorded twice (for example, before and after the router’s address could be read), merge one into the other. Merging doesn’t change the record files and can be undone with Separate." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "記録はルーターごとに分けています。同じネットワークが2つに分かれて記録されたとき（ルーターのアドレスが読めるようになる前と後など）は、片方をもう片方にまとめてください。まとめても記録のファイルは変わらず、「分ける」で元に戻せます。"
+          }
+        }
+      }
+    },
     "Records are kept separately for each network (router)." : {
       "localizations" : {
         "ja" : {
@@ -3481,6 +3571,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "再読み込み"
+          }
+        }
+      }
+    },
+    "Rename networks, or merge networks that were recorded separately" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ネットワークの名前を変えたり、分かれて記録されたネットワークをまとめたりします"
           }
         }
       }
@@ -3963,6 +4063,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "送信"
+          }
+        }
+      }
+    },
+    "Separate" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "分ける"
           }
         }
       }

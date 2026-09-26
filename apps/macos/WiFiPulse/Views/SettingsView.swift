@@ -1,11 +1,23 @@
 import SwiftUI
 
+/// 設定の画面のタブ。ほかの画面から特定のタブを開くときは `select` してから開く
+enum SettingsTab: String {
+    case general, networks, data, privacy
+
+    static let key = "settingsTab"
+
+    static func select(_ tab: SettingsTab) { UserDefaults.standard.set(tab.rawValue, forKey: key) }
+}
+
 struct SettingsView: View {
+    @AppStorage(SettingsTab.key) private var tab = SettingsTab.general
+
     var body: some View {
-        TabView {
-            Tab("General", systemImage: "gearshape") { GeneralSettings() }
-            Tab("Data", systemImage: "externaldrive") { DataSettings() }
-            Tab("Privacy", systemImage: "hand.raised") { PrivacySettings() }
+        TabView(selection: $tab) {
+            Tab("General", systemImage: "gearshape", value: .general) { GeneralSettings() }
+            Tab("Networks", systemImage: "wifi.router", value: .networks) { NetworkSettings() }
+            Tab("Data", systemImage: "externaldrive", value: .data) { DataSettings() }
+            Tab("Privacy", systemImage: "hand.raised", value: .privacy) { PrivacySettings() }
         }
         .frame(width: 520)
         .scenePadding()
@@ -93,6 +105,85 @@ private struct AppearanceSection: View {
             .onChange(of: appearance) { _, newValue in AppAppearance.apply(newValue) }
         }
     }
+}
+
+/// 計測したネットワークの名前の変更と統合
+private struct NetworkSettings: View {
+    @Environment(AppModel.self) private var model
+
+    var body: some View {
+        let monitor = model.monitor
+        let list = monitor.networks.representatives
+        Form {
+            if list.isEmpty {
+                ContentUnavailableView("No Networks Yet", systemImage: "wifi.router",
+                                       description: Text("Networks appear here once the app has measured them."))
+            }
+            ForEach(list) { n in
+                Section {
+                    NetworkNameField(network: n)
+                    LabeledContent("Router", value: routerText(n))
+                    LabeledContent("First Recorded") {
+                        Text(Date(epochMs: n.first), format: .dateTime.year().month().day().hour().minute())
+                    }
+                    ForEach(monitor.networks.members(of: n.id)) { m in
+                        LabeledContent {
+                            Button("Separate") { monitor.separateNetwork(m.id) }
+                        } label: {
+                            Text("Includes records of \(m.automaticName)")
+                            Text(routerText(m))
+                        }
+                    }
+                    let targets = list.filter { $0.id != n.id }
+                    if !targets.isEmpty {
+                        Menu("Merge Into") {
+                            ForEach(targets) { t in
+                                Button(t.displayName) { monitor.mergeNetwork(n.id, into: t.id) }
+                            }
+                        }
+                        .fixedSize()
+                    }
+                } header: {
+                    HStack {
+                        Text(n.displayName)
+                        if n.id == monitor.currentNetwork {
+                            Text("This Network").font(.caption).foregroundStyle(.secondary)
+                        }
+                    }
+                }
+            }
+            Section {
+            } footer: {
+                Text("Records are kept for each router. If the same network was recorded twice (for example, before and after the router’s address could be read), merge one into the other. Merging doesn’t change the record files and can be undone with Separate.")
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .formStyle(.grouped)
+    }
+
+    private func routerText(_ n: KnownNetwork) -> String {
+        n.isGatewayOnly ? String(localized: "\(n.gateway) (router address unknown)") : "\(n.gateway) · \(n.id)"
+    }
+}
+
+/// 名前の欄。1文字ごとに保存しないよう、確定したとき（Return・フォーカスが外れたとき）に保存する
+private struct NetworkNameField: View {
+    @Environment(AppModel.self) private var model
+    let network: KnownNetwork
+    @State private var text = ""
+    @FocusState private var focused: Bool
+
+    var body: some View {
+        TextField("Name", text: $text, prompt: Text(network.automaticName))
+            .focused($focused)
+            .onAppear { text = network.name ?? "" }
+            .onChange(of: network.name) { _, new in if !focused { text = new ?? "" } }
+            .onSubmit(commit)
+            .onChange(of: focused) { _, now in if !now { commit() } }
+            .onDisappear(perform: commit)
+    }
+
+    private func commit() { model.monitor.renameNetwork(network.id, to: text) }
 }
 
 private struct DataSettings: View {
