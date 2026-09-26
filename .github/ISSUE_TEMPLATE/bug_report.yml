@@ -1,0 +1,86 @@
+name: Bug report / 不具合の報告
+description: Something doesn't work as expected. / 期待どおりに動かない
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report! English or Japanese is fine. / 英語でも日本語でも構いません。
+
+        > [!WARNING]
+        > **Please hide personal network details** — IP addresses, MAC addresses, SSIDs, BSSIDs and device names — in text, logs and screenshots.
+        > **IP・MAC アドレス・SSID・BSSID・機器名は伏せてください**（本文・ログ・スクリーンショットのすべて）。
+        >
+        > Security issues: see [SECURITY.md](https://github.com/riku-mono/wifi-pulse/blob/main/SECURITY.md), not a public issue. / 脆弱性は公開の Issue ではなく SECURITY.md の方法で。
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened? / 何が起きたか
+      description: Also tell us what you expected. / 期待していた動作も書いてください。
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce / 再現手順
+      placeholder: |
+        1. Open the Latency view
+        2. Switch to iPhone tethering
+        3. ...
+    validations:
+      required: true
+  - type: dropdown
+    id: view
+    attributes:
+      label: Where in the app? / どの画面か
+      multiple: true
+      options:
+        - Overview / 概要
+        - Latency / 遅延
+        - Wi-Fi connection / Wi-Fi 接続
+        - Nearby Wi-Fi / 周辺の Wi-Fi
+        - App traffic / アプリの通信
+        - LAN devices / LAN の機器
+        - Speed & load tests / 速度測定・負荷試験
+        - Trends & reports / 傾向・レポート
+        - Menu bar / メニューバー
+        - Settings / 設定
+        - Other / その他
+  - type: dropdown
+    id: connection
+    attributes:
+      label: Connection / 接続の種類
+      options:
+        - Wi-Fi
+        - iPhone tethering / テザリング
+        - Wired (Ethernet) / 有線
+        - Other / その他
+    validations:
+      required: true
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version / macOS のバージョン
+      placeholder: "macOS 27.0 (27A123)"
+    validations:
+      required: true
+  - type: input
+    id: app-version
+    attributes:
+      label: App version or commit / アプリのバージョン・コミット
+      placeholder: "0.1 (1) / main @ abc1234"
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / ログ
+      description: |
+        Optional. With personal details removed. / 任意。個人の情報を消してから貼ってください。
+        `log show --info --last 5m --predicate 'subsystem == "me.riku-mono.WiFiPulse"'`
+      render: text
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots / スクリーンショット
+      description: Optional. / 任意。

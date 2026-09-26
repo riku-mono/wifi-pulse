@@ -60,10 +60,11 @@
    - 値を2つ以上埋め込む文は、語順が変わっても崩れないよう `%1$@`・`%2$lld` のように番号付きの指定子を使う
    - 英語で数によって形が変わる文は、「Vary by Plural」で `one` / `other` を分けるか、「ラベル: 数値」の形にして複数形を避ける
    - 英語では付けない単位（「件」「回」など）は、明示的なキーで書く: `String(localized: "unit.runs", defaultValue: "", comment: "…")` に日本語訳「回」を入れる
-3. カバレッジを確認し、README の表を更新する:
+3. カバレッジを確認し、README（英語・日本語）の表を更新する:
    ```bash
-   scripts/l10n-coverage.py --update README.md
+   scripts/l10n-coverage.py --update README.md --update README.ja.md
    ```
+   表の見出しは書き込むファイルで変わる（`*.ja.md` は日本語、それ以外は英語）。
 
 ソースから消えた文字列は、カタログ上で「Stale」になる。カバレッジの分母からは外れるが、不要なら削除する。
 
@@ -77,7 +78,7 @@ scripts/l10n-coverage.py --json coverage.json             # JSON で保存
 ```
 
 - 対象は「翻訳しない」以外の文字列。複数形などの variation は、すべてが翻訳済みのときだけ翻訳済みと数える。
-- CI（`l10n.yml`）では `en`（ソース）・`ja` が 100% であることと、README の表が最新であることを検査する。結果は GitHub Actions の Job Summary に表で出る。
+- CI（`l10n.yml`）では `en`（ソース）・`ja` が 100% であることと、両方の README の表が最新であることを検査する。結果は GitHub Actions の Job Summary に表で出る。
 - 新しい言語を追加するときは、最初は基準に入れず、揃ってから `--require <言語>=100` を足す。
 
 ### 検査できていないこと

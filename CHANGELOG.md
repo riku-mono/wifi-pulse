@@ -15,6 +15,8 @@
 - 英語・日本語対応（String Catalog。英語がソース言語）
 - 表示言語の設定（既定はシステム設定に従う。設定画面から English / 日本語 を選べ、再起動で反映）
 - 言語別カバレッジの集計スクリプト（`scripts/l10n-coverage.py`）と CI での検査
+- アプリアイコン（Icon Composer。ライト・ダーク・着色・クリアに対応）（#3）
+- 英語の README（既定）と日本語の `README.ja.md`、Issue・PR のテンプレート、`CONTRIBUTING.md`・`SECURITY.md`（#29）
 - ユニットテスト（Swift Testing）: nettop の解析、チャンネルの計算と混雑度、ping の集計、判定とレポート、記録の読み書き、LAN の掃引範囲と機器名（#2）
 
 ### Fixed
