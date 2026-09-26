@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/app-icon.png" width="128" alt=""></p>
+
 # Wi-Fi Pulse
 
 Mac の Wi-Fi とネットワークの状態を常時計測し、「遅いのはどこか」を切り分けるための macOS ネイティブアプリと、その周辺（LP・Web 版サンプル）のモノレポ。
