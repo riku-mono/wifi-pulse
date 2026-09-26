@@ -215,6 +215,39 @@ final class DeviceScanner {
         return []
     }
 
+    /// ARP 表を sysctl（NET_RT_FLAGS / RTF_LLINFO）で直接読む。`arp -an` と同じ情報だが、
+    /// アプリから起動した `arp` コマンドには空の表しか返ってこないことがある（macOS 27 で確認）ので、自分で読む。
+    nonisolated static func readARP() -> [String: String] {
+        var mib: [Int32] = [CTL_NET, PF_ROUTE, 0, AF_INET, NET_RT_FLAGS, 0x400 /* RTF_LLINFO */]
+        var size = 0
+        guard sysctl(&mib, u_int(mib.count), nil, &size, nil, 0) == 0, size > 0 else { return [:] }
+        var buf = [UInt8](repeating: 0, count: size)
+        guard sysctl(&mib, u_int(mib.count), &buf, &size, nil, 0) == 0 else { return [:] }
+        var table: [String: String] = [:]
+        buf.withUnsafeBytes { raw in
+            var offset = 0
+            while offset + MemoryLayout<rt_msghdr>.size <= size {
+                let msgLen = Int(raw.load(fromByteOffset: offset, as: UInt16.self))
+                guard msgLen > 0 else { break }
+                defer { offset += msgLen }
+                let sinOffset = offset + MemoryLayout<rt_msghdr>.size
+                let sinLen = Int(raw[sinOffset])
+                guard raw[sinOffset + 1] == UInt8(AF_INET) else { continue }
+                let addr = raw.loadUnaligned(fromByteOffset: sinOffset + 4, as: UInt32.self)
+                let dlOffset = sinOffset + (sinLen > 0 ? (1 + ((sinLen - 1) | 3)) : 4)
+                guard dlOffset + 8 <= offset + msgLen, raw[dlOffset + 1] == UInt8(AF_LINK) else { continue }
+                let nlen = Int(raw[dlOffset + 5]), alen = Int(raw[dlOffset + 6])
+                guard alen == 6 else { continue }
+                let mac = (0..<6).map { String(format: "%02x", raw[dlOffset + 8 + nlen + $0]) }.joined(separator: ":")
+                var a = in_addr(s_addr: addr)
+                var out = [CChar](repeating: 0, count: Int(INET_ADDRSTRLEN))
+                inet_ntop(AF_INET, &a, &out, socklen_t(out.count))
+                table[String(cString: out)] = mac
+            }
+        }
+        return table
+    }
+
     /// サブネット内のホスト（ネットワーク・ブロードキャストのアドレスと自分を除く）。/24 より広ければ自分の /24 に絞る。
     nonisolated static func sweepTargets(ip: UInt32, netmask: UInt32) -> [UInt32] {
         let mask = netmask | 0xFFFF_FF00
@@ -224,16 +257,9 @@ final class DeviceScanner {
         return (network + 1 ..< broadcast).filter { $0 != ip }
     }
 
+    /// IP → MAC。解決できていない（incomplete）ものとマルチキャスト・ブロードキャストは除く。
     nonisolated static func arpTable() async -> [String: String] {
-        let out = await Shell.run("/usr/sbin/arp", ["-an"])
-        var table: [String: String] = [:]
-        for line in out.split(separator: "\n") where !line.contains("incomplete") {
-            guard let m = line.firstMatch(of: #/\((\d+\.\d+\.\d+\.\d+)\) at ([0-9a-fA-F:]{11,17})/#) else { continue }
-            let ip = String(m.1)
-            if ip.hasPrefix("224.") || ip.hasPrefix("239.") || ip.hasSuffix(".255") { continue }
-            table[ip] = normalize(String(m.2))
-        }
-        return table
+        readARP().filter { ip, _ in !(ip.hasPrefix("224.") || ip.hasPrefix("239.") || ip.hasSuffix(".255")) }
     }
 
     nonisolated static func normalize(_ mac: String) -> String {
