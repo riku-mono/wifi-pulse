@@ -24,7 +24,7 @@
 
 ## Features
 
-| | |
+| Feature | What it does |
 |---|---|
 | **Always-on latency** | Pings your router and the internet (IPv4 / IPv6) side by side, so Wi-Fi delay and ISP delay show up separately |
 | **Wi-Fi connection** | RSSI, noise, SNR, channel, PHY mode and link rate (CoreWLAN), with DFS channel warnings |
