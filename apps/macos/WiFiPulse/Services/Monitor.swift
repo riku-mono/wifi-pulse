@@ -13,6 +13,42 @@ nonisolated struct Tick: Identifiable, Sendable {
     /// Wi-Fiインターフェースの受信・送信（bps）
     let rx: Double
     let tx: Double
+    /// スコア・判定・1分集計から外す理由（グラフには残す）
+    var excluded: Exclusion? = nil
+}
+
+/// その秒の計測をスコア・判定・1分集計から外す理由。
+nonisolated enum Exclusion: Sendable, Hashable {
+    /// 起動直後の慣らし運転（窓に十分なサンプルが溜まるまで判定しない）。
+    /// この秒は履歴にも入れない（どの画面のグラフも、スコアと同じく慣らし運転の後から描く）
+    case warmup
+    /// LAN の掃引。約1000個の宛先へ ARP のブロードキャストが飛び、ルーター宛ての ping が
+    /// 1〜2秒 100 ms 超に跳ねる・落ちる（家の Wi-Fi で 8 ms → 100〜160 ms を確認）
+    case lanScan
+
+    /// 判定を止めて理由を表示するか。数秒で終わるものは黙って外し、スコアは残りの秒から出す
+    var pausesJudgement: Bool { self == .warmup }
+}
+
+/// 判定を止めている間の表示
+struct JudgementPause: Equatable {
+    var reason: Exclusion
+    /// 0〜1。終わりが決まっていないときは nil
+    var progress: Double?
+
+    var title: String {
+        switch reason {
+        case .warmup: String(localized: "Getting Ready")
+        case .lanScan: String(localized: "Scanning for Devices")
+        }
+    }
+
+    var detail: String {
+        switch reason {
+        case .warmup: String(localized: "Waiting a few seconds after launch so start-up activity doesn’t affect the score.")
+        case .lanScan: String(localized: "Looking for devices on your network. The score resumes shortly.")
+        }
+    }
 }
 
 nonisolated struct DNSSample: Identifiable, Hashable, Sendable {
@@ -55,6 +91,8 @@ struct LiveSnapshot: Equatable {
     var bottleneck = Analysis.Bottleneck(level: .none, tag: String(localized: "Evaluating"), text: String(localized: "Collecting data."), segment: nil)
     var rx: Double = 0
     var tx: Double = 0
+    /// 判定を止めている間だけ入る（スコアは nil）
+    var pause: JudgementPause?
 }
 
 /// 接続先（SSID・チャンネル）。変化したときだけ更新する。
@@ -81,6 +119,9 @@ struct MenuState: Hashable {
 @Observable
 final class Monitor {
     static let historySeconds = 3600
+    /// 起動後、判定を始めるまでの秒数。掃引（起動の直後に走り、約3秒で終わる）とその後の乱れが収まり、
+    /// 窓にルーター宛て 50 発ほどが溜まるまで
+    static let warmupSeconds: TimeInterval = 10
 
     private(set) var env = NetworkEnvironment()
     private(set) var live = LiveSnapshot()
@@ -107,6 +148,7 @@ final class Monitor {
     @ObservationIgnored private var previousCounters: InterfaceCounters.Reading?
     @ObservationIgnored private var loops: [Task<Void, Never>] = []
     @ObservationIgnored private let pathMonitor = NWPathMonitor()
+    @ObservationIgnored private var warmupEnd: Date?
 
     var inet4Target: String { UserDefaults.standard.string(forKey: "inet4Target") ?? "1.1.1.1" }
     var inet6Target: String { UserDefaults.standard.string(forKey: "inet6Target") ?? "2001:4860:4860::8888" }
@@ -122,6 +164,7 @@ final class Monitor {
             network = env.networkID
             registerNetwork()
             restartPingers()
+            warmupEnd = Date().addingTimeInterval(Self.warmupSeconds)
             devices.start(monitor: self)
             loops.append(Task { await tickLoop() })
             loops.append(Task { await dnsLoop() })
@@ -164,9 +207,7 @@ final class Monitor {
     /// 変化に気づいた時点（`at`）より前の生データは前のネットワークの分として書き出し、履歴からも外す。
     private func switchNetwork(to id: String, at boundary: Date) {
         let old = network
-        let before = minuteBuffer.filter { $0.date < boundary }
-        // 数秒だけの切れ端は1分集計として意味が無いので捨てる
-        if before.count >= Self.minimumPartialMinute { flushMinute(before, network: old) }
+        flushMinute(minuteBuffer.filter { $0.date < boundary }, network: old)
         minuteBuffer.removeAll { $0.date < boundary }
         history.removeAll { $0.date < boundary }
         dns.removeAll()
@@ -175,7 +216,7 @@ final class Monitor {
         revision &+= 1
     }
 
-    static let minimumPartialMinute = 10
+    nonisolated static let minimumPartialMinute = 10
 
     private func registerNetwork() {
         guard let id = network, networks[id]?.gateway != env.gateway else { return }
@@ -251,15 +292,18 @@ final class Monitor {
             previousCounters = cur
         }
 
-        let t = Tick(date: raw.date, link: raw.link, gw: raw.gw, v4: raw.v4, v6: raw.v6, rx: rx, tx: tx)
-        history.append(t)
-        // 1秒ごとに先頭を消すと O(n) なので、まとめて消す
-        if history.count > Self.historySeconds + 300 { history.removeFirst(history.count - Self.historySeconds) }
+        let excluded = exclusion(at: raw.date)
+        let t = Tick(date: raw.date, link: raw.link, gw: raw.gw, v4: raw.v4, v6: raw.v6, rx: rx, tx: tx, excluded: excluded)
+        if excluded != .warmup {
+            history.append(t)
+            // 1秒ごとに先頭を消すと O(n) なので、まとめて消す
+            if history.count > Self.historySeconds + 300 { history.removeFirst(history.count - Self.historySeconds) }
 
-        minuteBuffer.append(t)
-        if minuteBuffer.count >= 60 {
-            flushMinute(minuteBuffer, network: network)
-            minuteBuffer.removeAll(keepingCapacity: true)
+            minuteBuffer.append(t)
+            if minuteBuffer.count >= 60 {
+                flushMinute(minuteBuffer, network: network)
+                minuteBuffer.removeAll(keepingCapacity: true)
+            }
         }
 
         // --- 観測されるプロパティの更新（毎秒1回） ---
@@ -273,6 +317,11 @@ final class Monitor {
         s.bottleneck = Analysis.bottleneck(s.w60, link: s.link)
         s.rx = rx
         s.tx = tx
+        if let excluded, excluded.pausesJudgement {
+            // 窓は空（スコアは nil）。何を待っているかと進み具合を出す
+            s.pause = JudgementPause(reason: excluded, progress: warmupEnd.map { Self.progress(at: raw.date, end: $0, length: Self.warmupSeconds) })
+            s.verdict = s.pause?.title ?? s.verdict
+        }
         live = s
         revision &+= 1
 
@@ -293,6 +342,15 @@ final class Monitor {
     }
 
     private func flushMinute(_ ts: [Tick], network: String?) {
+        guard let row = Self.minuteRow(ts, network: network) else { return }
+        Task.detached(priority: .utility) { DataStore.append(row, to: DataStore.minutes) }
+        minuteRevision += 1
+    }
+
+    /// 1分ぶんの生データを集計する。外す秒（`Tick.excluded`）は除き、残りが数秒だけなら意味が無いので nil
+    nonisolated static func minuteRow(_ all: [Tick], network: String?) -> MinuteRow? {
+        let ts = all.filter { $0.excluded == nil }
+        guard ts.count >= minimumPartialMinute else { return nil }
         func pct(_ kp: KeyPath<Tick, Pinger.Batch>, _ q: Double) -> Double? {
             percentile(ts.flatMap { $0[keyPath: kp].rtts }.sorted(), q)
         }
@@ -303,7 +361,7 @@ final class Monitor {
         }
         let links = ts.compactMap(\.link)
         let first = ts[0].date
-        let row = MinuteRow(
+        return MinuteRow(
             t: first.epochMs, hour: first.hour, wd: first.pythonWeekday, n: ts.count,
             rssi: median(links.map { Double($0.rssi) }),
             rate: median(links.map(\.txRate)),
@@ -315,8 +373,18 @@ final class Monitor {
             net: network,
             bssid: links.last { $0.bssid != nil }?.bssid
         )
-        Task.detached(priority: .utility) { DataStore.append(row, to: DataStore.minutes) }
-        minuteRevision += 1
+    }
+
+    /// この秒を判定・集計から外すか
+    private func exclusion(at date: Date) -> Exclusion? {
+        if let warmupEnd, date < warmupEnd { return .warmup }
+        if devices.isSweeping { return .lanScan }
+        return nil
+    }
+
+    /// `end` まで `length` 秒かかるものの進み具合（0〜1）
+    nonisolated static func progress(at date: Date, end: Date, length: TimeInterval) -> Double {
+        min(1, max(0, 1 - end.timeIntervalSince(date) / length))
     }
 
     private func dnsLoop() async {
@@ -343,8 +411,13 @@ final class Monitor {
         return history[start...]
     }
 
+    /// 直近 `seconds` 秒の集計。判定から外す秒は除く
     func window(_ seconds: Int) -> WindowStats {
-        let slice = recent(seconds)
+        Self.windowStats(recent(seconds), seconds: seconds)
+    }
+
+    nonisolated static func windowStats(_ ticks: some Collection<Tick>, seconds: Int) -> WindowStats {
+        let slice = ticks.filter { $0.excluded == nil }
         guard !slice.isEmpty else { return .empty(seconds) }
         let n = Double(slice.count)
         return WindowStats(

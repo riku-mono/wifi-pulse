@@ -117,6 +117,8 @@ struct ScoreRing: View {
     let score: Int?
     let level: Level
     var lineWidth: CGFloat = 12
+    /// スコアの代わりに進み具合（0〜1）を描く（慣らし運転の間など）
+    var progress: Double? = nil
 
     var body: some View {
         // 数字の大きさはリングの直径に合わせる（小さいリングで数字がはみ出さないように）
@@ -125,8 +127,8 @@ struct ScoreRing: View {
             ZStack {
                 Circle().stroke(.quaternary, lineWidth: lineWidth)
                 Circle()
-                    .trim(from: 0, to: CGFloat(score ?? 0) / 100)
-                    .stroke(level.tint, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                    .trim(from: 0, to: score.map { CGFloat($0) / 100 } ?? CGFloat(progress ?? 0))
+                    .stroke(score == nil ? AnyShapeStyle(.secondary) : AnyShapeStyle(level.tint), style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                     .rotationEffect(.degrees(-90))
                 VStack(spacing: 0) {
                     Text(score.map(String.init) ?? "--")
