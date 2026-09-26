@@ -2,6 +2,23 @@ import OSLog
 import SwiftUI
 
 @main
+enum AppEntry {
+    static func main() {
+        // テストの実行時もアプリがホストとして起動する。計測を始めると記録を書き込んでしまうので、何もしないアプリで起動する
+        if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil {
+            TestHostApp.main()
+        } else {
+            WiFiPulseApp.main()
+        }
+    }
+}
+
+struct TestHostApp: App {
+    var body: some Scene {
+        Settings { EmptyView() }
+    }
+}
+
 struct WiFiPulseApp: App {
     @State private var model = AppModel()
     @AppStorage("showMenuBarExtra") private var showMenuBarExtra = true

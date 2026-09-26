@@ -128,15 +128,26 @@ nonisolated enum DataStore {
 
     static func load<T: Decodable>(_ name: String, as: T.Type) -> [T] {
         guard let text = try? String(contentsOf: url(name), encoding: .utf8) else { return [] }
+        return decode(lines: text, as: T.self)
+    }
+
+    /// JSON Lines を1行ずつ読む。読めない行（書き込み途中で切れた行など）は飛ばす
+    static func decode<T: Decodable>(lines text: String, as: T.Type) -> [T] {
         let decoder = JSONDecoder()
         return text.split(separator: "\n").compactMap { try? decoder.decode(T.self, from: Data($0.utf8)) }
     }
 
-    static func append<T: Encodable>(_ row: T, to name: String) {
+    /// JSON Lines の1行（改行つき）
+    static func line<T: Encodable>(_ row: T) -> Data? {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
-        guard var data = try? encoder.encode(row) else { return }
+        guard var data = try? encoder.encode(row) else { return nil }
         data.append(0x0A)
+        return data
+    }
+
+    static func append<T: Encodable>(_ row: T, to name: String) {
+        guard let data = line(row) else { return }
         let u = url(name)
         try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         if let h = try? FileHandle(forWritingTo: u) {
