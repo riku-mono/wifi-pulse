@@ -252,10 +252,9 @@ final class DeviceScanner {
                 let nlen = Int(raw[dlOffset + 5]), alen = Int(raw[dlOffset + 6])
                 guard alen == 6 else { continue }
                 let mac = (0..<6).map { String(format: "%02x", raw[dlOffset + 8 + nlen + $0]) }.joined(separator: ":")
-                var a = in_addr(s_addr: addr)
-                var out = [CChar](repeating: 0, count: Int(INET_ADDRSTRLEN))
-                inet_ntop(AF_INET, &a, &out, socklen_t(out.count))
-                table[String(cString: out)] = mac
+                let host = UInt32(bigEndian: addr)
+                let ip = [24, 16, 8, 0].map { String(host >> UInt32($0) & 0xFF) }.joined(separator: ".")
+                table[ip] = mac
             }
         }
         return table
