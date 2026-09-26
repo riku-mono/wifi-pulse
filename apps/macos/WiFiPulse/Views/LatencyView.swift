@@ -149,8 +149,9 @@ private struct LatencyBandChart: View, Equatable {
     var body: some View {
         Chart {
             ForEach(series.excluded, id: \.lowerBound) { r in
+                // ライト・ダークのどちらでも背景からわずかに浮く濃さにする
                 RectangleMark(xStart: .value("Time", r.lowerBound), xEnd: .value("Time", r.upperBound))
-                    .foregroundStyle(.gray.opacity(0.15))
+                    .foregroundStyle(Color.primary.opacity(0.08))
             }
             ForEach(series.points) { p in
                 AreaMark(x: .value("Time", p.date), yStart: .value("Median", p.p50), yEnd: .value("Max", p.max),

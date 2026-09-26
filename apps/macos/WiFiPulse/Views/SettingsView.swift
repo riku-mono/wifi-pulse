@@ -21,6 +21,7 @@ private struct GeneralSettings: View {
     var body: some View {
         Form {
             LanguageSection()
+            AppearanceSection()
             Section {
                 TextField("IPv4 target", text: $inet4)
                 TextField("IPv6 target", text: $inet6)
@@ -76,6 +77,20 @@ private struct LanguageSection: View {
         } footer: {
             Text("You can also change this in System Settings › General › Language & Region › Applications.")
                 .foregroundStyle(.secondary)
+        }
+    }
+}
+
+/// 外観。既定はシステム設定に従う。すぐに反映される。
+private struct AppearanceSection: View {
+    @AppStorage(AppAppearance.key) private var appearance = AppAppearance.system
+
+    var body: some View {
+        Section {
+            Picker("Appearance", selection: $appearance) {
+                ForEach(AppAppearance.allCases) { Text($0.label).tag($0) }
+            }
+            .onChange(of: appearance) { _, newValue in AppAppearance.apply(newValue) }
         }
     }
 }
