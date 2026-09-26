@@ -48,25 +48,30 @@ private struct LanguageSection: View {
     @State private var choice = AppLanguage.override ?? ""
 
     var body: some View {
+        // 再起動が要るかは「いま選んでいる値」から判定する。
+        // 保存済みの値（UserDefaults）を見ると、onChange より先に描画されたときに1つ前の選択で判定してしまう
+        let needsRestart = AppLanguage.launchLanguage(choice: choice) != AppLanguage.current
         Section {
-            Picker("Language", selection: $choice) {
+            Picker("Language", selection: Binding(
+                get: { choice },
+                set: { newValue in
+                    choice = newValue
+                    AppLanguage.override = newValue.isEmpty ? nil : newValue
+                }
+            )) {
                 Text("System Setting (\(AppLanguage.displayName(AppLanguage.systemChoice)))").tag("")
                 Divider()
                 ForEach(AppLanguage.available, id: \.self) { code in
                     Text(verbatim: AppLanguage.displayName(code)).tag(code)
                 }
             }
-            .onChange(of: choice) {
-                AppLanguage.override = choice.isEmpty ? nil : choice
-            }
-            if AppLanguage.nextLaunch != AppLanguage.current {
+            if needsRestart {
                 HStack {
                     Label("Restart Wi-Fi Pulse to apply the change.", systemImage: "arrow.clockwise.circle")
                         .foregroundStyle(.secondary)
                     Spacer()
                     Button("Restart Now") { AppLanguage.relaunch() }
                 }
-                .id(choice) // 選択が変わるたびに判定し直す
             }
         } footer: {
             Text("You can also change this in System Settings › General › Language & Region › Applications.")

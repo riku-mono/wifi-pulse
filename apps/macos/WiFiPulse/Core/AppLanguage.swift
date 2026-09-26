@@ -43,8 +43,10 @@ enum AppLanguage {
         return Bundle.preferredLocalizations(from: available, forPreferences: global ?? Locale.preferredLanguages).first ?? "en"
     }
 
-    /// 次に起動したときに使われる言語
-    static var nextLaunch: String { override ?? systemChoice }
+    /// 設定画面の選択（空文字列 = システム設定に従う）のとき、次に起動したときに使われる言語
+    static func launchLanguage(choice: String) -> String {
+        choice.isEmpty ? systemChoice : choice
+    }
 
     /// その言語自身の表記での名前（`ja` → 日本語、`en` → English）
     static func displayName(_ code: String) -> String {
