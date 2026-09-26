@@ -218,8 +218,9 @@ struct LatencyLineChart: View, Equatable {
     var body: some View {
         Chart {
             ForEach(LatencySeries.spans(samples.filter(\.excluded).map(\.date)), id: \.lowerBound) { r in
+                // ライト・ダークのどちらでも背景からわずかに浮く濃さにする
                 RectangleMark(xStart: .value("Time", r.lowerBound), xEnd: .value("Time", r.upperBound))
-                    .foregroundStyle(.gray.opacity(0.15))
+                    .foregroundStyle(Color.primary.opacity(0.08))
             }
             ForEach(samples) { s in
                 if let v = s.router {

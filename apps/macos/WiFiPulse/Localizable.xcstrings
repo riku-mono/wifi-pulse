@@ -624,6 +624,16 @@
         }
       }
     },
+    "Appearance" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "外観"
+          }
+        }
+      }
+    },
     "Appliance" : {
       "localizations" : {
         "ja" : {
@@ -1206,6 +1216,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ダイキン"
+          }
+        }
+      }
+    },
+    "Dark" : {
+      "comment" : "外観の選択肢",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ダーク"
           }
         }
       }
@@ -2240,6 +2261,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "空いている順: %@"
+          }
+        }
+      }
+    },
+    "Light" : {
+      "comment" : "外観の選択肢",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライト"
           }
         }
       }
@@ -4361,6 +4393,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "並列 %lld 本"
+          }
+        }
+      }
+    },
+    "System Setting" : {
+      "comment" : "外観の選択肢",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "システム設定に従う"
           }
         }
       }

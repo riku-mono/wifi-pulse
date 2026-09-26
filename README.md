@@ -66,8 +66,8 @@ open build/DerivedData.noindex/Build/Products/Debug/WiFiPulse.app
 <!-- l10n-coverage:start -->
 | 言語 | 翻訳済み | カバレッジ | 要確認 | 未翻訳 |
 |---|---:|---|---:|---:|
-| `en`（ソース） | 538 / 538 | ██████████ 100.0% | 0 | 0 |
-| `ja` | 538 / 538 | ██████████ 100.0% | 0 | 0 |
+| `en`（ソース） | 542 / 542 | ██████████ 100.0% | 0 | 0 |
+| `ja` | 542 / 542 | ██████████ 100.0% | 0 | 0 |
 
 対象: `apps/macos/WiFiPulse/InfoPlist.xcstrings`, `apps/macos/WiFiPulse/Localizable.xcstrings`（翻訳不要 32 件・ソースから消えた文字列 0 件は除外）
 <!-- l10n-coverage:end -->
