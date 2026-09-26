@@ -2344,12 +2344,12 @@
         }
       }
     },
-    "Local network access may not be allowed. Check System Settings › Privacy & Security › Local Network." : {
+    "macOS didn’t return any devices on this network. Local network access may not be allowed, or macOS may be hiding the device list from this build of the app." : {
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ローカルネットワークへのアクセスが許可されていない可能性があります。システム設定 › プライバシーとセキュリティ › ローカルネットワーク を確認してください。"
+            "value" : "macOS からこのネットワークの機器が返ってきませんでした。ローカルネットワークへのアクセスが許可されていないか、macOS がこのビルドのアプリに機器の一覧を見せていない可能性があります。"
           }
         }
       }

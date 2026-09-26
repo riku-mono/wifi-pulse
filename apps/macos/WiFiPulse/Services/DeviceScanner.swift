@@ -178,7 +178,7 @@ final class DeviceScanner {
 
     // MARK: Sources
 
-    /// ARP を埋めるため、同じサブネット（広くても /24）の全アドレスへ UDP を1発ずつ投げる（中身は空、宛先は discard ポート）。
+    /// ARP を埋めるため、同じサブネット（広くても /22）の全アドレスへ UDP を1発ずつ投げる（中身は空、宛先は discard ポート）。
     nonisolated static func sweep(interface: String) async {
         let targets = sweepTargets(interface: interface)
         guard !targets.isEmpty else { return }
@@ -260,9 +260,10 @@ final class DeviceScanner {
         return table
     }
 
-    /// サブネット内のホスト（ネットワーク・ブロードキャストのアドレスと自分を除く）。/24 より広ければ自分の /24 に絞る。
+    /// サブネット内のホスト（ネットワーク・ブロードキャストのアドレスと自分を除く）。/22 より広ければ自分の /22 に絞る
+    /// （家庭用のメッシュ Wi-Fi には /22 のものがある。それより広いと1回の掃引が重くなる）。
     nonisolated static func sweepTargets(ip: UInt32, netmask: UInt32) -> [UInt32] {
-        let mask = netmask | 0xFFFF_FF00
+        let mask = netmask | 0xFFFF_FC00
         guard mask <= 0xFFFF_FFFC else { return [] }  // /31・/32 には相手がいない
         let network = ip & mask
         let broadcast = network | ~mask

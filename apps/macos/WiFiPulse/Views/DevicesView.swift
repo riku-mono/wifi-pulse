@@ -25,11 +25,16 @@ struct DevicesView: View {
                 } description: {
                     Text(scanner.arpWorks
                          ? "Sends one probe to each address on your local network and lists the devices that respond."
-                         : "Local network access may not be allowed. Check System Settings › Privacy & Security › Local Network.")
+                         : "macOS didn’t return any devices on this network. Local network access may not be allowed, or macOS may be hiding the device list from this build of the app.")
                 } actions: {
                     Button("Find") { scanner.requestSweep() }
                         .buttonStyle(.glassProminent)
                         .disabled(scanner.isSweeping)
+                    if !scanner.arpWorks {
+                        Button("Open Local Network Settings") {
+                            NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_LocalNetwork")!)
+                        }
+                    }
                 }
             } else {
                 Table(list, selection: $selection) {
