@@ -94,11 +94,11 @@ private struct TilesGrid: View {
                        level: Level.rssi(link?.rssi))
             MetricTile(title: "To the Internet", systemImage: "globe.asia.australia",
                        value: Fmt.ms(s.w30.v4.p50), unit: "ms",
-                       caption: "p95 \(Fmt.ms(s.w60.v4.p95)) ms · IPv6 \(Fmt.ms(s.w60.v6.p50)) ms",
+                       caption: "p95 \(Fmt.ms(s.w30.v4.p95)) ms · IPv6 \(Fmt.ms(s.w60.v6.p50)) ms",
                        level: Level.internet(s.w30.v4.p95))
             MetricTile(title: "To the Router", systemImage: "wifi.router",
                        value: Fmt.ms(s.w30.gw.p50), unit: "ms",
-                       caption: "p95 \(Fmt.ms(s.w60.gw.p95)) ms · \(m.env.gateway.isEmpty ? "—" : m.env.gateway)",
+                       caption: "p95 \(Fmt.ms(s.w30.gw.p95)) ms · \(m.env.gateway.isEmpty ? "—" : m.env.gateway)",
                        level: Level.gateway(s.w30.gw.p95))
             MetricTile(title: "Stability", systemImage: "waveform",
                        value: stab,
@@ -205,6 +205,14 @@ struct LatencyLineChart: View, Equatable {
     let samples: [LatencySample]
     var compact = false
 
+    /// 対数軸の範囲。自動だと 1〜100 のような切りのよい範囲に広がり、小さいグラフでは線が下に寄って上が空くので、
+    /// 値の範囲に少し余白を足した分だけにする
+    private var yDomain: ClosedRange<Double> {
+        let values = samples.flatMap { [$0.router, $0.internet] }.compactMap { $0 }.map { max(0.1, $0) }
+        guard let lo = values.min(), let hi = values.max() else { return 1...100 }
+        return (lo / 1.3)...max(hi * 1.3, lo / 1.3 * 2)
+    }
+
     var body: some View {
         Chart {
             ForEach(samples) { s in
@@ -224,8 +232,11 @@ struct LatencyLineChart: View, Equatable {
             }
         }
         .chartForegroundStyleScale([SeriesName.router: SeriesColor.router, SeriesName.internet: SeriesColor.inet4])
-        .chartYScale(type: .log)
-        .chartYAxisLabel(compact ? "" : "ms")
+        .chartYScale(domain: yDomain, type: .log)
+        // 空の文字列でも軸ラベルの1行分が上に空くので、小さいグラフでは付けない
+        .chartYAxisLabel {
+            if !compact { Text("ms") }
+        }
         .chartYAxis(compact ? .hidden : .automatic)
         .chartLegend(compact ? .hidden : .visible)
         .chartLegend(position: .top, alignment: .trailing)

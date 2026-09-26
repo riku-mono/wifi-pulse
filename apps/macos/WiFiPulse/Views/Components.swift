@@ -98,13 +98,16 @@ struct MetricTile: View {
 struct LevelBadge: View {
     let text: String
     let level: Level
+    /// メニューバーのパネルなど狭いところ用
+    var compact = false
 
     var body: some View {
         Label(text, systemImage: level.symbol)
-            .font(.callout.weight(.semibold))
+            .font(compact ? .caption.weight(.semibold) : .callout.weight(.semibold))
+            .lineLimit(1)
             .foregroundStyle(level.tint)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 4)
+            .padding(.horizontal, compact ? 8 : 10)
+            .padding(.vertical, compact ? 3 : 4)
             .background(level.tint.opacity(0.14), in: .capsule)
     }
 }
@@ -116,18 +119,28 @@ struct ScoreRing: View {
     var lineWidth: CGFloat = 12
 
     var body: some View {
-        ZStack {
-            Circle().stroke(.quaternary, lineWidth: lineWidth)
-            Circle()
-                .trim(from: 0, to: CGFloat(score ?? 0) / 100)
-                .stroke(level.tint, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
-                .rotationEffect(.degrees(-90))
-            VStack(spacing: 0) {
-                Text(score.map(String.init) ?? "--")
-                    .font(.system(size: 44, weight: .bold, design: .rounded))
-                    .monospacedDigit()
-                Text("/ 100").font(.caption).foregroundStyle(.secondary)
+        // 数字の大きさはリングの直径に合わせる（小さいリングで数字がはみ出さないように）
+        GeometryReader { geo in
+            let d = min(geo.size.width, geo.size.height)
+            ZStack {
+                Circle().stroke(.quaternary, lineWidth: lineWidth)
+                Circle()
+                    .trim(from: 0, to: CGFloat(score ?? 0) / 100)
+                    .stroke(level.tint, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                VStack(spacing: 0) {
+                    Text(score.map(String.init) ?? "--")
+                        .font(.system(size: d * (d < 100 ? 0.36 : 0.3), weight: .bold, design: .rounded))
+                        .monospacedDigit()
+                        .minimumScaleFactor(0.5)
+                        .lineLimit(1)
+                    if d >= 100 {
+                        Text("/ 100").font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+                .padding(lineWidth)
             }
+            .frame(width: geo.size.width, height: geo.size.height)
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Overall Score")
