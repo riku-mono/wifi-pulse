@@ -83,12 +83,103 @@ nonisolated struct KnownNetwork: Codable, Sendable, Identifiable, Hashable {
     var ssid: String?
     var gateway: String
     var first: Int64
+    /// 自分で付けた名前（SSID が取れない有線・テザリングなど）
+    var name: String?
+    /// ほかのネットワークにまとめたときの、まとめ先の識別子。記録の `net` は書き換えず、表示と集計でまとめ先の分として扱う
+    var mergedInto: String?
+    /// 自分で分けたネットワーク。自動ではまとめない
+    var keepSeparate: Bool?
+
+    /// ルーターの MAC が取れずに、ゲートウェイの IP で登録したもの
+    var isGatewayOnly: Bool { id.hasPrefix("ip:") }
 
     var displayName: String {
+        if let name, !name.isEmpty { return name }
+        return automaticName
+    }
+
+    /// 自分で名前を付けていないときの名前
+    var automaticName: String {
         if let ssid, !ssid.isEmpty { return ssid }
         // SSID が取れない（位置情報の許可が無い・有線）ときはルーターで見分ける
-        if id.hasPrefix("ip:") { return String(localized: "Network at \(gateway)") }
+        if isGatewayOnly { return String(localized: "Network at \(gateway)") }
         return String(localized: "Network at \(gateway) (router …\(String(id.suffix(5))))")
+    }
+}
+
+/// networks.json の中身（識別子 → 登録）。まとめたネットワークは、まとめ先を代表として扱う
+extension Dictionary where Key == String, Value == KnownNetwork {
+    /// 代表の識別子。まとめていなければ自分自身（登録の無い識別子も自分自身）
+    nonisolated func canonical(_ id: String) -> String {
+        var cur = id
+        // まとめ先は常に代表を指すが、壊れたファイルで輪になっても止まるようにする
+        for _ in 0...count {
+            guard let next = self[cur]?.mergedInto, next != cur, self[next] != nil else { return cur }
+            cur = next
+        }
+        return cur
+    }
+
+    nonisolated func canonical(_ id: String?) -> String? { id.map { canonical($0) } }
+
+    /// 2つの識別子が同じネットワーク（まとめたものを含む）を指すか
+    nonisolated func same(_ a: String?, _ b: String?) -> Bool { canonical(a) == canonical(b) }
+
+    /// 代表のネットワーク（一覧に出すもの）。新しく計測を始めた順
+    nonisolated var representatives: [KnownNetwork] {
+        values.filter { canonical($0.id) == $0.id }.sorted { $0.first > $1.first }
+    }
+
+    /// `id` にまとめたネットワーク（`id` 自身は含まない）
+    nonisolated func members(of id: String) -> [KnownNetwork] {
+        values.filter { $0.id != id && canonical($0.id) == id }.sorted { $0.first < $1.first }
+    }
+
+    /// `source` を `target` にまとめる。`source` にまとめてあったものも一緒に移る。
+    /// まとめ先に SSID・名前が無ければ `source` のものを引き継ぐ
+    nonisolated mutating func merge(_ source: String, into target: String) {
+        let from = canonical(source), to = canonical(target)
+        guard from != to, let s = self[from], self[to] != nil else { return }
+        for (id, n) in self where id == from || n.mergedInto == from {
+            self[id]?.mergedInto = to
+            self[id]?.keepSeparate = nil
+        }
+        if self[to]?.ssid?.isEmpty ?? true, let ssid = s.ssid, !ssid.isEmpty { self[to]?.ssid = ssid }
+        if self[to]?.name?.isEmpty ?? true, let name = s.name, !name.isEmpty { self[to]?.name = name }
+        let first = Swift.min(self[to]!.first, s.first)
+        self[to]?.first = first
+    }
+
+    /// まとめたものを分け直す。以後、自動ではまとめない
+    nonisolated mutating func separate(_ id: String) {
+        guard self[id]?.mergedInto != nil else { return }
+        self[id]?.mergedInto = nil
+        self[id]?.keepSeparate = true
+    }
+
+    /// 自分で名前を付ける（空なら外す）
+    nonisolated mutating func rename(_ id: String, to name: String) {
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        self[id]?.name = trimmed.isEmpty ? nil : trimmed
+    }
+
+    /// ゲートウェイの IP で登録したもの（`ip:…`）を、同じゲートウェイ・同じ SSID のルーターの MAC の登録にまとめる。
+    /// ARP 表が読めない状態で起動すると、同じネットワークが2つに分かれて登録されるため。
+    /// ゲートウェイの IP はどこでも同じ（192.168.1.1 など）なので、SSID が一致して候補が1つのときだけまとめる。
+    /// まとめたら true
+    @discardableResult
+    nonisolated mutating func autoMerge() -> Bool {
+        var changed = false
+        for n in values where n.isGatewayOnly && n.mergedInto == nil && n.keepSeparate != true {
+            guard let ssid = n.ssid, !ssid.isEmpty else { continue }
+            let candidates = values.filter {
+                !$0.isGatewayOnly && $0.mergedInto == nil && $0.gateway == n.gateway && $0.ssid == ssid
+            }
+            guard candidates.count == 1 else { continue }
+            merge(n.id, into: candidates[0].id)
+            changed = true
+        }
+        return changed
     }
 }
 
@@ -97,10 +188,11 @@ nonisolated enum NetworkFilter: Hashable, Sendable {
     case all
     case network(String)
 
-    func includes(_ net: String?) -> Bool {
+    /// `networks` を渡すと、まとめたネットワークの記録も含める
+    func includes(_ net: String?, in networks: [String: KnownNetwork] = [:]) -> Bool {
         switch self {
         case .all: true
-        case .network(let id): net == id
+        case .network(let id): net != nil && networks.same(net, id)
         }
     }
 }

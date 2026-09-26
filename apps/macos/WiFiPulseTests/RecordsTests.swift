@@ -53,6 +53,111 @@ struct NetworkTests {
         #expect(!NetworkFilter.network("x").includes(nil))
     }
 
+    static let mac = "40:ed:00:00:00:01"
+
+    /// ARP が読めずに `ip:…` で登録され、あとでルーターの MAC で別に登録された状態
+    static func split(ipSSID: String? = "Home", macSSID: String? = "Home") -> [String: KnownNetwork] {
+        [
+            "ip:192.168.68.1": KnownNetwork(id: "ip:192.168.68.1", ssid: ipSSID, gateway: "192.168.68.1", first: 100),
+            mac: KnownNetwork(id: mac, ssid: macSSID, gateway: "192.168.68.1", first: 200),
+        ]
+    }
+
+    @Test func filterIncludesMergedNetworks() {
+        var nets = Self.split()
+        #expect(!NetworkFilter.network(Self.mac).includes("ip:192.168.68.1", in: nets))
+        nets.merge("ip:192.168.68.1", into: Self.mac)
+        #expect(NetworkFilter.network(Self.mac).includes("ip:192.168.68.1", in: nets))
+        #expect(NetworkFilter.network(Self.mac).includes(Self.mac, in: nets))
+        // まとめた側を選んでいても代表の分として見る
+        #expect(NetworkFilter.network("ip:192.168.68.1").includes(Self.mac, in: nets))
+        #expect(!NetworkFilter.network(Self.mac).includes(nil, in: nets))
+        #expect(!NetworkFilter.network(Self.mac).includes("other", in: nets))
+    }
+
+    @Test func mergeCarriesSSIDAndFirstDate() {
+        var nets = Self.split(macSSID: nil)
+        nets.merge("ip:192.168.68.1", into: Self.mac)
+        #expect(nets.canonical("ip:192.168.68.1") == Self.mac)
+        #expect(nets[Self.mac]?.ssid == "Home")
+        #expect(nets[Self.mac]?.first == 100)
+        #expect(nets.representatives.map(\.id) == [Self.mac])
+        #expect(nets.members(of: Self.mac).map(\.id) == ["ip:192.168.68.1"])
+        // 記録側の識別子は変わらないので、分け直せる
+        nets.separate("ip:192.168.68.1")
+        #expect(nets.canonical("ip:192.168.68.1") == "ip:192.168.68.1")
+        #expect(nets.representatives.count == 2)
+    }
+
+    /// まとめ先をさらにまとめても、代表は1段でたどれる
+    @Test func mergeMovesMembersAlong() {
+        var nets = Self.split()
+        nets["c"] = KnownNetwork(id: "c", gateway: "10.0.0.1", first: 50)
+        nets.merge("ip:192.168.68.1", into: Self.mac)
+        nets.merge(Self.mac, into: "c")
+        #expect(nets["ip:192.168.68.1"]?.mergedInto == "c")
+        #expect(nets[Self.mac]?.mergedInto == "c")
+        #expect(nets.representatives.map(\.id) == ["c"])
+        // 自分の仲間にはまとめられない
+        nets.merge("c", into: Self.mac)
+        #expect(nets["c"]?.mergedInto == nil)
+    }
+
+    @Test func canonicalStopsOnACycle() {
+        var nets = Self.split()
+        nets["ip:192.168.68.1"]?.mergedInto = Self.mac
+        nets[Self.mac]?.mergedInto = "ip:192.168.68.1"
+        _ = nets.canonical(Self.mac)
+        #expect(nets.canonical("unknown") == "unknown")
+    }
+
+    @Test func autoMergeNeedsTheSameSSID() {
+        var same = Self.split()
+        let sameMerged = same.autoMerge()
+        #expect(sameMerged)
+        #expect(same.canonical("ip:192.168.68.1") == Self.mac)
+
+        var noSSID = Self.split(macSSID: nil)
+        let noSSIDMerged = noSSID.autoMerge()
+        #expect(!noSSIDMerged)
+        var other = Self.split(macSSID: "Cafe")
+        let otherMerged = other.autoMerge()
+        #expect(!otherMerged)
+
+        // 同じゲートウェイ・同じ SSID のルーターが2つあると、どちらか決められない
+        var two = Self.split()
+        two["aa"] = KnownNetwork(id: "aa", ssid: "Home", gateway: "192.168.68.1", first: 300)
+        let twoMerged = two.autoMerge()
+        #expect(!twoMerged)
+    }
+
+    @Test func autoMergeRespectsSeparation() {
+        var nets = Self.split()
+        nets.autoMerge()
+        nets.separate("ip:192.168.68.1")
+        let netsMerged = nets.autoMerge()
+        #expect(!netsMerged)
+        #expect(nets.representatives.count == 2)
+    }
+
+    @Test func nameOverridesSSID() {
+        var nets = Self.split()
+        nets.rename(Self.mac, to: "  Living Room  ")
+        #expect(nets[Self.mac]?.name == "Living Room")
+        #expect(nets[Self.mac]?.displayName == "Living Room")
+        nets.rename(Self.mac, to: " ")
+        #expect(nets[Self.mac]?.name == nil)
+        #expect(nets[Self.mac]?.displayName == "Home")
+    }
+
+    /// 項目が増える前の networks.json も読める
+    @Test func decodesOldRegistry() throws {
+        let json = #"{"ip:192.168.1.1":{"first":1,"gateway":"192.168.1.1","id":"ip:192.168.1.1"}}"#
+        let nets = try JSONDecoder().decode([String: KnownNetwork].self, from: Data(json.utf8))
+        #expect(nets["ip:192.168.1.1"]?.mergedInto == nil)
+        #expect(nets["ip:192.168.1.1"]?.isGatewayOnly == true)
+    }
+
     @Test func networkIDPrefersTheRouterMAC() {
         var env = NetworkEnvironment()
         #expect(env.networkID == nil)

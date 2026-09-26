@@ -150,12 +150,12 @@ nonisolated struct RecordSet: Sendable {
     var speed: [SpeedTestRecord] = []
     var loads: [LoadTestRecord] = []
 
-    static func load(hours: Int?, network: NetworkFilter) -> RecordSet {
+    static func load(hours: Int?, network: NetworkFilter, networks: [String: KnownNetwork]) -> RecordSet {
         let cutoff = hours.map { Date().addingTimeInterval(-Double($0) * 3600).epochMs } ?? 0
         return RecordSet(
-            minutes: DataStore.load(DataStore.minutes, as: MinuteRow.self).filter { $0.t >= cutoff && network.includes($0.net) },
-            speed: DataStore.load(DataStore.speedtests, as: SpeedTestRecord.self).filter { $0.t >= cutoff && network.includes($0.net) },
-            loads: DataStore.load(DataStore.loadtests, as: LoadTestRecord.self).filter { $0.t >= cutoff && network.includes($0.net) }
+            minutes: DataStore.load(DataStore.minutes, as: MinuteRow.self).filter { $0.t >= cutoff && network.includes($0.net, in: networks) },
+            speed: DataStore.load(DataStore.speedtests, as: SpeedTestRecord.self).filter { $0.t >= cutoff && network.includes($0.net, in: networks) },
+            loads: DataStore.load(DataStore.loadtests, as: LoadTestRecord.self).filter { $0.t >= cutoff && network.includes($0.net, in: networks) }
         )
     }
 }

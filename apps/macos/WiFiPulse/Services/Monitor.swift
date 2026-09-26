@@ -163,6 +163,8 @@ final class Monitor {
     private(set) var network: String?
     /// これまでに計測したネットワーク
     private(set) var networks: [String: KnownNetwork] = [:]
+    /// いまのネットワークの代表の識別子（ほかのネットワークにまとめてあれば、まとめ先）
+    var currentNetwork: String? { networks.canonical(network) }
 
     let devices = DeviceScanner()
 
@@ -187,6 +189,7 @@ final class Monitor {
         guard !isRunning else { return }
         isRunning = true
         networks = DataStore.readJSON(DataStore.networks, as: [String: KnownNetwork].self) ?? [:]
+        if networks.autoMerge() { saveNetworks() }
         Task {
             env = await NetworkEnvironment.resolve()
             network = env.networkID
@@ -219,10 +222,15 @@ final class Monitor {
             env = fresh
             // 切断中（識別子なし）は区切らない。一瞬切れて同じネットワークに戻っても履歴は続ける
             if let id = fresh.networkID, id != network {
-                if network == "ip:\(fresh.gateway)" {
+                if let old = network, old == "ip:\(fresh.gateway)" {
                     // ルーターの MAC が後から取れた（ローカルネットワークの許可など）。同じネットワークとして続ける
                     network = id
                     registerNetwork()
+                    if networks[old]?.keepSeparate != true, !networks.same(old, id) {
+                        networks.merge(old, into: id)
+                        saveNetworks()
+                        minuteRevision += 1
+                    }
                 } else {
                     switchNetwork(to: id, at: at)
                 }
@@ -251,6 +259,7 @@ final class Monitor {
         var n = networks[id] ?? KnownNetwork(id: id, gateway: env.gateway, first: Date().epochMs)
         n.gateway = env.gateway
         networks[id] = n
+        if networks.autoMerge() { minuteRevision += 1 }
         saveNetworks()
     }
 
@@ -259,9 +268,31 @@ final class Monitor {
         Task.detached(priority: .utility) { DataStore.writeJSON(snapshot, to: DataStore.networks) }
     }
 
+    /// ネットワークに名前を付ける（空なら自動の名前に戻す）
+    func renameNetwork(_ id: String, to name: String) {
+        guard networks[id] != nil, (networks[id]?.name ?? "") != name else { return }
+        networks.rename(id, to: name)
+        saveNetworks()
+    }
+
+    /// `source` の記録を `target` の記録として扱う
+    func mergeNetwork(_ source: String, into target: String) {
+        networks.merge(source, into: target)
+        saveNetworks()
+        minuteRevision += 1
+    }
+
+    /// まとめたネットワークを分け直す
+    func separateNetwork(_ id: String) {
+        networks.separate(id)
+        saveNetworks()
+        minuteRevision += 1
+    }
+
     /// 設定で記録を消したとき。いまのネットワークだけ残す
     func recordsDeleted() {
         networks = networks.filter { $0.key == network }
+        for id in networks.keys { networks[id]?.mergedInto = nil; networks[id]?.keepSeparate = nil }
         saveNetworks()
         minuteRevision += 1
     }
@@ -370,6 +401,7 @@ final class Monitor {
         // SSID は位置情報の許可があるときだけ取れる。取れたらネットワークの表示名にする
         if let id = network, let ssid = c.ssid, !ssid.isEmpty, networks[id] != nil, networks[id]?.ssid != ssid {
             networks[id]?.ssid = ssid
+            if networks.autoMerge() { minuteRevision += 1 }
             saveNetworks()
         }
     }

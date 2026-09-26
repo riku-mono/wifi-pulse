@@ -6,8 +6,8 @@ struct SpeedTestView: View {
 
     var body: some View {
         let st = model.speedTest
-        let network = model.monitor.network
-        let history = st.history.filter { $0.net == network }
+        let network = model.monitor.network, networks = model.monitor.networks
+        let history = st.history.filter { $0.net != nil && networks.same($0.net, network) }
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 Card("Speed and Responsiveness", systemImage: "speedometer",
