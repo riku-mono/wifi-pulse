@@ -19,13 +19,13 @@ struct DevicesView: View {
         Group {
             if all.isEmpty {
                 ContentUnavailableView {
-                    Label(scanner.isSweeping ? "機器を探しています…" : "機器が見つかりません", systemImage: "network")
+                    Label(scanner.isSweeping ? "Looking for Devices…" : "No Devices Found", systemImage: "network")
                 } description: {
                     Text(scanner.arpWorks
-                         ? "LAN 内のアドレスに1回ずつ問い合わせて、応答した機器を一覧にします。"
-                         : "ローカルネットワークへのアクセスが許可されていない可能性があります。システム設定 › プライバシーとセキュリティ › ローカルネットワーク を確認してください。")
+                         ? "Sends one probe to each address on your local network and lists the devices that respond."
+                         : "Local network access may not be allowed. Check System Settings › Privacy & Security › Local Network.")
                 } actions: {
-                    Button("探す") { scanner.requestSweep() }
+                    Button("Find") { scanner.requestSweep() }
                         .buttonStyle(.glassProminent)
                         .disabled(scanner.isSweeping)
                 }
@@ -37,27 +37,27 @@ struct DevicesView: View {
                             .accessibilityLabel(d.kindLabel)
                     }
                     .width(24)
-                    TableColumn("名前") { d in
+                    TableColumn("Name") { d in
                         VStack(alignment: .leading, spacing: 1) {
                             Text(d.displayName).fontWeight(d.name != nil ? .semibold : .regular)
                             if d.ip == model.monitor.env.gateway {
-                                Text("このネットワークのルーター").font(.caption).foregroundStyle(.secondary)
+                                Text("Router for this network").font(.caption).foregroundStyle(.secondary)
                             } else if d.ip == model.monitor.env.selfIP {
-                                Text("このMac").font(.caption).foregroundStyle(.secondary)
+                                Text("This Mac").font(.caption).foregroundStyle(.secondary)
                             }
                         }
                     }
-                    TableColumn("IPアドレス") { Text($0.ip ?? "—").monospacedDigit() }
+                    TableColumn("IP Address") { Text($0.ip ?? "—").monospacedDigit() }
                         .width(min: 100, ideal: 120)
-                    TableColumn("メーカー") { d in
-                        Text(d.vendor_ja ?? d.vendor ?? (d.random == true ? "プライベートアドレス" : "不明"))
+                    TableColumn("Manufacturer") { d in
+                        Text(d.vendor_ja ?? d.vendor ?? (d.random == true ? String(localized: "Private Address") : String(localized: "Unknown")))
                             .foregroundStyle(d.vendor == nil ? .secondary : .primary)
                     }
-                    TableColumn("種類") { Text($0.kindLabel) }
+                    TableColumn("Type") { Text($0.kindLabel) }
                         .width(min: 70, ideal: 90)
-                    TableColumn("状態") { d in
+                    TableColumn("Status") { d in
                         if d.online == true {
-                            Label("オンライン", systemImage: "circle.fill").foregroundStyle(.green).labelStyle(.titleAndIcon).imageScale(.small)
+                            Label("Online", systemImage: "circle.fill").foregroundStyle(.green).labelStyle(.titleAndIcon).imageScale(.small)
                         } else {
                             Text(d.lastSeen, format: .relative(presentation: .named)).foregroundStyle(.secondary)
                         }
@@ -66,7 +66,7 @@ struct DevicesView: View {
                 }
                 .contextMenu(forSelectionType: Device.ID.self) { ids in
                     if let mac = ids.first {
-                        Button("MACアドレスをコピー") {
+                        Button("Copy MAC Address") {
                             NSPasteboard.general.clearContents()
                             NSPasteboard.general.setString(mac, forType: .string)
                         }
@@ -74,8 +74,8 @@ struct DevicesView: View {
                 }
             }
         }
-        .navigationTitle("機器")
-        .searchable(text: $search, placement: .toolbar, prompt: "名前・IP・メーカー")
+        .navigationTitle("Devices")
+        .searchable(text: $search, placement: .toolbar, prompt: "Name, IP, Manufacturer")
         .inspector(isPresented: $showInspector) {
             DeviceInspector(device: all.first { $0.id == selection })
                 .inspectorColumnWidth(min: 260, ideal: 300, max: 380)
@@ -83,20 +83,20 @@ struct DevicesView: View {
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
                 Toggle(isOn: $showOffline) {
-                    Label("オフラインも表示", systemImage: "clock.arrow.circlepath")
+                    Label("Show Offline Devices", systemImage: "clock.arrow.circlepath")
                 }
-                .help("過去に見つかった機器も表示します")
+                .help("Also show devices found earlier")
                 Button {
                     scanner.requestSweep()
                 } label: {
-                    Label("探す", systemImage: "arrow.clockwise")
+                    Label("Find", systemImage: "arrow.clockwise")
                 }
                 .disabled(scanner.isSweeping)
-                .help("LAN内の全アドレスに問い合わせて一覧を更新します")
+                .help("Probe every address on the local network and refresh the list")
                 Button {
                     showInspector.toggle()
                 } label: {
-                    Label("インスペクタ", systemImage: "sidebar.trailing")
+                    Label("Inspector", systemImage: "sidebar.trailing")
                 }
             }
         }
@@ -123,24 +123,24 @@ private struct DeviceInspector: View {
                         }
                     }
                 }
-                Section("名前") {
-                    TextField("名前", text: $name, prompt: Text("例: リビングのテレビ"))
+                Section("Name") {
+                    TextField("Name", text: $name, prompt: Text("e.g. Living Room TV"))
                         .onSubmit { model.monitor.devices.rename(d.mac, to: name) }
-                    Text("自分で付けた名前は data フォルダの device_names.json に保存されます。")
+                    Text("Names you assign are saved to device_names.json in the data folder.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
-                Section("詳細") {
-                    LabeledContent("IPアドレス", value: d.ip ?? "—")
-                    LabeledContent("MACアドレス") { Text(d.mac).font(.callout.monospaced()).textSelection(.enabled) }
-                    LabeledContent("メーカー（OUI）", value: d.vendor ?? "不明")
-                    LabeledContent("mDNS 名", value: d.mdns ?? "—")
-                    LabeledContent("初めて見た", value: d.firstSeen.formatted(date: .abbreviated, time: .shortened))
-                    LabeledContent("最後に見た", value: d.lastSeen.formatted(date: .abbreviated, time: .shortened))
+                Section("Details") {
+                    LabeledContent("IP Address", value: d.ip ?? "—")
+                    LabeledContent("MAC Address") { Text(d.mac).font(.callout.monospaced()).textSelection(.enabled) }
+                    LabeledContent("Manufacturer (OUI)", value: d.vendor ?? String(localized: "Unknown"))
+                    LabeledContent("mDNS Name", value: d.mdns ?? "—")
+                    LabeledContent("First Seen", value: d.firstSeen.formatted(date: .abbreviated, time: .shortened))
+                    LabeledContent("Last Seen", value: d.lastSeen.formatted(date: .abbreviated, time: .shortened))
                 }
                 if d.random == true {
                     Section {
-                        Text("プライベート Wi-Fi アドレス（ランダム化されたMAC）です。iPhone・iPad・Mac などは、ネットワークごとに別のアドレスを使うため、メーカー名が分かりません。")
+                        Text("This is a private Wi-Fi address (randomized MAC). iPhone, iPad, Mac, and others use a different address on each network, so the manufacturer can’t be identified.")
                             .font(.callout)
                             .foregroundStyle(.secondary)
                     }
@@ -150,7 +150,7 @@ private struct DeviceInspector: View {
             .onAppear { name = d.name ?? "" }
             .onChange(of: d.id) { name = d.name ?? "" }
         } else {
-            ContentUnavailableView("機器を選択", systemImage: "cursorarrow.click.2", description: Text("一覧から機器を選ぶと詳細を表示し、名前を付けられます。"))
+            ContentUnavailableView("Select a Device", systemImage: "cursorarrow.click.2", description: Text("Select a device in the list to see details and give it a name."))
         }
     }
 }

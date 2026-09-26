@@ -3,9 +3,9 @@ import SwiftUI
 struct SettingsView: View {
     var body: some View {
         TabView {
-            Tab("一般", systemImage: "gearshape") { GeneralSettings() }
-            Tab("データ", systemImage: "externaldrive") { DataSettings() }
-            Tab("プライバシー", systemImage: "hand.raised") { PrivacySettings() }
+            Tab("General", systemImage: "gearshape") { GeneralSettings() }
+            Tab("Data", systemImage: "externaldrive") { DataSettings() }
+            Tab("Privacy", systemImage: "hand.raised") { PrivacySettings() }
         }
         .frame(width: 520)
         .scenePadding()
@@ -20,24 +20,63 @@ private struct GeneralSettings: View {
 
     var body: some View {
         Form {
+            LanguageSection()
             Section {
-                TextField("IPv4 の宛先", text: $inet4)
-                TextField("IPv6 の宛先", text: $inet6)
-                Button("適用") { model.monitor.applyTargets() }
+                TextField("IPv4 target", text: $inet4)
+                TextField("IPv6 target", text: $inet6)
+                Button("Apply") { model.monitor.applyTargets() }
             } header: {
-                Text("インターネット側の ping 宛先")
+                Text("Internet Ping Targets")
             } footer: {
-                Text("ルーター宛ては自動で決まります。宛先を変えると、それまでの記録とは比較しにくくなります。")
+                Text("The router target is detected automatically. Changing targets makes comparison with earlier records harder.")
                     .foregroundStyle(.secondary)
             }
             Section {
-                Toggle("メニューバーに表示", isOn: $showMenuBarExtra)
+                Toggle("Show in Menu Bar", isOn: $showMenuBarExtra)
             } footer: {
-                Text("ウインドウを閉じても、アプリが起動している間は常時計測が続きます。")
+                Text("Monitoring continues while the app is running, even with the window closed.")
                     .foregroundStyle(.secondary)
             }
         }
         .formStyle(.grouped)
+    }
+}
+
+/// 表示言語。既定はシステム設定に従う。変更は再起動で反映される。
+private struct LanguageSection: View {
+    /// 空文字列 = システム設定に従う
+    @State private var choice = AppLanguage.override ?? ""
+
+    var body: some View {
+        // 再起動が要るかは「いま選んでいる値」から判定する。
+        // 保存済みの値（UserDefaults）を見ると、onChange より先に描画されたときに1つ前の選択で判定してしまう
+        let needsRestart = AppLanguage.launchLanguage(choice: choice) != AppLanguage.current
+        Section {
+            Picker("Language", selection: Binding(
+                get: { choice },
+                set: { newValue in
+                    choice = newValue
+                    AppLanguage.override = newValue.isEmpty ? nil : newValue
+                }
+            )) {
+                Text("System Setting (\(AppLanguage.displayName(AppLanguage.systemChoice)))").tag("")
+                Divider()
+                ForEach(AppLanguage.available, id: \.self) { code in
+                    Text(verbatim: AppLanguage.displayName(code)).tag(code)
+                }
+            }
+            if needsRestart {
+                HStack {
+                    Label("Restart Wi-Fi Pulse to apply the change.", systemImage: "arrow.clockwise.circle")
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Button("Restart Now") { AppLanguage.relaunch() }
+                }
+            }
+        } footer: {
+            Text("You can also change this in System Settings › General › Language & Region › Applications.")
+                .foregroundStyle(.secondary)
+        }
     }
 }
 
@@ -49,31 +88,31 @@ private struct DataSettings: View {
     var body: some View {
         Form {
             Section {
-                LabeledContent("保存先") {
+                LabeledContent("Folder") {
                     Text(DataStore.folder.path(percentEncoded: false))
                         .lineLimit(2)
                         .truncationMode(.middle)
                         .textSelection(.enabled)
                 }
                 HStack {
-                    Button("変更…") { picking = true }
-                    Button("既定に戻す") { folderPath = "" }.disabled(folderPath.isEmpty)
+                    Button("Change…") { picking = true }
+                    Button("Restore Default") { folderPath = "" }.disabled(folderPath.isEmpty)
                     Spacer()
-                    Button("Finder で開く") {
+                    Button("Show in Finder") {
                         try? FileManager.default.createDirectory(at: DataStore.folder, withIntermediateDirectories: true)
                         NSWorkspace.shared.open(DataStore.folder)
                     }
                 }
             } header: {
-                Text("記録の保存先")
+                Text("Record Location")
             } footer: {
-                Text("形式は Wi-Fi Pulse 診断キットと同じ JSON Lines です。キットの data フォルダを指定すれば、tools/report.py でもそのまま集計できます。")
+                Text("Records are stored as JSON Lines, the same format as the Wi-Fi Pulse diagnostic kit. Point this at the kit’s data folder to analyze them with tools/report.py as well.")
                     .foregroundStyle(.secondary)
             }
             Section {
-                Button("計測記録を削除…", role: .destructive) { confirmDelete = true }
+                Button("Delete Records…", role: .destructive) { confirmDelete = true }
             } footer: {
-                Text("1分ごとの集計・速度測定・負荷試験・機器一覧を削除します。")
+                Text("Deletes per-minute records, speed tests, load tests, and the device list.")
                     .foregroundStyle(.secondary)
             }
         }
@@ -81,10 +120,10 @@ private struct DataSettings: View {
         .fileImporter(isPresented: $picking, allowedContentTypes: [.folder]) { result in
             if case .success(let url) = result { folderPath = url.path(percentEncoded: false) }
         }
-        .confirmationDialog("計測記録を削除しますか？", isPresented: $confirmDelete) {
-            Button("削除", role: .destructive) { DataStore.deleteRecords() }
+        .confirmationDialog("Delete all measurement records?", isPresented: $confirmDelete) {
+            Button("Delete", role: .destructive) { DataStore.deleteRecords() }
         } message: {
-            Text("この操作は取り消せません。")
+            Text("This can’t be undone.")
         }
     }
 }
@@ -94,29 +133,29 @@ private struct PrivacySettings: View {
 
     var body: some View {
         Form {
-            Section("権限") {
-                LabeledContent("位置情報") {
+            Section("Permissions") {
+                LabeledContent("Location") {
                     HStack {
                         Text(model.location.statusText).foregroundStyle(.secondary)
                         if !model.location.isAuthorized {
-                            Button("許可する…") { model.location.request() }
+                            Button("Allow…") { model.location.request() }
                         }
                     }
                 }
-                Button("システム設定の「位置情報サービス」を開く") {
+                Button("Open Location Services Settings") {
                     NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_LocationServices")!)
                 }
-                Button("システム設定の「ローカルネットワーク」を開く") {
+                Button("Open Local Network Settings") {
                     NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_LocalNetwork")!)
                 }
             }
-            Section("取得するもの") {
+            Section("What Is Collected") {
                 Text("""
-                    ・Wi-Fi の電波情報（CoreWLAN）・ルーターとインターネットへの ping・DNS 応答時間
-                    ・LAN 上の機器の IP / MAC / mDNS 名（メーカー名は同梱の表で照合し、外部には送りません）
-                    ・macOS の統合ログのうち Wi-Fi 関連の行（読み込んだときだけ）
-                    ・速度測定と負荷試験は、それぞれ Apple と Cloudflare のサーバーと通信します
-                    ルーターや Mac の設定は一切変更しません。
+                    • Wi-Fi radio information (CoreWLAN), pings to the router and the Internet, and DNS response times
+                    • IP, MAC, and mDNS names of devices on your local network (manufacturers are looked up in a bundled table and never sent anywhere)
+                    • Wi-Fi–related lines from the macOS unified log (only when you load them)
+                    • Speed tests and load tests communicate with Apple and Cloudflare servers, respectively
+                    Router and Mac settings are never changed.
                     """)
                     .font(.callout)
                     .foregroundStyle(.secondary)

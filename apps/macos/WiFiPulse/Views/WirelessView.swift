@@ -12,14 +12,14 @@ struct WirelessView: View {
                     LocationBanner()
                 }
                 LinkSection()
-                Card("信号とノイズ（直近10分）", systemImage: "chart.xyaxis.line", subtitle: "5秒ごとの中央値。間の幅が SN比で、広いほど余裕があります。") {
+                Card("Signal and Noise (Last 10 Minutes)", systemImage: "chart.xyaxis.line", subtitle: String(localized: "Median every 5 seconds. The gap between the lines is the SNR — the wider, the better.")) {
                     SignalHistory()
                         .frame(height: 240)
                 }
             }
             .padding(24)
         }
-        .navigationTitle("Wi-Fi 接続")
+        .navigationTitle("Wi-Fi Connection")
     }
 }
 
@@ -33,13 +33,13 @@ struct LocationBanner: View {
                     .font(.largeTitle)
                     .foregroundStyle(.tint)
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("ネットワーク名と詳しい電波情報には位置情報の許可が必要です").font(.headline)
-                    Text("macOS は位置情報の許可が無いアプリに SSID・BSSID・ビーコンの詳細を返しません。位置そのものは記録しません。")
+                    Text("Network names and detailed radio information require Location access").font(.headline)
+                    Text("macOS doesn’t give apps the SSID, BSSID, or beacon details without Location access. Your location itself is never recorded.")
                         .font(.callout)
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
-                Button("許可する…") { model.location.request() }
+                Button("Allow…") { model.location.request() }
                     .buttonStyle(.glassProminent)
             }
         }
@@ -56,15 +56,15 @@ private struct LinkSection: View {
                 if link.isDFS {
                     Card {
                         ObservationRow(level: .warn,
-                                       text: "\(link.channel ?? 0)ch は DFS 対象（W53/W56）です",
-                                       detail: "気象・航空レーダーを検出すると、ルーターは最大60秒まったく送信できなくなります。通信が数十秒止まる症状の典型原因です。ルーターのチャンネルを W52（36/40/44/48ch）に固定すると止まります。")
+                                       text: String(localized: "Channel \(link.channel ?? 0) is a DFS channel (W53/W56)"),
+                                       detail: String(localized: "When weather or aviation radar is detected, the router can’t transmit at all for up to 60 seconds — a classic cause of traffic stalling for tens of seconds. Fixing your router to W52 (channels 36/40/44/48) stops it."))
                     }
                 }
                 LinkCard(link: link).equatable()
             }
         } else {
-            ContentUnavailableView("Wi-Fi に接続していません", systemImage: "wifi.slash",
-                                   description: Text("Wi-Fi をオンにしてネットワークに接続すると、電波の状態を表示します。"))
+            ContentUnavailableView("Not Connected to Wi-Fi", systemImage: "wifi.slash",
+                                   description: Text("Turn on Wi-Fi and join a network to see signal details."))
         }
     }
 }
@@ -73,28 +73,28 @@ private struct LinkCard: View, Equatable {
     let link: LinkSample
 
     var body: some View {
-        Card("接続中のネットワーク", systemImage: "wifi") {
+        Card("Connected Network", systemImage: "wifi") {
             HStack(spacing: 12) {
                 SignalBars(bars: link.bars).tint(Level.rssi(link.rssi).tint)
-                Text(link.ssid ?? "（ネットワーク名は非表示）")
+                Text(link.ssid ?? String(localized: "(network name hidden)"))
                     .font(.title2.weight(.semibold))
                     .lineLimit(1)
             }
             Grid(alignment: .leading, horizontalSpacing: 24, verticalSpacing: 8) {
-                row("電波強度", "\(link.rssi) dBm（\(link.strengthWord)）", level: Level.rssi(link.rssi))
-                row("ノイズ", "\(link.noise) dBm")
-                row("SN比", "\(link.snr) dB", level: link.snr >= 25 ? .good : link.snr >= 15 ? .warn : .crit)
-                row("バンド / チャンネル", "\(link.bandLabel) · \(link.channelLabel)", level: link.isDFS ? .warn : .none)
-                row("規格", link.phy)
-                row("リンク速度", "\(Int(link.txRate)) Mbps")
-                row("送信出力", "\(link.txPower) mW")
+                row("Signal Strength", String(localized: "\(link.rssi) dBm (\(link.strengthWord))"), level: Level.rssi(link.rssi))
+                row("Noise", "\(link.noise) dBm")
+                row("SNR", "\(link.snr) dB", level: link.snr >= 25 ? .good : link.snr >= 15 ? .warn : .crit)
+                row("Band / Channel", "\(link.bandLabel) · \(link.channelLabel)", level: link.isDFS ? .warn : .none)
+                row("Standard", link.phy)
+                row("Link Rate", "\(Int(link.txRate)) Mbps")
+                row("Transmit Power", "\(link.txPower) mW")
                 row("BSSID", link.bssid ?? "—")
             }
             .font(.callout)
         }
     }
 
-    private func row(_ title: String, _ value: String, level: Level = .none) -> some View {
+    private func row(_ title: LocalizedStringKey, _ value: String, level: Level = .none) -> some View {
         GridRow {
             Text(title).foregroundStyle(.secondary)
             HStack(spacing: 6) {
@@ -144,14 +144,14 @@ private struct SignalChart: View, Equatable {
     var body: some View {
         Chart {
             ForEach(points) { p in
-                AreaMark(x: .value("時刻", p.date), yStart: .value("ノイズ", p.noise), yEnd: .value("信号", p.rssi))
+                AreaMark(x: .value("Time", p.date), yStart: .value("Noise", p.noise), yEnd: .value("Signal", p.rssi))
                     .foregroundStyle(.tint.opacity(0.15))
-                LineMark(x: .value("時刻", p.date), y: .value("dBm", p.rssi), series: .value("系列", "信号"))
+                LineMark(x: .value("Time", p.date), y: .value("dBm", p.rssi), series: .value("Series", "Signal"))
                     .foregroundStyle(.tint)
-                LineMark(x: .value("時刻", p.date), y: .value("dBm", p.noise), series: .value("系列", "ノイズ"))
+                LineMark(x: .value("Time", p.date), y: .value("dBm", p.noise), series: .value("Series", "Noise"))
                     .foregroundStyle(.secondary)
             }
-            RuleMark(y: .value("目安", -70))
+            RuleMark(y: .value("Guide", -70))
                 .foregroundStyle(.orange.opacity(0.6))
                 .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 4]))
                 .annotation(position: .top, alignment: .leading) {

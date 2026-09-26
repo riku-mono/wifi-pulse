@@ -1,0 +1,33 @@
+name: Localization
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/**/*.xcstrings"
+      - "scripts/l10n-coverage.py"
+      - "README.md"
+      - ".github/workflows/l10n.yml"
+  pull_request:
+    paths:
+      - "apps/**/*.xcstrings"
+      - "scripts/l10n-coverage.py"
+      - "README.md"
+      - ".github/workflows/l10n.yml"
+
+concurrency:
+  group: l10n-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  coverage:
+    # カタログ（JSON）を読むだけなので、macOS ランナーは使わない
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: 言語別カバレッジ（ja・en は 100% 必須、README の表が最新であること）
+        run: python3 scripts/l10n-coverage.py --require ja=100 --require en=100 --check README.md

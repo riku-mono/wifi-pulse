@@ -28,32 +28,32 @@ struct NeighborsView: View {
                     LocationBanner()
                 }
                 if let e = scanner.error {
-                    Card { ObservationRow(level: .warn, text: "スキャンできませんでした", detail: e) }
+                    Card { ObservationRow(level: .warn, text: String(localized: "Scan failed"), detail: e) }
                 }
                 if scanner.lastScan == nil {
                     Card {
                         HStack(spacing: 12) {
                             ProgressView().controlSize(.small)
-                            Text(scanner.isScanning ? "周辺をスキャンしています…" : "まだスキャンしていません")
+                            Text(scanner.isScanning ? "Scanning nearby networks…" : "Not scanned yet")
                                 .foregroundStyle(.secondary)
                         }
                         .frame(maxWidth: .infinity, minHeight: 60)
                     }
                 } else {
                     summary(all, loads: loads, recs: recs, myChannel: myChannel)
-                    Card("スペクトラム", systemImage: "waveform",
-                         subtitle: "各アクセスポイントが電波を出している幅（チャンネル幅）と強さ。重なっている部分は電波を取り合います。グラフの上をなぞると、そのチャンネルに重なっているネットワークを表示します。") {
+                    Card("Spectrum", systemImage: "waveform",
+                         subtitle: String(localized: "The width (channel width) and strength of each access point’s signal. Overlapping networks compete for airtime. Hover over the chart to see which networks overlap that channel.")) {
                         SpectrumChart(aps: all, band: band, mySSID: mySSID).equatable()
                             .frame(height: 300)
                     }
-                    Card("チャンネルごとの混雑度", systemImage: "chart.bar.fill",
-                         subtitle: "そのチャンネルに重なっているほかのネットワークの影響の合計（電波が強い・利用率が高いほど大きい）。自分のネットワークは除いています。") {
+                    Card("Congestion by Channel", systemImage: "chart.bar.fill",
+                         subtitle: String(localized: "The combined impact of other networks overlapping each channel (higher for stronger signals and busier networks). Your own network is excluded.")) {
                         CongestionChart(loads: loads, recommended: recs.map(\.channel), band: band).equatable()
                             .frame(height: 200)
                         recommendationText(recs, loads: loads, myChannel: myChannel)
                     }
-                    Card("アクセスポイント", systemImage: "list.bullet",
-                         subtitle: "\(Set(all.map(\.sortName)).count) 個のネットワーク · \(all.count) 台のアクセスポイント") {
+                    Card("Access Points", systemImage: "list.bullet",
+                         subtitle: String(localized: "Networks: \(Set(all.map(\.sortName)).count) · Access points: \(all.count)")) {
                         APTable(aps: filtered.sorted(using: sortOrder), selection: $selection, sortOrder: $sortOrder, mySSID: mySSID)
                             .frame(minHeight: 320)
                     }
@@ -61,8 +61,8 @@ struct NeighborsView: View {
             }
             .padding(24)
         }
-        .navigationTitle("周辺の Wi-Fi")
-        .searchable(text: $search, placement: .toolbar, prompt: "SSID・BSSID・メーカー")
+        .navigationTitle("Nearby Wi-Fi")
+        .searchable(text: $search, placement: .toolbar, prompt: "SSID, BSSID, Manufacturer")
         .inspector(isPresented: $showInspector) {
             APInspector(ap: all.first { $0.id == selection } ?? scanner.accessPoints.first { $0.id == selection })
                 .inspectorColumnWidth(min: 280, ideal: 320, max: 420)
@@ -70,7 +70,7 @@ struct NeighborsView: View {
         .onChange(of: selection) { if selection != nil { showInspector = true } }
         .toolbar {
             ToolbarItem(placement: .principal) {
-                Picker("バンド", selection: $band) {
+                Picker("Band", selection: $band) {
                     ForEach(Band.allCases) { Text($0.label).tag($0) }
                 }
                 .pickerStyle(.segmented)
@@ -78,26 +78,26 @@ struct NeighborsView: View {
             }
             ToolbarItemGroup(placement: .primaryAction) {
                 Menu {
-                    Picker("自動スキャン", selection: $scanner.autoInterval) {
+                    Picker("Auto-Scan", selection: $scanner.autoInterval) {
                         ForEach(NeighborScanner.AutoInterval.allCases) { Text($0.label).tag($0) }
                     }
                     .pickerStyle(.inline)
-                    Toggle("直近10分に見えたものも表示", isOn: $includeStale)
+                    Toggle("Include Networks Seen in the Last 10 Minutes", isOn: $includeStale)
                 } label: {
-                    Label("表示オプション", systemImage: scanner.autoInterval == .off ? "timer" : "timer.circle.fill")
+                    Label("View Options", systemImage: scanner.autoInterval == .off ? "timer" : "timer.circle.fill")
                 }
-                .help("スキャン中は自分の通信も数百ms止まるため、自動スキャンは必要なときだけ使ってください")
+                .help("Each scan pauses your own traffic for a few hundred milliseconds, so use auto-scan only when needed")
                 Button {
                     Task { await scanner.scan() }
                 } label: {
-                    Label("スキャン", systemImage: "arrow.clockwise")
+                    Label("Scan", systemImage: "arrow.clockwise")
                 }
                 .disabled(scanner.isScanning)
-                .help("周辺のアクセスポイントをスキャンします（15秒以上あけて実行）")
+                .help("Scan for nearby access points (at least 15 seconds apart)")
                 Button {
                     showInspector.toggle()
                 } label: {
-                    Label("インスペクタ", systemImage: "sidebar.trailing")
+                    Label("Inspector", systemImage: "sidebar.trailing")
                 }
             }
         }
@@ -112,19 +112,19 @@ struct NeighborsView: View {
         let scanner = model.neighbors
         let mine = loads.first { $0.channel == myChannel }
         return LazyVGrid(columns: [GridItem(.adaptive(minimum: 180), spacing: 12)], spacing: 12) {
-            MetricTile(title: "ネットワーク", systemImage: "wifi", value: "\(Set(aps.map(\.sortName)).count)",
-                       caption: "アクセスポイント \(aps.count) 台")
-            MetricTile(title: "自分のチャンネル", systemImage: "scope",
+            MetricTile(title: "Network", systemImage: "wifi", value: "\(Set(aps.map(\.sortName)).count)",
+                       caption: String(localized: "Access points: \(aps.count)"))
+            MetricTile(title: "Your Channel", systemImage: "scope",
                        value: myChannel.map { "\($0)ch" } ?? "—",
-                       caption: mine.map { "重なるネットワーク \($0.count) 件" } ?? "このバンドには接続していません",
+                       caption: mine.map { String(localized: "Overlapping networks: \($0.count)") } ?? String(localized: "Not connected on this band"),
                        level: mine?.level ?? .none)
-            MetricTile(title: "いちばん空いている", systemImage: "star",
+            MetricTile(title: "Least Congested", systemImage: "star",
                        value: recs.first.map { "\($0.channel)ch" } ?? "—",
-                       caption: recs.first.map { $0.isDFS ? "DFS 対象（レーダー検出で停止あり）" : (band.dfsLabel($0.channel).map { "\($0)・DFSなし" } ?? "重なり \($0.count) 件") },
+                       caption: recs.first.map { $0.isDFS ? String(localized: "DFS channel (pauses when radar is detected)") : (band.dfsLabel($0.channel).map { String(localized: "\($0) · no DFS") } ?? String(localized: "Overlaps: \($0.count)")) },
                        level: recs.first == nil ? .none : .good)
-            MetricTile(title: "最終スキャン", systemImage: "clock",
+            MetricTile(title: "Last Scan", systemImage: "clock",
                        value: scanner.lastScan.map { Fmt.time($0) } ?? "—",
-                       caption: "所要 \(String(format: "%.1f", scanner.lastDuration)) 秒 · \(scanner.scanCount) 回目")
+                       caption: String(localized: "Took \(String(format: "%.1f", scanner.lastDuration)) s · Scan #\(scanner.scanCount)"))
         }
     }
 
@@ -134,18 +134,18 @@ struct NeighborsView: View {
             let mine = loads.first { $0.channel == myChannel }
             VStack(alignment: .leading, spacing: 6) {
                 ObservationRow(level: .good,
-                               text: "空いている順: " + recs.map { "\($0.channel)ch" + (band.dfsLabel($0.channel).map { "（\($0)）" } ?? "") }.joined(separator: "、"))
+                               text: String(localized: "Least congested: \(recs.map { "\($0.channel)ch" + (band.dfsLabel($0.channel).map { String(localized: " (\($0))") } ?? "") }.formatted(.list(type: .and)))"))
                 if let mine, mine.score > best.score + 0.5 {
                     ObservationRow(level: .warn,
-                                   text: "いまの \(mine.channel)ch より \(best.channel)ch の方が空いています。",
-                                   detail: "ルーターの設定でチャンネルを変えると改善する可能性があります。変えたら、しばらくしてからもう一度スキャンして確かめてください。")
+                                   text: String(localized: "Channel \(best.channel) is less congested than your current channel \(mine.channel)."),
+                                   detail: String(localized: "Changing the channel in your router’s settings may help. After changing it, wait a while and scan again to confirm."))
                 }
                 if band == .ghz5 {
-                    Text("W53（52〜64ch）・W56（100〜144ch）は DFS 対象で、レーダーを検出するとルーターが最大60秒送信を止めます。安定性を優先するなら W52（36〜48ch）を選びます。")
+                    Text("W53 (channels 52–64) and W56 (100–144) are DFS channels: when radar is detected, the router stops transmitting for up to 60 seconds. For stability, choose W52 (channels 36–48).")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 } else if band == .ghz24 {
-                    Text("2.4GHz は隣のチャンネルと電波が重なるため、1・6・11ch のどれかを選ぶのが基本です。")
+                    Text("On 2.4 GHz, neighboring channels overlap, so stick to channel 1, 6, or 11.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -181,18 +181,18 @@ private struct SpectrumChart: View, Equatable {
                 let color = color(for: ap)
                 let isMine = mySSID != nil && ap.ssid == mySSID
                 ForEach(vertices(ap)) { v in
-                    AreaMark(x: .value("チャンネル", v.x), yStart: .value("下限", -100), yEnd: .value("dBm", v.y),
+                    AreaMark(x: .value("Channel", v.x), yStart: .value("Floor", -100), yEnd: .value("dBm", v.y),
                              series: .value("AP", v.ap))
                         .foregroundStyle(color.opacity(isMine ? 0.28 : 0.10))
-                    LineMark(x: .value("チャンネル", v.x), y: .value("dBm", v.y), series: .value("AP", v.ap))
+                    LineMark(x: .value("Channel", v.x), y: .value("dBm", v.y), series: .value("AP", v.ap))
                         .foregroundStyle(color)
                         .lineStyle(StrokeStyle(lineWidth: isMine ? 2.5 : 1.2))
                 }
                 if labeled.contains(ap.id) {
-                    PointMark(x: .value("チャンネル", ap.center), y: .value("dBm", ap.rssi))
+                    PointMark(x: .value("Channel", ap.center), y: .value("dBm", ap.rssi))
                         .symbolSize(0)
                         .annotation(position: .top, spacing: 2) {
-                            Text(ap.isHidden ? "（非公開）" : ap.ssid!)
+                            Text(ap.isHidden ? String(localized: "(hidden)") : ap.ssid!)
                                 .font(.caption2.weight(isMine ? .bold : .regular))
                                 .foregroundStyle(isMine ? AnyShapeStyle(.tint) : AnyShapeStyle(.secondary))
                                 .lineLimit(1)
@@ -200,7 +200,7 @@ private struct SpectrumChart: View, Equatable {
                 }
             }
             if let ch = selectedChannel {
-                RuleMark(x: .value("選択", ch))
+                RuleMark(x: .value("Selection", ch))
                     .foregroundStyle(.primary.opacity(0.35))
                     .annotation(position: .top, alignment: .center, spacing: 0,
                                 overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
@@ -216,13 +216,13 @@ private struct SpectrumChart: View, Equatable {
                 AxisValueLabel { if let c = v.as(Int.self) { Text("\(c)") } }
             }
         }
-        .chartXAxisLabel("チャンネル")
+        .chartXAxisLabel("Channel")
         .chartYAxisLabel("dBm")
         .chartXSelection(value: $selectedX)
         .transaction { $0.animation = nil }
         .overlay {
             if aps.isEmpty {
-                ContentUnavailableView("このバンドのアクセスポイントは見つかりません", systemImage: "antenna.radiowaves.left.and.right.slash")
+                ContentUnavailableView("No Access Points on This Band", systemImage: "antenna.radiowaves.left.and.right.slash")
             }
         }
     }
@@ -230,9 +230,9 @@ private struct SpectrumChart: View, Equatable {
     private func channelPopover(_ ch: Int) -> some View {
         let over = aps.filter { $0.overlaps(channel: ch) }.sorted { $0.rssi > $1.rssi }
         return VStack(alignment: .leading, spacing: 3) {
-            Text("\(ch)ch" + (band.dfsLabel(ch).map { "（\($0)）" } ?? "")).font(.caption.weight(.semibold))
+            Text("\(ch)ch" + (band.dfsLabel(ch).map { String(localized: " (\($0))") } ?? "")).font(.caption.weight(.semibold))
             if over.isEmpty {
-                Text("重なるネットワークなし").font(.caption2).foregroundStyle(.secondary)
+                Text("No overlapping networks").font(.caption2).foregroundStyle(.secondary)
             }
             ForEach(over.prefix(6)) { ap in
                 HStack(spacing: 6) {
@@ -243,7 +243,7 @@ private struct SpectrumChart: View, Equatable {
                 }
                 .font(.caption2)
             }
-            if over.count > 6 { Text("ほか \(over.count - 6) 件").font(.caption2).foregroundStyle(.secondary) }
+            if over.count > 6 { Text("+\(over.count - 6) more").font(.caption2).foregroundStyle(.secondary) }
         }
         .padding(8)
         .frame(width: 200)
@@ -291,19 +291,19 @@ private struct CongestionChart: View, Equatable {
 
     var body: some View {
         Chart(loads) { l in
-            BarMark(x: .value("チャンネル", "\(l.channel)"), y: .value("混雑度", l.score))
+            BarMark(x: .value("Channel", "\(l.channel)"), y: .value("Congestion", l.score))
                 .foregroundStyle(l.level.tint.opacity(l.isDFS ? 0.5 : 0.9))
                 .annotation(position: .top, spacing: 2) {
                     if l.isMine {
                         Image(systemName: "wifi").font(.caption2).foregroundStyle(.tint)
-                            .accessibilityLabel("現在のチャンネル")
+                            .accessibilityLabel("Current channel")
                     } else if recommended.first == l.channel {
                         Image(systemName: "star.fill").font(.caption2).foregroundStyle(.green)
-                            .accessibilityLabel("おすすめ")
+                            .accessibilityLabel("Recommended")
                     }
                 }
         }
-        .chartXAxisLabel("チャンネル（薄い色は DFS 対象・\(Image(systemName: "wifi")) は現在・\(Image(systemName: "star.fill")) はおすすめ）")
+        .chartXAxisLabel("Channel (faded = DFS, \(Image(systemName: "wifi")) = current, \(Image(systemName: "star.fill")) = recommended)")
         .chartYAxis {
             AxisMarks { v in
                 AxisGridLine()
@@ -324,16 +324,16 @@ private struct APTable: View {
 
     var body: some View {
         Table(aps, selection: $selection, sortOrder: $sortOrder) {
-            TableColumn("ネットワーク", value: \.sortName) { ap in
+            TableColumn("Network", value: \.sortName) { ap in
                 HStack(spacing: 6) {
                     if mySSID != nil && ap.ssid == mySSID {
-                        Image(systemName: "checkmark.circle.fill").foregroundStyle(.tint).accessibilityLabel("接続中")
+                        Image(systemName: "checkmark.circle.fill").foregroundStyle(.tint).accessibilityLabel("Connected")
                     }
                     Text(ap.displayName).foregroundStyle(ap.isHidden ? .secondary : .primary)
                 }
             }
             .width(min: 140, ideal: 200)
-            TableColumn("電波", value: \.rssi) { ap in
+            TableColumn("Signal", value: \.rssi) { ap in
                 HStack(spacing: 6) {
                     Gauge(value: Double(ap.rssi + 100), in: 0...70) { EmptyView() }
                         .gaugeStyle(.accessoryLinearCapacity)
@@ -343,7 +343,7 @@ private struct APTable: View {
                 }
             }
             .width(90)
-            TableColumn("チャンネル", value: \.channel) { ap in
+            TableColumn("Channel", value: \.channel) { ap in
                 HStack(spacing: 4) {
                     Text("\(ap.channel)").monospacedDigit()
                     Text("· \(ap.width) MHz").foregroundStyle(.secondary)
@@ -351,21 +351,21 @@ private struct APTable: View {
                 }
             }
             .width(min: 110, ideal: 130)
-            TableColumn("規格", value: \.sortGeneration) { Text($0.generationLabel) }
+            TableColumn("Standard", value: \.sortGeneration) { Text($0.generationLabel) }
                 .width(70)
-            TableColumn("セキュリティ", value: \.security) { ap in
-                Text(ap.security).foregroundStyle(ap.security.contains("WEP") || ap.security.contains("オープン") ? .orange : .primary)
+            TableColumn("Security", value: \.security) { ap in
+                Text(ap.security).foregroundStyle(ap.isInsecure ? .orange : .primary)
             }
             .width(min: 80, ideal: 110)
-            TableColumn("端末数", value: \.sortStations) { Text($0.stations.map(String.init) ?? "—").monospacedDigit() }
+            TableColumn("Clients", value: \.sortStations) { Text($0.stations.map(String.init) ?? "—").monospacedDigit() }
                 .width(55)
-            TableColumn("利用率", value: \.sortUtilization) { Text($0.utilization.map { "\(Int($0 * 100))%" } ?? "—").monospacedDigit() }
+            TableColumn("Utilization", value: \.sortUtilization) { Text($0.utilization.map { "\(Int($0 * 100))%" } ?? "—").monospacedDigit() }
                 .width(55)
-            TableColumn("メーカー", value: \.sortVendor) { Text($0.vendor ?? "—").foregroundStyle(.secondary) }
+            TableColumn("Manufacturer", value: \.sortVendor) { Text($0.vendor ?? "—").foregroundStyle(.secondary) }
                 .width(min: 80, ideal: 140)
             TableColumn("BSSID") { Text($0.bssid ?? "—").font(.caption.monospaced()).foregroundStyle(.secondary) }
                 .width(min: 110, ideal: 130)
-            TableColumn("最終確認", value: \.lastSeen) { Text(Fmt.time($0.lastSeen)).monospacedDigit().foregroundStyle(.secondary) }
+            TableColumn("Last Seen", value: \.lastSeen) { Text(Fmt.time($0.lastSeen)).monospacedDigit().foregroundStyle(.secondary) }
                 .width(70)
         }
         .scrollContentBackground(.hidden)
@@ -386,42 +386,42 @@ private struct APInspector: View {
                         Text("\(ap.band.label) · \(ap.channel)ch · \(ap.width) MHz").foregroundStyle(.secondary)
                     }
                 }
-                Section("電波の推移（スキャンごと）") {
+                Section("Signal History (per Scan)") {
                     Chart(ap.history, id: \.date) { p in
-                        LineMark(x: .value("時刻", p.date), y: .value("dBm", p.rssi))
-                        PointMark(x: .value("時刻", p.date), y: .value("dBm", p.rssi)).symbolSize(12)
+                        LineMark(x: .value("Time", p.date), y: .value("dBm", p.rssi))
+                        PointMark(x: .value("Time", p.date), y: .value("dBm", p.rssi)).symbolSize(12)
                     }
                     .chartYScale(domain: -100 ... -20)
                     .frame(height: 120)
                 }
-                Section("電波") {
-                    LabeledContent("電波強度", value: "\(ap.rssi) dBm")
-                    LabeledContent("ノイズ", value: "\(ap.noise) dBm")
-                    LabeledContent("SN比", value: "\(ap.rssi - ap.noise) dB")
-                    LabeledContent("使用範囲", value: String(format: "%.0f〜%.0f ch（中心 %.0f）", ap.span.lowerBound + 2, ap.span.upperBound - 2, ap.center))
-                    if let dfs = ap.band.dfsLabel(ap.channel) { LabeledContent("区分", value: dfs + (ap.isDFS ? "（DFS）" : "")) }
+                Section("Signal") {
+                    LabeledContent("Signal Strength", value: "\(ap.rssi) dBm")
+                    LabeledContent("Noise", value: "\(ap.noise) dBm")
+                    LabeledContent("SNR", value: "\(ap.rssi - ap.noise) dB")
+                    LabeledContent("Occupied Range", value: String(format: String(localized: "ch %.0f–%.0f (center %.0f)"), ap.span.lowerBound + 2, ap.span.upperBound - 2, ap.center))
+                    if let dfs = ap.band.dfsLabel(ap.channel) { LabeledContent("Band Group", value: dfs + (ap.isDFS ? String(localized: " (DFS)") : "")) }
                 }
-                Section("混雑（BSS Load）") {
-                    LabeledContent("接続端末数", value: ap.stations.map { "\($0) 台" } ?? "非公開")
-                    LabeledContent("チャンネル利用率", value: ap.utilization.map { "\(Int($0 * 100))%" } ?? "非公開")
-                    Text("アクセスポイント自身が知らせている値です。対応していない機種では表示されません。")
+                Section("Load (BSS Load)") {
+                    LabeledContent("Connected Clients", value: ap.stations.map { String(localized: "\($0)") } ?? String(localized: "Not reported"))
+                    LabeledContent("Channel Utilization", value: ap.utilization.map { "\(Int($0 * 100))%" } ?? String(localized: "Not reported"))
+                    Text("Reported by the access point itself. Not shown for models that don’t support it.")
                         .font(.caption).foregroundStyle(.secondary)
                 }
-                Section("詳細") {
-                    LabeledContent("規格", value: ap.generationLabel)
-                    LabeledContent("セキュリティ", value: ap.security)
+                Section("Details") {
+                    LabeledContent("Standard", value: ap.generationLabel)
+                    LabeledContent("Security", value: ap.security)
                     LabeledContent("BSSID") { Text(ap.bssid ?? "—").font(.callout.monospaced()).textSelection(.enabled) }
-                    LabeledContent("メーカー", value: ap.vendor ?? "不明")
-                    LabeledContent("国コード", value: ap.country ?? "—")
-                    LabeledContent("ビーコン間隔", value: "\(ap.beaconInterval) TU")
-                    LabeledContent("初めて見た", value: ap.firstSeen.formatted(date: .omitted, time: .standard))
-                    LabeledContent("最後に見た", value: ap.lastSeen.formatted(date: .omitted, time: .standard))
+                    LabeledContent("Manufacturer", value: ap.vendor ?? String(localized: "Unknown"))
+                    LabeledContent("Country Code", value: ap.country ?? "—")
+                    LabeledContent("Beacon Interval", value: "\(ap.beaconInterval) TU")
+                    LabeledContent("First Seen", value: ap.firstSeen.formatted(date: .omitted, time: .standard))
+                    LabeledContent("Last Seen", value: ap.lastSeen.formatted(date: .omitted, time: .standard))
                 }
             }
             .formStyle(.grouped)
         } else {
-            ContentUnavailableView("アクセスポイントを選択", systemImage: "cursorarrow.click.2",
-                                   description: Text("一覧から選ぶと、詳細と電波の推移を表示します。"))
+            ContentUnavailableView("Select an Access Point", systemImage: "cursorarrow.click.2",
+                                   description: Text("Select one in the list to see details and signal history."))
         }
     }
 }

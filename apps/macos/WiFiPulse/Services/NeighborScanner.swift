@@ -16,6 +16,8 @@ nonisolated struct AccessPoint: Identifiable, Hashable, Sendable {
     var rssi: Int
     var noise: Int
     var security: String
+    /// 暗号化なし・WEP（表示を注意色にする）
+    var isInsecure: Bool
     var generation: Int?
     var beaconInterval: Int
     var country: String?
@@ -45,7 +47,7 @@ nonisolated struct AccessPoint: Identifiable, Hashable, Sendable {
 
     var isDFS: Bool { band == .ghz5 && ((52...64).contains(channel) || (100...144).contains(channel)) }
     var isHidden: Bool { (ssid ?? "").isEmpty }
-    var displayName: String { isHidden ? "（非公開ネットワーク）" : ssid! }
+    var displayName: String { isHidden ? String(localized: "(hidden network)") : ssid! }
     var generationLabel: String { generation.map { "Wi-Fi \($0)" } ?? "—" }
 
     // Table の並べ替え用（Optional は Comparable でないため）
@@ -109,10 +111,10 @@ final class NeighborScanner {
         var id: Self { self }
         var label: String {
             switch self {
-            case .off: "自動スキャンしない"
-            case .s30: "30秒ごと"
-            case .s60: "1分ごと"
-            case .s120: "2分ごと"
+            case .off: String(localized: "Don’t Auto-Scan")
+            case .s30: String(localized: "Every 30 seconds")
+            case .s60: String(localized: "Every minute")
+            case .s120: String(localized: "Every 2 minutes")
             }
         }
     }
@@ -179,7 +181,7 @@ final class NeighborScanner {
             let key = r.bssid ?? "\(r.ssid ?? "?")|\(r.band.rawValue)|\(r.channel)"
             var ap = store[key] ?? AccessPoint(
                 id: key, ssid: r.ssid, bssid: r.bssid, band: r.band, channel: r.channel, width: r.width,
-                center: r.center, rssi: r.rssi, noise: r.noise, security: r.security, generation: r.generation,
+                center: r.center, rssi: r.rssi, noise: r.noise, security: r.security, isInsecure: r.isInsecure, generation: r.generation,
                 beaconInterval: r.beaconInterval, country: r.country, firstSeen: date, lastSeen: date)
             ap.ssid = r.ssid ?? ap.ssid
             ap.channel = r.channel
@@ -188,6 +190,7 @@ final class NeighborScanner {
             ap.rssi = r.rssi
             ap.noise = r.noise
             ap.security = r.security
+            ap.isInsecure = r.isInsecure
             ap.generation = r.generation ?? ap.generation
             ap.stations = r.stations
             ap.utilization = r.utilization
@@ -247,6 +250,7 @@ final class NeighborScanner {
         var rssi: Int
         var noise: Int
         var security: String
+        var isInsecure: Bool
         var generation: Int?
         var beaconInterval: Int
         var country: String?
@@ -257,7 +261,7 @@ final class NeighborScanner {
     @concurrent
     nonisolated static func performScan() async -> Result<[RawNetwork], any Error> {
         guard let iface = CWWiFiClient.shared().interface() else {
-            return .failure(NSError(domain: "WiFiPulse", code: 1, userInfo: [NSLocalizedDescriptionKey: "Wi-Fiインターフェースが見つかりません"]))
+            return .failure(NSError(domain: "WiFiPulse", code: 1, userInfo: [NSLocalizedDescriptionKey: String(localized: "No Wi-Fi interface found")]))
         }
         do {
             let nets = try iface.scanForNetworks(withSSID: nil)
@@ -286,21 +290,29 @@ final class NeighborScanner {
         else if n.supportsPHYMode(.mode11n) || ie.hasHT { gen = 4 }
         return RawNetwork(ssid: n.ssid, bssid: n.bssid, band: band, channel: ch.channelNumber, width: width,
                           center: center, rssi: n.rssiValue, noise: n.noiseMeasurement,
-                          security: securityLabel(n), generation: gen, beaconInterval: n.beaconInterval,
+                          security: securityLabel(n), isInsecure: isInsecure(n), generation: gen, beaconInterval: n.beaconInterval,
                           country: n.countryCode, stations: ie.stationCount, utilization: ie.channelUtilization)
     }
 
+    /// 暗号化の無いオープンネットワークと WEP。OWE は暗号化されるので含めない
+    nonisolated static func isInsecure(_ n: CWNetwork) -> Bool {
+        let encrypted: [CWSecurity] = [.wpaPersonal, .wpaPersonalMixed, .wpa2Personal, .personal, .wpaEnterprise, .wpaEnterpriseMixed,
+                                       .wpa2Enterprise, .enterprise, .wpa3Personal, .wpa3Enterprise, .wpa3Transition, .OWE, .oweTransition]
+        if encrypted.contains(where: n.supportsSecurity) { return false }
+        return n.supportsSecurity(.none) || n.supportsSecurity(.WEP) || n.supportsSecurity(.dynamicWEP)
+    }
+
     nonisolated static func securityLabel(_ n: CWNetwork) -> String {
-        if n.supportsSecurity(.wpa3Enterprise) { return "WPA3 エンタープライズ" }
+        if n.supportsSecurity(.wpa3Enterprise) { return String(localized: "WPA3 Enterprise") }
         if n.supportsSecurity(.wpa3Personal) && !n.supportsSecurity(.wpa2Personal) { return "WPA3" }
         if n.supportsSecurity(.wpa3Transition) || (n.supportsSecurity(.wpa3Personal) && n.supportsSecurity(.wpa2Personal)) { return "WPA2/WPA3" }
-        if n.supportsSecurity(.wpa2Enterprise) || n.supportsSecurity(.enterprise) { return "WPA2 エンタープライズ" }
+        if n.supportsSecurity(.wpa2Enterprise) || n.supportsSecurity(.enterprise) { return String(localized: "WPA2 Enterprise") }
         if n.supportsSecurity(.wpa2Personal) { return "WPA2" }
         if n.supportsSecurity(.wpaPersonal) || n.supportsSecurity(.wpaPersonalMixed) { return "WPA" }
-        if n.supportsSecurity(.OWE) || n.supportsSecurity(.oweTransition) { return "OWE（暗号化オープン）" }
-        if n.supportsSecurity(.WEP) || n.supportsSecurity(.dynamicWEP) { return "WEP（危険）" }
-        if n.supportsSecurity(.none) { return "なし（オープン）" }
-        return "不明"
+        if n.supportsSecurity(.OWE) || n.supportsSecurity(.oweTransition) { return String(localized: "OWE (Enhanced Open)") }
+        if n.supportsSecurity(.WEP) || n.supportsSecurity(.dynamicWEP) { return String(localized: "WEP (insecure)") }
+        if n.supportsSecurity(.none) { return String(localized: "None (open)") }
+        return String(localized: "Unknown")
     }
 }
 

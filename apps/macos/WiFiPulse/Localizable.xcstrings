@@ -1,0 +1,5309 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "" : {
+      "shouldTranslate" : false
+    },
+    " (%@)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "（%@）"
+          }
+        }
+      }
+    },
+    " (DFS)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "（DFS）"
+          }
+        }
+      }
+    },
+    " (active)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "（通信中）"
+          }
+        }
+      }
+    },
+    " (mostly idle)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "（ほぼ待機中）"
+          }
+        }
+      }
+    },
+    "# Network Diagnostics Report" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "# ネットワーク診断レポート"
+          }
+        }
+      }
+    },
+    "## Collected data" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "## 集まっているデータ"
+          }
+        }
+      }
+    },
+    "## Findings (most severe first)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "## 所見（深刻な順）"
+          }
+        }
+      }
+    },
+    "%@ (%lld)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@（%2$lld件）"
+          }
+        }
+      }
+    },
+    "%@ Internet%@" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ ネット%2$@"
+          }
+        }
+      }
+    },
+    "%@ Mbps" : {
+      "shouldTranslate" : false
+    },
+    "%@ Router" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ ルーター"
+          }
+        }
+      }
+    },
+    "%@ evening — the busiest time of day (around 8–11 PM). Numbers now show your everyday worst case." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@の夜。1日で最も混雑する時間帯（20〜23時前後）です。ここでの数値が「普段の最低ライン」の目安になります。"
+          }
+        }
+      }
+    },
+    "%@ late night — the quietest time for both nearby networks and your ISP, so numbers tend to look their best." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@の深夜。近隣も回線も最も空いている時間帯なので、数値は良く出やすくなります（ベストケース）。"
+          }
+        }
+      }
+    },
+    "%@ morning. Networks are usually quiet." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@の朝。混雑は少なめです。"
+          }
+        }
+      }
+    },
+    "%@ ms" : {
+      "shouldTranslate" : false
+    },
+    "%@ ms (p95 %@)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ ms（p95 %2$@）"
+          }
+        }
+      }
+    },
+    "%@ · %lldch · %lld MHz" : {
+      "shouldTranslate" : false
+    },
+    "%@ · Target %@ · Router %@" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · 宛先 %2$@ · ルーター %3$@"
+          }
+        }
+      }
+    },
+    "%@ · no DFS" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@・DFSなし"
+          }
+        }
+      }
+    },
+    "%@%%" : {
+      "shouldTranslate" : false
+    },
+    "%@%@" : {
+      "shouldTranslate" : false
+    },
+    "%lld" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 台"
+          }
+        }
+      }
+    },
+    "%lld RPM" : {
+      "shouldTranslate" : false
+    },
+    "%lld dBm" : {
+      "shouldTranslate" : false
+    },
+    "%lld dBm (%@)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld dBm（%2$@）"
+          }
+        }
+      }
+    },
+    "%lld min" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld分"
+          }
+        }
+      }
+    },
+    "%lld out of 100" : {
+      "comment" : "総合スコアの読み上げ",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld点"
+          }
+        }
+      }
+    },
+    "%lld s per phase" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "各フェーズ %lld 秒"
+          }
+        }
+      }
+    },
+    "%lld%%" : {
+      "shouldTranslate" : false
+    },
+    "%lld/%lld" : {
+      "shouldTranslate" : false
+    },
+    "%lld:00" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld時"
+          }
+        }
+      }
+    },
+    "%lld:00 (%@%%)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld時台(%2$@%%)"
+          }
+        }
+      }
+    },
+    "%lld:00–" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld時台"
+          }
+        }
+      }
+    },
+    "(hidden network)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "（非公開ネットワーク）"
+          }
+        }
+      }
+    },
+    "(hidden)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "（非公開）"
+          }
+        }
+      }
+    },
+    "(network name hidden)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "（ネットワーク名は非表示）"
+          }
+        }
+      }
+    },
+    "+%lld more" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ほか %lld 件"
+          }
+        }
+      }
+    },
+    "- Continuous monitoring: %lld min (%@ h)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "- 常時計測: %1$lld分ぶん（%2$@ 時間）"
+          }
+        }
+      }
+    },
+    "- Speed tests: %lld / Load tests: %lld" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "- 速度測定 %1$lld回 / 負荷試験 %2$lld回"
+          }
+        }
+      }
+    },
+    "-70 dBm" : {
+      "shouldTranslate" : false
+    },
+    "/ 100" : {
+      "shouldTranslate" : false
+    },
+    "1 hour" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1時間"
+          }
+        }
+      }
+    },
+    "10 min" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "10分"
+          }
+        }
+      }
+    },
+    "2 hours" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2時間"
+          }
+        }
+      }
+    },
+    "2 min" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2分"
+          }
+        }
+      }
+    },
+    "24 hours" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "24時間"
+          }
+        }
+      }
+    },
+    "6 hours" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "6時間"
+          }
+        }
+      }
+    },
+    "60 min" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "60分"
+          }
+        }
+      }
+    },
+    ":%@" : {
+      "shouldTranslate" : false
+    },
+    "A healthy value is 1–4 ms. The cause is the signal, channel congestion, or the router’s processing power." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "健全なら1〜4msです。電波・チャンネルの混雑・ルーターの処理能力のいずれかが原因です。"
+          }
+        }
+      }
+    },
+    "AP" : {
+      "shouldTranslate" : false
+    },
+    "AWDL Status" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AWDL の状態"
+          }
+        }
+      }
+    },
+    "Above 1%, dropouts become clearly noticeable in video calls and games." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1%を超えると、ビデオ通話やゲームで途切れがはっきり分かります。"
+          }
+        }
+      }
+    },
+    "Access Points" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アクセスポイント"
+          }
+        }
+      }
+    },
+    "Access points: %lld" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アクセスポイント %lld 台"
+          }
+        }
+      }
+    },
+    "Action needed" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "要対応"
+          }
+        }
+      }
+    },
+    "Active" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "動作中"
+          }
+        }
+      }
+    },
+    "Active Only" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通信中のみ"
+          }
+        }
+      }
+    },
+    "Aim for -60 dBm or stronger." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "-60dBm 以上が目安です。"
+          }
+        }
+      }
+    },
+    "All" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すべて"
+          }
+        }
+      }
+    },
+    "All Records" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すべての記録"
+          }
+        }
+      }
+    },
+    "Allowed" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "許可済み"
+          }
+        }
+      }
+    },
+    "Allow…" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "許可する…"
+          }
+        }
+      }
+    },
+    "Also show devices found earlier" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "過去に見つかった機器も表示します"
+          }
+        }
+      }
+    },
+    "Any latency problems likely come from the Wi-Fi segment, disconnects, or ISP congestion at certain times. Use continuous monitoring and Wi-Fi Events to narrow it down." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "遅延の原因があるとすれば、Wi-Fi 区間・切断・時間帯による回線の混雑です。常時計測と「Wi-Fi イベント」で切り分けてください。"
+          }
+        }
+      }
+    },
+    "App" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリ"
+          }
+        }
+      }
+    },
+    "App / Process" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリ / プロセス"
+          }
+        }
+      }
+    },
+    "App Name" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリ名"
+          }
+        }
+      }
+    },
+    "App Traffic" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリの通信"
+          }
+        }
+      }
+    },
+    "Appliance" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "家電"
+          }
+        }
+      }
+    },
+    "Apply" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "適用"
+          }
+        }
+      }
+    },
+    "Auto-Scan" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自動スキャン"
+          }
+        }
+      }
+    },
+    "BSSID" : {
+      "shouldTranslate" : false
+    },
+    "Bad. Calls and games lag by hundreds of milliseconds to a second" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "悪い。通話やゲームで数百ms〜1秒の遅れが出る"
+          }
+        }
+      }
+    },
+    "Band" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "バンド"
+          }
+        }
+      }
+    },
+    "Band / Channel" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "バンド / チャンネル"
+          }
+        }
+      }
+    },
+    "Band Group" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "区分"
+          }
+        }
+      }
+    },
+    "Barely increases. Ideal" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ほぼ増えない。理想的"
+          }
+        }
+      }
+    },
+    "Beacon Interval" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ビーコン間隔"
+          }
+        }
+      }
+    },
+    "Being bad only at certain times is a typical sign of congestion at your ISP." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "特定の時間帯だけ悪いのは、回線側（プロバイダの混雑）の典型的なパターンです。"
+          }
+        }
+      }
+    },
+    "Bluetooth Coexistence" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bluetooth共存"
+          }
+        }
+      }
+    },
+    "Both the Wi-Fi segment and the Internet line are healthy." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wi-Fi 区間も回線区間も問題ありません。"
+          }
+        }
+      }
+    },
+    "Brother" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ブラザー"
+          }
+        }
+      }
+    },
+    "Buffalo" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "バッファロー"
+          }
+        }
+      }
+    },
+    "Cancelled" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "中断しました"
+          }
+        }
+      }
+    },
+    "Canon" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "キヤノン"
+          }
+        }
+      }
+    },
+    "Can’t Get Traffic Data" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通信量を取得できません"
+          }
+        }
+      }
+    },
+    "Change…" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "変更…"
+          }
+        }
+      }
+    },
+    "Changing the channel in your router’s settings may help. After changing it, wait a while and scan again to confirm." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ルーターの設定でチャンネルを変えると改善する可能性があります。変えたら、しばらくしてからもう一度スキャンして確かめてください。"
+          }
+        }
+      }
+    },
+    "Channel" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "チャンネル"
+          }
+        }
+      }
+    },
+    "Channel %lld is a DFS channel (W53/W56)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lldch は DFS 対象（W53/W56）です"
+          }
+        }
+      }
+    },
+    "Channel %lld is less congested than your current channel %lld." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "いまの %2$lldch より %1$lldch の方が空いています。"
+          }
+        }
+      }
+    },
+    "Channel (faded = DFS, %@ = current, %@ = recommended)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "チャンネル（薄い色は DFS 対象・%1$@ は現在・%2$@ はおすすめ）"
+          }
+        }
+      }
+    },
+    "Channel Utilization" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "チャンネル利用率"
+          }
+        }
+      }
+    },
+    "Check Nearby Wi-Fi for a less congested channel." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「周辺の Wi-Fi」で空いているチャンネルを確認してください。"
+          }
+        }
+      }
+    },
+    "Check Wi-Fi Events for disconnects, scans, or radar detection at the same time." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「Wi-Fi イベント」で同じ時刻の切断・スキャン・レーダー検出を確認してください。"
+          }
+        }
+      }
+    },
+    "Checking connection" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "接続確認中"
+          }
+        }
+      }
+    },
+    "Click Measure Speed to test download and upload speed, and responsiveness (RPM) while the connection is saturated." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「速度を測る」を押すと、下り・上りの速度と、回線が埋まったときの応答性（RPM）を測ります。"
+          }
+        }
+      }
+    },
+    "Clients" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "端末数"
+          }
+        }
+      }
+    },
+    "Collecting data." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "データを集めています。"
+          }
+        }
+      }
+    },
+    "Collecting traffic history… (updates every 10 seconds)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通信量の推移を集めています…（10秒ごとに更新）"
+          }
+        }
+      }
+    },
+    "Combining %lld processes" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 個のプロセスをまとめて表示しています"
+          }
+        }
+      }
+    },
+    "Compare the test times with the chart above." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "測った時刻を上のグラフと突き合わせてください。"
+          }
+        }
+      }
+    },
+    "Computer" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "パソコン"
+          }
+        }
+      }
+    },
+    "Congestion" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "混雑度"
+          }
+        }
+      }
+    },
+    "Congestion by Channel" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "チャンネルごとの混雑度"
+          }
+        }
+      }
+    },
+    "Connected" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "接続中"
+          }
+        }
+      }
+    },
+    "Connected Clients" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "接続端末数"
+          }
+        }
+      }
+    },
+    "Connected Network" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "接続中のネットワーク"
+          }
+        }
+      }
+    },
+    "Connections" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "接続"
+          }
+        }
+      }
+    },
+    "Connections (%lld)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "接続（%lld）"
+          }
+        }
+      }
+    },
+    "Continuous Monitoring" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "常時計測"
+          }
+        }
+      }
+    },
+    "Copied" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コピーしました"
+          }
+        }
+      }
+    },
+    "Copy MAC Address" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MACアドレスをコピー"
+          }
+        }
+      }
+    },
+    "Copy as Markdown" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Markdown をコピー"
+          }
+        }
+      }
+    },
+    "Copy in Markdown format to paste into other apps" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ほかのアプリに貼り付けられる Markdown 形式でコピーします"
+          }
+        }
+      }
+    },
+    "Couldn’t measure" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "測定できず"
+          }
+        }
+      }
+    },
+    "Couldn’t open a pseudo-terminal" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "疑似端末を開けませんでした"
+          }
+        }
+      }
+    },
+    "Couldn’t start nettop" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "nettop を起動できませんでした"
+          }
+        }
+      }
+    },
+    "Count" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "件数"
+          }
+        }
+      }
+    },
+    "Count per ping" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ping 1回ごとの件数"
+          }
+        }
+      }
+    },
+    "Country Code" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "国コード"
+          }
+        }
+      }
+    },
+    "Current Traffic" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "いまの通信量"
+          }
+        }
+      }
+    },
+    "Current channel" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "現在のチャンネル"
+          }
+        }
+      }
+    },
+    "DFS" : {
+      "shouldTranslate" : false
+    },
+    "DFS channel (pauses when radar is detected)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DFS 対象（レーダー検出で停止あり）"
+          }
+        }
+      }
+    },
+    "DNS Response" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DNS 応答"
+          }
+        }
+      }
+    },
+    "DNS Response Time" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DNS の応答時間"
+          }
+        }
+      }
+    },
+    "Daikin" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ダイキン"
+          }
+        }
+      }
+    },
+    "Data" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "データ"
+          }
+        }
+      }
+    },
+    "Data Folder" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "データフォルダ"
+          }
+        }
+      }
+    },
+    "Date" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日時"
+          }
+        }
+      }
+    },
+    "Days" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曜日"
+          }
+        }
+      }
+    },
+    "Delete" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "削除"
+          }
+        }
+      }
+    },
+    "Delete Records…" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "計測記録を削除…"
+          }
+        }
+      }
+    },
+    "Delete all measurement records?" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "計測記録を削除しますか？"
+          }
+        }
+      }
+    },
+    "Deletes per-minute records, speed tests, load tests, and the device list." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1分ごとの集計・速度測定・負荷試験・機器一覧を削除します。"
+          }
+        }
+      }
+    },
+    "Deliberately saturates your connection and measures how far latency rises (bufferbloat). It directly checks why calls and games freeze during large downloads." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "回線をわざと埋めて、そのとき遅延がどこまで跳ねるかを測ります（バッファブロート）。大きなダウンロード中に通話やゲームが止まる原因を直接確かめる試験です。"
+          }
+        }
+      }
+    },
+    "Denied" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "許可されていません"
+          }
+        }
+      }
+    },
+    "Details" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "詳細"
+          }
+        }
+      }
+    },
+    "Details by Phase" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "フェーズごとの詳細"
+          }
+        }
+      }
+    },
+    "Device with a Private Address" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プライベートアドレスの端末"
+          }
+        }
+      }
+    },
+    "Devices" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "機器"
+          }
+        }
+      }
+    },
+    "Diagnostics" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "診断"
+          }
+        }
+      }
+    },
+    "Direction" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "方向"
+          }
+        }
+      }
+    },
+    "Disconnects" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "切断・再接続"
+          }
+        }
+      }
+    },
+    "Don’t Auto-Scan" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自動スキャンしない"
+          }
+        }
+      }
+    },
+    "Download" : {
+      "comment" : "チャートの系列名（ダウンロード）",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下り"
+          }
+        }
+      }
+    },
+    "Download + Upload" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下り＋上り"
+          }
+        }
+      }
+    },
+    "Download Load" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下り負荷"
+          }
+        }
+      }
+    },
+    "Download Only" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下りのみ"
+          }
+        }
+      }
+    },
+    "Download Saturated" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下りを埋めたとき"
+          }
+        }
+      }
+    },
+    "During a scan the radio leaves your channel, pausing traffic for a few hundred milliseconds each time. Many from locationd means Location Services; sharingd means AirDrop discovery." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スキャン中はチャンネルを離れるので、1回あたり数百ms通信が止まります。locationd が多ければ位置情報サービス、sharingd なら AirDrop の相手探索です。"
+          }
+        }
+      }
+    },
+    "Each scan pauses your own traffic for a few hundred milliseconds, so use auto-scan only when needed" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スキャン中は自分の通信も数百ms止まるため、自動スキャンは必要なときだけ使ってください"
+          }
+        }
+      }
+    },
+    "Elapsed (s)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "経過秒"
+          }
+        }
+      }
+    },
+    "Enable QoS / SQM on your router, or limit upload bandwidth to about 90% of the measured speed." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ルーターの QoS / SQM を有効にするか、上り帯域を実測値の90%程度に制限してください。"
+          }
+        }
+      }
+    },
+    "Enabling QoS / SQM (fq_codel or cake) on your router, or limiting upload bandwidth to about 90% of the measured speed, will help." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ルーターの QoS / SQM（fq_codel・cake）を有効にするか、上り帯域を実測値の90%程度に制限すると改善します。"
+          }
+        }
+      }
+    },
+    "Epson" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "エプソン"
+          }
+        }
+      }
+    },
+    "Espressif (IoT device)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Espressif（IoT機器）"
+          }
+        }
+      }
+    },
+    "Evaluating" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "判定中"
+          }
+        }
+      }
+    },
+    "Even a single disconnect stops traffic for several seconds. Reason codes: 3 = leaving, 4 = inactivity timeout, 8 = disconnected by the access point." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "切断が1回でもあれば、その瞬間の通信は数秒止まります。reason code 3=離脱, 4=無通信タイムアウト, 8=AP側から切断。"
+          }
+        }
+      }
+    },
+    "Even pings to the router are delayed, so the congestion is on the Wi-Fi segment or in the router itself. Suspect the signal, the channel, or the router’s processing power." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ルーター宛てでも待たされています。詰まっているのは Wi-Fi 区間かルーター本体です。電波・チャンネル・ルーターの処理能力を疑ってください。"
+          }
+        }
+      }
+    },
+    "Evening" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "夕方"
+          }
+        }
+      }
+    },
+    "Evening. Congestion starts rising as people get home." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "夕方。帰宅に合わせて混雑が増え始める時間帯です。"
+          }
+        }
+      }
+    },
+    "Events per 10 minutes" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "10分ごとの件数"
+          }
+        }
+      }
+    },
+    "Every 2 minutes" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2分ごと"
+          }
+        }
+      }
+    },
+    "Every 30 seconds" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "30秒ごと"
+          }
+        }
+      }
+    },
+    "Every minute" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1分ごと"
+          }
+        }
+      }
+    },
+    "Excellent" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "快適"
+          }
+        }
+      }
+    },
+    "Exited Process" : {
+      "comment" : "チャートの系列名（もう存在しないプロセス）",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "終了したプロセス"
+          }
+        }
+      }
+    },
+    "Explanations and Log Lines by Type" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "種類ごとの説明とログ"
+          }
+        }
+      }
+    },
+    "Extracts events from the macOS unified log that can cause latency spikes — disconnects, roaming, scans, radar detection (DFS), and AWDL. Load it right after you notice a problem." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "macOS の統合ログから、切断・ローミング・スキャン・レーダー検出（DFS）・AWDL など、遅延スパイクの原因になりうる出来事を抜き出します。症状が出た直後に読むのが効果的です。"
+          }
+        }
+      }
+    },
+    "Find" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "探す"
+          }
+        }
+      }
+    },
+    "Find Local Devices" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LANの機器を探す"
+          }
+        }
+      }
+    },
+    "Findings (Most Severe First)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "所見（深刻な順）"
+          }
+        }
+      }
+    },
+    "First Seen" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "初めて見た"
+          }
+        }
+      }
+    },
+    "Floor" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下限"
+          }
+        }
+      }
+    },
+    "Folder" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存先"
+          }
+        }
+      }
+    },
+    "Game Console" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ゲーム機"
+          }
+        }
+      }
+    },
+    "General" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一般"
+          }
+        }
+      }
+    },
+    "Generated: %@" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "生成: %@"
+          }
+        }
+      }
+    },
+    "Good" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "良い"
+          }
+        }
+      }
+    },
+    "Good. No effect on calls or games" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "良好。通話やゲームに影響しない"
+          }
+        }
+      }
+    },
+    "Group by App" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリごとにまとめる"
+          }
+        }
+      }
+    },
+    "Guide" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "目安"
+          }
+        }
+      }
+    },
+    "Healthy" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "良好"
+          }
+        }
+      }
+    },
+    "High median latency on the Wi-Fi segment: %@ ms" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wi-Fi区間の中央値が %@ms と大きい"
+          }
+        }
+      }
+    },
+    "History" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "これまでの結果"
+          }
+        }
+      }
+    },
+    "Hitachi" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日立"
+          }
+        }
+      }
+    },
+    "Hour" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "時"
+          }
+        }
+      }
+    },
+    "Hours with packet loss: %@" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "パケットロスが出ている時間帯: %@"
+          }
+        }
+      }
+    },
+    "IP Address" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IPアドレス"
+          }
+        }
+      }
+    },
+    "IPv4 target" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IPv4 の宛先"
+          }
+        }
+      }
+    },
+    "IPv6 target" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IPv6 の宛先"
+          }
+        }
+      }
+    },
+    "Idle" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無負荷"
+          }
+        }
+      }
+    },
+    "Idle RTT" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無負荷RTT"
+          }
+        }
+      }
+    },
+    "Idle Round Trip" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無負荷時の往復"
+          }
+        }
+      }
+    },
+    "If this appears on a 5 GHz W53/W56 channel, it is almost certainly the cause. Fixing your router to W52 (channels 36/40/44/48) stops it." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "5GHz の W53/W56 でこれが出るなら原因はほぼ確定。ルーターのチャンネルを W52（36/40/44/48ch）に固定すれば止まります。"
+          }
+        }
+      }
+    },
+    "If this happens on the single hop to your router, the cause is inside your home." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ルーターまでの1ホップでこれが出るなら、原因は家の中にあります。"
+          }
+        }
+      }
+    },
+    "If you connect via PPPoE, switching to IPoE (IPv6-based access) helps the most." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PPPoE 接続なら IPoE（IPv6 接続方式）への切り替えが最も効きます。"
+          }
+        }
+      }
+    },
+    "Inactive" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "停止中"
+          }
+        }
+      }
+    },
+    "Include Networks Seen in the Last 10 Minutes" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "直近10分に見えたものも表示"
+          }
+        }
+      }
+    },
+    "Inspector" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "インスペクタ"
+          }
+        }
+      }
+    },
+    "Intel (built into PC)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Intel（PC内蔵）"
+          }
+        }
+      }
+    },
+    "Internet" : {
+      "comment" : "チャートの系列名（インターネットまでの遅延）",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "インターネット"
+          }
+        }
+      }
+    },
+    "Internet (median)" : {
+      "comment" : "チャートの系列名",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "インターネット（中央値）"
+          }
+        }
+      }
+    },
+    "Internet Latency" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ネット遅延"
+          }
+        }
+      }
+    },
+    "Internet Ping Targets" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "インターネット側の ping 宛先"
+          }
+        }
+      }
+    },
+    "Internet latency worsens at %lld:00 (%@ ms → %@ ms)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld時台にネット遅延が %2$@ms → %3$@ms へ悪化"
+          }
+        }
+      }
+    },
+    "Internet line" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "回線区間"
+          }
+        }
+      }
+    },
+    "Internet p95 %@ ms (idle %@ ms)\nRouter p95 %@ ms (idle %@ ms)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "インターネット p95 %1$@ ms（無負荷 %2$@ ms）\nルーター p95 %3$@ ms（無負荷 %4$@ ms）"
+          }
+        }
+      }
+    },
+    "IoT Device" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IoT機器"
+          }
+        }
+      }
+    },
+    "Issues found in the recorded measurements, most severe first" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "記録された計測結果から、気になる点を深刻な順に並べています"
+          }
+        }
+      }
+    },
+    "It’s %@ now. " : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "いまは「%@」。"
+          }
+        }
+      }
+    },
+    "Jitter" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ゆらぎ"
+          }
+        }
+      }
+    },
+    "Language" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "言語"
+          }
+        }
+      }
+    },
+    "Large differences by time of day suggest congestion at your ISP" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "時間帯によって大きく違うなら、回線側の混雑が疑われます"
+          }
+        }
+      }
+    },
+    "Last %@ · %lld log lines analyzed · Retrieved %@" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "直近%1$@ · %2$lld 行のログを解析 · %3$@ 取得"
+          }
+        }
+      }
+    },
+    "Last %lld min" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "直近%lld分"
+          }
+        }
+      }
+    },
+    "Last 24 Hours" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "直近24時間"
+          }
+        }
+      }
+    },
+    "Last 7 Days" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "直近7日"
+          }
+        }
+      }
+    },
+    "Last Scan" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最終スキャン"
+          }
+        }
+      }
+    },
+    "Last Seen" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最終確認"
+          }
+        }
+      }
+    },
+    "Late Night" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "深夜帯"
+          }
+        }
+      }
+    },
+    "Latency" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "遅延"
+          }
+        }
+      }
+    },
+    "Latency Distribution" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "遅延の分布"
+          }
+        }
+      }
+    },
+    "Latency Over Time" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "遅延の推移"
+          }
+        }
+      }
+    },
+    "Latency Under Load (Bufferbloat)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "負荷時の遅延（バッファブロート）"
+          }
+        }
+      }
+    },
+    "Latency barely increases under load." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "負荷をかけても遅延はほとんど増えません。"
+          }
+        }
+      }
+    },
+    "Latest grade: %@" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "直近の判定 %@"
+          }
+        }
+      }
+    },
+    "Least Congested" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "いちばん空いている"
+          }
+        }
+      }
+    },
+    "Least congested: %@" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "空いている順: %@"
+          }
+        }
+      }
+    },
+    "Lines are medians; bands extend to the maximum. Red vertical lines mark packet loss. Logarithmic scale." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "線は中央値、帯は最大値までの幅。赤い縦線はパケットロス。縦軸は対数。"
+          }
+        }
+      }
+    },
+    "Lines show the maximum for each second, so spikes are visible as they happen." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "線はそれぞれの秒の最大値。跳ね上がりがそのまま見えます。"
+          }
+        }
+      }
+    },
+    "Link Rate" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "リンク速度"
+          }
+        }
+      }
+    },
+    "Listening :%@" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "待ち受け :%@"
+          }
+        }
+      }
+    },
+    "Live Measurement" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "計測の様子"
+          }
+        }
+      }
+    },
+    "Live scans: %lld" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "うち live scan %lld 件"
+          }
+        }
+      }
+    },
+    "Load" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "読み込む"
+          }
+        }
+      }
+    },
+    "Load (BSS Load)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "混雑（BSS Load）"
+          }
+        }
+      }
+    },
+    "Load Test" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "負荷試験"
+          }
+        }
+      }
+    },
+    "Load Wi-Fi Events" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wi-Fi イベントを読み込む"
+          }
+        }
+      }
+    },
+    "Local Devices" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LAN の機器"
+          }
+        }
+      }
+    },
+    "Local network access may not be allowed. Check System Settings › Privacy & Security › Local Network." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ローカルネットワークへのアクセスが許可されていない可能性があります。システム設定 › プライバシーとセキュリティ › ローカルネットワーク を確認してください。"
+          }
+        }
+      }
+    },
+    "Location" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "位置情報"
+          }
+        }
+      }
+    },
+    "Looking for Devices…" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "機器を探しています…"
+          }
+        }
+      }
+    },
+    "Loss" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ロス"
+          }
+        }
+      }
+    },
+    "Loss %@%% · Jitter %@ ms" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "途切れ %1$@%% · 揺らぎ %2$@ ms"
+          }
+        }
+      }
+    },
+    "MAC Address" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MACアドレス"
+          }
+        }
+      }
+    },
+    "Manufacturer" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メーカー"
+          }
+        }
+      }
+    },
+    "Manufacturer (OUI)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メーカー（OUI）"
+          }
+        }
+      }
+    },
+    "Max" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最大"
+          }
+        }
+      }
+    },
+    "Mbps" : {
+      "shouldTranslate" : false
+    },
+    "Measure" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "計測"
+          }
+        }
+      }
+    },
+    "Measure Speed" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "速度を測る"
+          }
+        }
+      }
+    },
+    "Measure speed and responsiveness with networkQuality" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "networkQuality で速度と応答性を測ります"
+          }
+        }
+      }
+    },
+    "Measured %@ · Responsiveness (RPM) is how many round trips per minute the connection can make while it is saturated. Apple’s guide: good = 800 or more, fair = 300–800, poor = under 300. Under 300 suggests bufferbloat; use Load Test to find which segment is responsible." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ に測定 · 応答性（RPM）は「回線が埋まっているときに1分あたり何往復できるか」。Apple の目安は 良い=800以上、普通=300〜800、悪い=300未満。300未満ならバッファブロートを疑い、「負荷試験」で区間を切り分けてください。"
+          }
+        }
+      }
+    },
+    "Measuring" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "計測中"
+          }
+        }
+      }
+    },
+    "Measuring…" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "測定しています…"
+          }
+        }
+      }
+    },
+    "Median" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "中央値"
+          }
+        }
+      }
+    },
+    "Median every 5 seconds. The gap between the lines is the SNR — the wider, the better." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "5秒ごとの中央値。間の幅が SN比で、広いほど余裕があります。"
+          }
+        }
+      }
+    },
+    "Medians of the per-minute records, grouped by hour. If only certain hours are bad, suspect congestion at your ISP." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1分ごとの記録を時刻別にまとめた中央値。特定の時間帯だけ悪いなら回線側（ISPの輻輳）が疑われます。"
+          }
+        }
+      }
+    },
+    "Mild to moderate bufferbloat" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "軽度〜中程度のバッファブロートあり"
+          }
+        }
+      }
+    },
+    "Monitor" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "モニター"
+          }
+        }
+      }
+    },
+    "Monitoring" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "常時計測中"
+          }
+        }
+      }
+    },
+    "Monitoring continues while the app is running, even with the window closed." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ウインドウを閉じても、アプリが起動している間は常時計測が続きます。"
+          }
+        }
+      }
+    },
+    "Morning" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "朝"
+          }
+        }
+      }
+    },
+    "Mostly Good" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "おおむね良好"
+          }
+        }
+      }
+    },
+    "Mostly Stable" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ほぼ安定"
+          }
+        }
+      }
+    },
+    "Move closer to the router, reduce obstacles, or switch to a less congested channel." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ルーターに近づく・障害物を減らす・混雑していないチャンネルへ変えるのが有効です。"
+          }
+        }
+      }
+    },
+    "Name" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "名前"
+          }
+        }
+      }
+    },
+    "Name, IP, Manufacturer" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "名前・IP・メーカー"
+          }
+        }
+      }
+    },
+    "Names you assign are saved to device_names.json in the data folder." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自分で付けた名前は data フォルダの device_names.json に保存されます。"
+          }
+        }
+      }
+    },
+    "Nearby Wi-Fi" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "周辺の Wi-Fi"
+          }
+        }
+      }
+    },
+    "Network" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ネットワーク"
+          }
+        }
+      }
+    },
+    "Network names and detailed radio information require Location access" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ネットワーク名と詳しい電波情報には位置情報の許可が必要です"
+          }
+        }
+      }
+    },
+    "Networks: %lld · Access points: %lld" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld 個のネットワーク · %2$lld 台のアクセスポイント"
+          }
+        }
+      }
+    },
+    "Nintendo" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "任天堂"
+          }
+        }
+      }
+    },
+    "No Access Points on This Band" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このバンドのアクセスポイントは見つかりません"
+          }
+        }
+      }
+    },
+    "No Apps Are Using the Network" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "いま通信しているアプリはありません"
+          }
+        }
+      }
+    },
+    "No Bottleneck" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ボトルネックなし"
+          }
+        }
+      }
+    },
+    "No Devices Found" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "機器が見つかりません"
+          }
+        }
+      }
+    },
+    "No Matching Apps" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "該当するアプリはありません"
+          }
+        }
+      }
+    },
+    "No Measurements Yet" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まだ測っていません"
+          }
+        }
+      }
+    },
+    "No Records Yet" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まだ記録がありません"
+          }
+        }
+      }
+    },
+    "No Wi-Fi interface found" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wi-Fiインターフェースが見つかりません"
+          }
+        }
+      }
+    },
+    "No connections" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "接続はありません"
+          }
+        }
+      }
+    },
+    "No default gateway found. Are you connected to a network?" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "デフォルトゲートウェイが見つかりません。ネットワークに接続していますか？"
+          }
+        }
+      }
+    },
+    "No dropouts." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "途切れもありません。"
+          }
+        }
+      }
+    },
+    "No notable problems were found." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "目立つ異常は見つかりませんでした。"
+          }
+        }
+      }
+    },
+    "No overlapping networks" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重なるネットワークなし"
+          }
+        }
+      }
+    },
+    "No records" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "記録なし"
+          }
+        }
+      }
+    },
+    "No scan requests found" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スキャン要求は見つかりませんでした"
+          }
+        }
+      }
+    },
+    "No verdict" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "判定なし"
+          }
+        }
+      }
+    },
+    "Noise" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ノイズ"
+          }
+        }
+      }
+    },
+    "None (open)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "なし（オープン）"
+          }
+        }
+      }
+    },
+    "Not Connected to Wi-Fi" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wi-Fi に接続していません"
+          }
+        }
+      }
+    },
+    "Not Determined" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未確認"
+          }
+        }
+      }
+    },
+    "Not connected" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未接続"
+          }
+        }
+      }
+    },
+    "Not connected on this band" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このバンドには接続していません"
+          }
+        }
+      }
+    },
+    "Not connected to Wi-Fi" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wi-Fiに接続していません"
+          }
+        }
+      }
+    },
+    "Not reported" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "非公開"
+          }
+        }
+      }
+    },
+    "Not scanned yet" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まだスキャンしていません"
+          }
+        }
+      }
+    },
+    "Noticeable. Calls break up during downloads" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "はっきり影響。ダウンロード中は通話が乱れる"
+          }
+        }
+      }
+    },
+    "Now" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "いま"
+          }
+        }
+      }
+    },
+    "OWE (Enhanced Open)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OWE（暗号化オープン）"
+          }
+        }
+      }
+    },
+    "Occupied Range" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用範囲"
+          }
+        }
+      }
+    },
+    "On 2.4 GHz, neighboring channels overlap, so stick to channel 1, 6, or 11." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2.4GHz は隣のチャンネルと電波が重なるため、1・6・11ch のどれかを選ぶのが基本です。"
+          }
+        }
+      }
+    },
+    "On this connection, as soon as someone starts a large transfer, other traffic is delayed by hundreds of milliseconds to several seconds." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この回線は、誰かが大きな通信を始めた瞬間に、ほかの通信が数百ms〜数秒遅れる状態です。"
+          }
+        }
+      }
+    },
+    "Online" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "オンライン"
+          }
+        }
+      }
+    },
+    "Open Data Folder" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "データフォルダを開く"
+          }
+        }
+      }
+    },
+    "Open Local Network Settings" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "システム設定の「ローカルネットワーク」を開く"
+          }
+        }
+      }
+    },
+    "Open Location Services Settings" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "システム設定の「位置情報サービス」を開く"
+          }
+        }
+      }
+    },
+    "Open Window" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ウインドウを開く"
+          }
+        }
+      }
+    },
+    "Other" : {
+      "comment" : "チャートの系列名（上位以外の合計）",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "その他"
+          }
+        }
+      }
+    },
+    "Other traffic is heavily delayed during uploads." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アップロード中に、ほかの通信が大きく遅れます。"
+          }
+        }
+      }
+    },
+    "Others on the same connection will also be slowed for a few tens of seconds. Pause large downloads while testing." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "同じ回線を使っている人の通信も数十秒間遅くなります。測定中は大きなダウンロードを止めてください。"
+          }
+        }
+      }
+    },
+    "Overall Score" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "総合スコア"
+          }
+        }
+      }
+    },
+    "Overlapping networks: %lld" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重なるネットワーク %lld 件"
+          }
+        }
+      }
+    },
+    "Overlaps: %lld" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重なり %lld 件"
+          }
+        }
+      }
+    },
+    "Overview" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "概要"
+          }
+        }
+      }
+    },
+    "Packet loss on the Wi-Fi segment: %@%%" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wi-Fi区間でパケットロス %@%%"
+          }
+        }
+      }
+    },
+    "Panasonic" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "パナソニック"
+          }
+        }
+      }
+    },
+    "Path" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "場所"
+          }
+        }
+      }
+    },
+    "Peak Hours" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ピーク帯"
+          }
+        }
+      }
+    },
+    "Period" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "期間"
+          }
+        }
+      }
+    },
+    "Permissions" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "権限"
+          }
+        }
+      }
+    },
+    "Pings to the router and to the Internet run at the same time and are split into per-segment latency (median of the last 60 seconds)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ルーター宛てとインターネット宛ての ping を同時に測り、区間ごとの遅延に分けています（直近60秒の中央値）"
+          }
+        }
+      }
+    },
+    "Poor" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不調"
+          }
+        }
+      }
+    },
+    "Poor — calls break up when the connection is busy" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "悪い — 回線が混むと通話が乱れます"
+          }
+        }
+      }
+    },
+    "Printer" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プリンター"
+          }
+        }
+      }
+    },
+    "Privacy" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プライバシー"
+          }
+        }
+      }
+    },
+    "Private Address" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プライベートアドレス"
+          }
+        }
+      }
+    },
+    "Probe every address on the local network and refresh the list" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LAN内の全アドレスに問い合わせて一覧を更新します"
+          }
+        }
+      }
+    },
+    "Queries your router’s DNS every 10 seconds" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ルーターのDNSへ10秒ごとに問い合わせ"
+          }
+        }
+      }
+    },
+    "Quit Wi-Fi Pulse (continuous monitoring stops too)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wi-Fi Pulse を終了（常時計測も止まります）"
+          }
+        }
+      }
+    },
+    "RSSI" : {
+      "shouldTranslate" : false
+    },
+    "RTT" : {
+      "shouldTranslate" : false
+    },
+    "RTT %@ ms" : {
+      "shouldTranslate" : false
+    },
+    "Radar / Channel Change" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "レーダー / チャンネル変更"
+          }
+        }
+      }
+    },
+    "Range" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "表示範囲"
+          }
+        }
+      }
+    },
+    "Reading the unified log… (this can take a few tens of seconds)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "統合ログを読んでいます…（数十秒かかることがあります）"
+          }
+        }
+      }
+    },
+    "Received" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "受信"
+          }
+        }
+      }
+    },
+    "Recommended" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "おすすめ"
+          }
+        }
+      }
+    },
+    "Record Location" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "記録の保存先"
+          }
+        }
+      }
+    },
+    "Records" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "記録"
+          }
+        }
+      }
+    },
+    "Records accumulate every minute while the app is running. Keep it running for half a day to a full day, including the times problems occur." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリを起動している間、1分ごとに記録が溜まります。症状が出る時間帯を含めて、半日〜1日ほど動かし続けてください。"
+          }
+        }
+      }
+    },
+    "Records are stored as JSON Lines, the same format as the Wi-Fi Pulse diagnostic kit. Point this at the kit’s data folder to analyze them with tools/report.py as well." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "形式は Wi-Fi Pulse 診断キットと同じ JSON Lines です。キットの data フォルダを指定すれば、tools/report.py でもそのまま集計できます。"
+          }
+        }
+      }
+    },
+    "Records of sharing 2.4 GHz airtime with Bluetooth devices. If there are many, moving to 5 GHz may help." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2.4GHz 帯で Bluetooth 機器と電波を分け合っている記録。多ければ 5GHz に寄せると改善することがあります。"
+          }
+        }
+      }
+    },
+    "Recovery" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "回復待ち"
+          }
+        }
+      }
+    },
+    "Reload" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再読み込み"
+          }
+        }
+      }
+    },
+    "Reported by the access point itself. Not shown for models that don’t support it." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アクセスポイント自身が知らせている値です。対応していない機種では表示されません。"
+          }
+        }
+      }
+    },
+    "Responsiveness (Download Load)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "応答性（下り負荷時）"
+          }
+        }
+      }
+    },
+    "Responsiveness (Last 2 Minutes)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "反応の速さ（直近2分）"
+          }
+        }
+      }
+    },
+    "Responsiveness (Upload Load)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "応答性（上り負荷時）"
+          }
+        }
+      }
+    },
+    "Responsiveness may drop when, for example, someone at home is streaming video." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "家族が動画を見ている時間帯などに、反応が遅くなることがあります。"
+          }
+        }
+      }
+    },
+    "Responsiveness under download load is %lld RPM (under 300 is poor)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下り負荷時の応答性が %lld RPM（300未満＝悪い）"
+          }
+        }
+      }
+    },
+    "Responsiveness under upload load is %lld RPM (under 300 is poor)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上り負荷時の応答性が %lld RPM（300未満＝悪い）"
+          }
+        }
+      }
+    },
+    "Responsiveness ↑" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "応答性 ↑"
+          }
+        }
+      }
+    },
+    "Responsiveness ↓" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "応答性 ↓"
+          }
+        }
+      }
+    },
+    "Restart Now" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今すぐ再起動"
+          }
+        }
+      }
+    },
+    "Restart Wi-Fi Pulse to apply the change." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "変更は Wi-Fi Pulse の再起動後に反映されます。"
+          }
+        }
+      }
+    },
+    "Restore Default" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "既定に戻す"
+          }
+        }
+      }
+    },
+    "Restricted" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "制限されています"
+          }
+        }
+      }
+    },
+    "Retransmits" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再送"
+          }
+        }
+      }
+    },
+    "Retransmitted %@" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再送 %@"
+          }
+        }
+      }
+    },
+    "Review the distance to the router, obstacles, and where it’s placed." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ルーターとの距離・障害物・設置場所を見直してください。"
+          }
+        }
+      }
+    },
+    "Roaming" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ローミング"
+          }
+        }
+      }
+    },
+    "Roborock" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ロボロック"
+          }
+        }
+      }
+    },
+    "Router" : {
+      "comment" : "チャートの系列名（Mac からルーターまでの遅延）\n機器の種類",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ルーター"
+          }
+        }
+      }
+    },
+    "Router %@" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ルーター %@"
+          }
+        }
+      }
+    },
+    "Router %@ ms · Internet %@ ms" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ルーター %1$@ ms · ネット %2$@ ms"
+          }
+        }
+      }
+    },
+    "Router (median)" : {
+      "comment" : "チャートの系列名",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ルーター（中央値）"
+          }
+        }
+      }
+    },
+    "Router for this network" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このネットワークのルーター"
+          }
+        }
+      }
+    },
+    "SNR" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SN比"
+          }
+        }
+      }
+    },
+    "SSID, BSSID, Manufacturer" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SSID・BSSID・メーカー"
+          }
+        }
+      }
+    },
+    "Sampled by nettop every %lld seconds. Totals count from when this view was opened." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "nettop で %lld 秒ごとに集計。累計はこの画面を開いてからの量です。"
+          }
+        }
+      }
+    },
+    "Saturate Download" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下りを埋める"
+          }
+        }
+      }
+    },
+    "Saturate Upload" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上りを埋める"
+          }
+        }
+      }
+    },
+    "Scan" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スキャン"
+          }
+        }
+      }
+    },
+    "Scan Nearby Wi-Fi" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "周辺のWi-Fiをスキャン"
+          }
+        }
+      }
+    },
+    "Scan Requests" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スキャン要求"
+          }
+        }
+      }
+    },
+    "Scan failed" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スキャンできませんでした"
+          }
+        }
+      }
+    },
+    "Scan for nearby access points (at least 15 seconds apart)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "周辺のアクセスポイントをスキャンします（15秒以上あけて実行）"
+          }
+        }
+      }
+    },
+    "Scanning" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スキャン中"
+          }
+        }
+      }
+    },
+    "Scanning nearby networks…" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "周辺をスキャンしています…"
+          }
+        }
+      }
+    },
+    "Scope" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "対象"
+          }
+        }
+      }
+    },
+    "Security" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "セキュリティ"
+          }
+        }
+      }
+    },
+    "Select a Device" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "機器を選択"
+          }
+        }
+      }
+    },
+    "Select a device in the list to see details and give it a name." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一覧から機器を選ぶと詳細を表示し、名前を付けられます。"
+          }
+        }
+      }
+    },
+    "Select an Access Point" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アクセスポイントを選択"
+          }
+        }
+      }
+    },
+    "Select an App" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリを選択"
+          }
+        }
+      }
+    },
+    "Select one in the list to see details and signal history." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一覧から選ぶと、詳細と電波の推移を表示します。"
+          }
+        }
+      }
+    },
+    "Select one in the list to see its traffic history and connections." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一覧から選ぶと、通信量の推移と接続先の一覧を表示します。"
+          }
+        }
+      }
+    },
+    "Selection" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選択"
+          }
+        }
+      }
+    },
+    "Sends one probe to each address on your local network and lists the devices that respond." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LAN 内のアドレスに1回ずつ問い合わせて、応答した機器を一覧にします。"
+          }
+        }
+      }
+    },
+    "Sent" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "送信"
+          }
+        }
+      }
+    },
+    "Sercomm (ISP-provided)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sercomm（ISPレンタル機）"
+          }
+        }
+      }
+    },
+    "Series" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "系列"
+          }
+        }
+      }
+    },
+    "Severe bufferbloat (grade D–F)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "バッファブロートが深刻（判定D〜F）"
+          }
+        }
+      }
+    },
+    "Sharp" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "シャープ"
+          }
+        }
+      }
+    },
+    "Show Listening" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "待ち受けも表示"
+          }
+        }
+      }
+    },
+    "Show Offline Devices" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "オフラインも表示"
+          }
+        }
+      }
+    },
+    "Show helper processes combined with their parent app" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ヘルパープロセスを親のアプリにまとめて表示します"
+          }
+        }
+      }
+    },
+    "Show in Finder" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finder で開く"
+          }
+        }
+      }
+    },
+    "Show in Menu Bar" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メニューバーに表示"
+          }
+        }
+      }
+    },
+    "Show only apps with traffic in the last %lld seconds" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "直近%lld秒以内に通信があったものだけを表示します"
+          }
+        }
+      }
+    },
+    "Signal" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "電波"
+          }
+        }
+      }
+    },
+    "Signal History (per Scan)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "電波の推移（スキャンごと）"
+          }
+        }
+      }
+    },
+    "Signal Strength" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "電波強度"
+          }
+        }
+      }
+    },
+    "Signal and Noise (Last 10 Minutes)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "信号とノイズ（直近10分）"
+          }
+        }
+      }
+    },
+    "Signal is %@ and response is %@. %@" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "電波は%1$@、反応は%2$@状態です。%3$@"
+          }
+        }
+      }
+    },
+    "Signal strength of %lld dBm is somewhat weak" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "電波強度 %lld dBm はやや弱い"
+          }
+        }
+      }
+    },
+    "Signal strength of %lld dBm is too weak" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "電波強度 %lld dBm は弱すぎる"
+          }
+        }
+      }
+    },
+    "Since %@" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ から"
+          }
+        }
+      }
+    },
+    "Slight. Audio may cut out briefly" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "わずかに影響。音が一瞬途切れることがある"
+          }
+        }
+      }
+    },
+    "Smartphone" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スマートフォン"
+          }
+        }
+      }
+    },
+    "Somewhat Unstable" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "やや不安定"
+          }
+        }
+      }
+    },
+    "Sony" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ソニー"
+          }
+        }
+      }
+    },
+    "Sony (PlayStation)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ソニー（PlayStation）"
+          }
+        }
+      }
+    },
+    "Speaker" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スピーカー"
+          }
+        }
+      }
+    },
+    "Spectrum" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スペクトラム"
+          }
+        }
+      }
+    },
+    "Speed" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "速度"
+          }
+        }
+      }
+    },
+    "Speed Test" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "速度測定"
+          }
+        }
+      }
+    },
+    "Speed and Responsiveness" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "速度と応答性"
+          }
+        }
+      }
+    },
+    "Speed tends to drop when the network is busy." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "混雑時に速度が落ちやすくなります。"
+          }
+        }
+      }
+    },
+    "Speed varies a lot by time of day." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "時間帯によって速度が大きく変わっています。"
+          }
+        }
+      }
+    },
+    "Speed varies widely (%@–%@ Mbps)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "速度のばらつきが大きい（%1$@〜%2$@ Mbps）"
+          }
+        }
+      }
+    },
+    "Spikes up to %@ ms on the Internet line" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "回線側で最大 %@ms のスパイク"
+          }
+        }
+      }
+    },
+    "Spikes up to %@ ms on the Wi-Fi segment" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wi-Fi区間で最大 %@ms のスパイク"
+          }
+        }
+      }
+    },
+    "Stability" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "安定性"
+          }
+        }
+      }
+    },
+    "Stable" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "安定"
+          }
+        }
+      }
+    },
+    "Standard" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "規格"
+          }
+        }
+      }
+    },
+    "Start Test (about %lld s)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "試験を始める（約%lld秒）"
+          }
+        }
+      }
+    },
+    "Starting measurement…" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "計測を開始しています…"
+          }
+        }
+      }
+    },
+    "Statistics" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "統計"
+          }
+        }
+      }
+    },
+    "Status" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "状態"
+          }
+        }
+      }
+    },
+    "Stop" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "中止"
+          }
+        }
+      }
+    },
+    "Streams: %lld" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "並列 %lld 本"
+          }
+        }
+      }
+    },
+    "System Setting (%@)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "システム設定に従う（%@）"
+          }
+        }
+      }
+    },
+    "TCP Retransmissions" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TCP 再送"
+          }
+        }
+      }
+    },
+    "TV / Video" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "テレビ・映像"
+          }
+        }
+      }
+    },
+    "Tablet" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タブレット"
+          }
+        }
+      }
+    },
+    "Target" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "宛先"
+          }
+        }
+      }
+    },
+    "Tests delay under congestion" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "混雑時の遅れを調べる検査"
+          }
+        }
+      }
+    },
+    "The Wi-Fi segment in your home is congested (nearby Wi-Fi, microwaves, other devices in use, etc.)." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "家の中の Wi-Fi 区間が混み合っています（近隣のWi-Fi、電子レンジ、同時に使う端末など）。"
+          }
+        }
+      }
+    },
+    "The combined impact of other networks overlapping each channel (higher for stronger signals and busier networks). Your own network is excluded." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "そのチャンネルに重なっているほかのネットワークの影響の合計（電波が強い・利用率が高いほど大きい）。自分のネットワークは除いています。"
+          }
+        }
+      }
+    },
+    "The router responds quickly but the Internet is slow, so the queue on the WAN side is congested. Enabling QoS/SQM on your router, or limiting upload bandwidth to about 90% of the actual speed, will help." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ルーターまでは速いのに外が遅い状態です。詰まっているのは回線（WAN）側のキューです。ルーターの QoS/SQM を有効にするか、上り帯域を実効値の90%程度に制限すると改善します。"
+          }
+        }
+      }
+    },
+    "The router target is detected automatically. Changing targets makes comparison with earlier records harder." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ルーター宛ては自動で決まります。宛先を変えると、それまでの記録とは比較しにくくなります。"
+          }
+        }
+      }
+    },
+    "The width (channel width) and strength of each access point’s signal. Overlapping networks compete for airtime. Hover over the chart to see which networks overlap that channel." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "各アクセスポイントが電波を出している幅（チャンネル幅）と強さ。重なっている部分は電波を取り合います。グラフの上をなぞると、そのチャンネルに重なっているネットワークを表示します。"
+          }
+        }
+      }
+    },
+    "There are dropouts or jitter." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "途切れや揺らぎが出ています。"
+          }
+        }
+      }
+    },
+    "There is mild to moderate bufferbloat. Expect symptoms at peak times." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "軽度〜中程度のバッファブロートがあります。ピーク時に症状が出るはずです。"
+          }
+        }
+      }
+    },
+    "There is slight jitter." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "わずかに揺らぎがあります。"
+          }
+        }
+      }
+    },
+    "There may simply be no data from the times problems occur. Keep monitoring running and note when problems happen so you can compare." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ただし症状が出る時間帯のデータが無いだけの可能性があります。常時計測を続け、症状が出た時刻をメモしておくと突き合わせが最短です。"
+          }
+        }
+      }
+    },
+    "This Mac" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このMac"
+          }
+        }
+      }
+    },
+    "This can’t be undone." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この操作は取り消せません。"
+          }
+        }
+      }
+    },
+    "This is a private Wi-Fi address (randomized MAC). iPhone, iPad, Mac, and others use a different address on each network, so the manufacturer can’t be identified." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プライベート Wi-Fi アドレス（ランダム化されたMAC）です。iPhone・iPad・Mac などは、ネットワークごとに別のアドレスを使うため、メーカー名が分かりません。"
+          }
+        }
+      }
+    },
+    "Time" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "時刻"
+          }
+        }
+      }
+    },
+    "Time to resolve www.apple.com via your router’s DNS (every 10 seconds)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ルーターの DNS に www.apple.com を問い合わせた時間（10秒ごと）"
+          }
+        }
+      }
+    },
+    "To isolate it, temporarily disable it in Terminal during a call (AirDrop, Sidecar, and Handoff stop working; restarting also restores it):" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "切り分けたいときは、通話中にターミナルで一時的に止めます（AirDrop・Sidecar・Handoff が止まります。再起動でも戻ります）:"
+          }
+        }
+      }
+    },
+    "To the Internet" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "インターネットまで"
+          }
+        }
+      }
+    },
+    "To the Router" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ルーターまで"
+          }
+        }
+      }
+    },
+    "Took %@ s · Scan #%lld" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "所要 %1$@ 秒 · %2$lld 回目"
+          }
+        }
+      }
+    },
+    "Total" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "累計"
+          }
+        }
+      }
+    },
+    "Traffic" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通信量"
+          }
+        }
+      }
+    },
+    "Traffic for AirDrop, AirPlay, Handoff, and Sidecar. The Wi-Fi chip periodically hops to another channel, causing regular latency spikes." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AirDrop・AirPlay・Handoff・Sidecar 用の通信。Wi-Fi チップが定期的に別チャンネルへ出張するため、周期的なスパイクが出ます。"
+          }
+        }
+      }
+    },
+    "Transmit Power" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "送信出力"
+          }
+        }
+      }
+    },
+    "Trends & Report" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "時間帯とレポート"
+          }
+        }
+      }
+    },
+    "Trends by Hour" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "時間帯ごとの傾向"
+          }
+        }
+      }
+    },
+    "Turn on Wi-Fi and join a network to see signal details." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wi-Fi をオンにしてネットワークに接続すると、電波の状態を表示します。"
+          }
+        }
+      }
+    },
+    "Tuya (smart home)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tuya（スマート家電）"
+          }
+        }
+      }
+    },
+    "Type" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "種類"
+          }
+        }
+      }
+    },
+    "Unknown" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不明"
+          }
+        }
+      }
+    },
+    "Unknown Device" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不明な機器"
+          }
+        }
+      }
+    },
+    "Unstable" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不安定"
+          }
+        }
+      }
+    },
+    "Upload" : {
+      "comment" : "チャートの系列名（アップロード）",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上り"
+          }
+        }
+      }
+    },
+    "Upload Load" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上り負荷"
+          }
+        }
+      }
+    },
+    "Upload Only" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上りのみ"
+          }
+        }
+      }
+    },
+    "Upload Saturated" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上りを埋めたとき"
+          }
+        }
+      }
+    },
+    "Uses macOS’s built-in networkQuality. It briefly saturates your connection, so let others on your network know first." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "macOS 標準の networkQuality で測ります。回線を一時的に埋めるので、同居人がいれば一声かけてから。"
+          }
+        }
+      }
+    },
+    "Utilization" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "利用率"
+          }
+        }
+      }
+    },
+    "Verdict" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "判定"
+          }
+        }
+      }
+    },
+    "Very bad. Other traffic stalls for seconds during transfers" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "非常に悪い。通信中にほかの通信が数秒止まる"
+          }
+        }
+      }
+    },
+    "View Options" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "表示オプション"
+          }
+        }
+      }
+    },
+    "W53 (channels 52–64) and W56 (100–144) are DFS channels: when radar is detected, the router stops transmitting for up to 60 seconds. For stability, choose W52 (channels 36–48)." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "W53（52〜64ch）・W56（100〜144ch）は DFS 対象で、レーダーを検出するとルーターが最大60秒送信を止めます。安定性を優先するなら W52（36〜48ch）を選びます。"
+          }
+        }
+      }
+    },
+    "WEP (insecure)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WEP（危険）"
+          }
+        }
+      }
+    },
+    "WPA2 Enterprise" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WPA2 エンタープライズ"
+          }
+        }
+      }
+    },
+    "WPA3 Enterprise" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WPA3 エンタープライズ"
+          }
+        }
+      }
+    },
+    "Waiting for the first data…" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最初のデータを待っています…"
+          }
+        }
+      }
+    },
+    "Warning" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "注意"
+          }
+        }
+      }
+    },
+    "Weak Signal" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "電波が弱い"
+          }
+        }
+      }
+    },
+    "Weekday Daytime" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "平日の日中"
+          }
+        }
+      }
+    },
+    "Weekday Morning" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "平日の午前"
+          }
+        }
+      }
+    },
+    "Weekday daytime. Relatively quiet." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "平日の日中。比較的空いています。"
+          }
+        }
+      }
+    },
+    "Weekday morning. Remote work adds a little load, but it’s generally quiet." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "平日の午前。在宅勤務があると少し混みますが、全体としては空いています。"
+          }
+        }
+      }
+    },
+    "Weekdays" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "平日"
+          }
+        }
+      }
+    },
+    "Weekend Afternoon" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "休日の昼"
+          }
+        }
+      }
+    },
+    "Weekend Morning" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "休日の午前"
+          }
+        }
+      }
+    },
+    "Weekend afternoon. Nearby usage rises with video streaming and the like." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "休日の昼。動画視聴などで近隣の利用が増える時間帯です。"
+          }
+        }
+      }
+    },
+    "Weekend morning. More people are home, so networks start getting busier." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "休日の午前。家にいる人が多く、やや混み始めます。"
+          }
+        }
+      }
+    },
+    "Weekends" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "休日"
+          }
+        }
+      }
+    },
+    "What Is Collected" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取得するもの"
+          }
+        }
+      }
+    },
+    "When the connection is busy, real-time communication barely works." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "回線が混むと、リアルタイムの通信がまともに成立しない水準です。"
+          }
+        }
+      }
+    },
+    "When the connection saturates, latency jumps to hundreds of milliseconds or several seconds. This is why calls and games freeze during large downloads." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "回線が埋まった瞬間に、遅延が数百ms〜数秒に跳ね上がります。大きなダウンロード中に通話やゲームが止まるのはこれが原因です。"
+          }
+        }
+      }
+    },
+    "When weather or aviation radar is detected, the router can’t transmit at all for up to 60 seconds — a classic cause of traffic stalling for tens of seconds. Fixing your router to W52 (channels 36/40/44/48) stops it." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "気象・航空レーダーを検出すると、ルーターは最大60秒まったく送信できなくなります。通信が数十秒止まる症状の典型原因です。ルーターのチャンネルを W52（36/40/44/48ch）に固定すると止まります。"
+          }
+        }
+      }
+    },
+    "Where the Delay Is" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "どこで遅れているか"
+          }
+        }
+      }
+    },
+    "Who Requested Scans" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "誰がスキャンを要求したか"
+          }
+        }
+      }
+    },
+    "Wi-Fi" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wi-Fi接続"
+          }
+        }
+      }
+    },
+    "Wi-Fi Connection" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wi-Fi 接続"
+          }
+        }
+      }
+    },
+    "Wi-Fi Events" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wi-Fi イベント"
+          }
+        }
+      }
+    },
+    "Wi-Fi Pulse" : {
+      "shouldTranslate" : false
+    },
+    "Wi-Fi is fine. The delay is on the Internet side (your ISP or the route)." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wi-Fi は正常です。遅れはインターネット回線側（プロバイダや経路）で起きています。"
+          }
+        }
+      }
+    },
+    "Wi-Fi is fine; the delay is at your ISP or further along the route." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wi-Fi は正常で、遅れはプロバイダ側か経路で起きています。"
+          }
+        }
+      }
+    },
+    "Wi-Fi segment" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wi-Fi区間"
+          }
+        }
+      }
+    },
+    "Wired" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "有線接続"
+          }
+        }
+      }
+    },
+    "Wireless conditions are poor and packets are lost on the way to the router." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無線の状態が悪く、ルーターまでの間でパケットが失われています。"
+          }
+        }
+      }
+    },
+    "With mesh systems or extenders, devices can bounce between access points, causing repeated 1–3 second dropouts." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メッシュや中継器があると、端末が行ったり来たりして1〜3秒の断が繰り返し起きます。"
+          }
+        }
+      }
+    },
+    "You can also change this in System Settings › General › Language & Region › Applications." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "システム設定 › 一般 › 言語と地域 › アプリケーション からも変更できます。"
+          }
+        }
+      }
+    },
+    "Your Channel" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自分のチャンネル"
+          }
+        }
+      }
+    },
+    "You’re far from the router or something is in the way. Moving closer will help." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ルーターから遠いか、間に障害物があります。ルーターに近づくと改善します。"
+          }
+        }
+      }
+    },
+    "bytes/s" : {
+      "shouldTranslate" : false
+    },
+    "ch %.0f–%.0f (center %.0f)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$.0f〜%2$.0f ch（中心 %3$.0f）"
+          }
+        }
+      }
+    },
+    "dBm" : {
+      "shouldTranslate" : false
+    },
+    "e.g. Living Room TV" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "例: リビングのテレビ"
+          }
+        }
+      }
+    },
+    "fair" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "普通"
+          }
+        }
+      }
+    },
+    "fast" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "速い"
+          }
+        }
+      }
+    },
+    "h" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "時間"
+          }
+        }
+      }
+    },
+    "locationd = Location Services, sharingd = AirDrop discovery. Monitoring tools and system_profiler can also trigger scans." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "locationd = 位置情報サービス、sharingd = AirDrop の相手探索。自作の監視ツールや system_profiler も原因になります。"
+          }
+        }
+      }
+    },
+    "mDNS Name" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mDNS 名"
+          }
+        }
+      }
+    },
+    "macOS doesn’t give apps the SSID, BSSID, or beacon details without Location access. Your location itself is never recorded." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "macOS は位置情報の許可が無いアプリに SSID・BSSID・ビーコンの詳細を返しません。位置そのものは記録しません。"
+          }
+        }
+      }
+    },
+    "ms" : {
+      "shouldTranslate" : false
+    },
+    "nettop exited (%d). Restarting…" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "nettop が終了しました（%d）。再起動します…"
+          }
+        }
+      }
+    },
+    "networkQuality failed. Check your network connection." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "networkQuality の実行に失敗しました。ネットワーク接続を確認してください。"
+          }
+        }
+      }
+    },
+    "p95" : {
+      "shouldTranslate" : false
+    },
+    "p99" : {
+      "shouldTranslate" : false
+    },
+    "slow" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "遅い"
+          }
+        }
+      }
+    },
+    "strong" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "強い"
+          }
+        }
+      }
+    },
+    "sudo ifconfig awdl0 down\nsudo ifconfig awdl0 up" : {
+      "shouldTranslate" : false
+    },
+    "unit.events" : {
+      "comment" : "件数の単位。英語では付けない",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "件"
+          }
+        }
+      }
+    },
+    "unit.runs" : {
+      "comment" : "回数の単位。英語では付けない",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "回"
+          }
+        }
+      }
+    },
+    "very fast" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "とても速い"
+          }
+        }
+      }
+    },
+    "very strong" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "非常に強い"
+          }
+        }
+      }
+    },
+    "very weak" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "とても弱い"
+          }
+        }
+      }
+    },
+    "weak" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "弱い"
+          }
+        }
+      }
+    },
+    "· %lld MHz" : {
+      "shouldTranslate" : false
+    },
+    "—" : {
+      "shouldTranslate" : false
+    },
+    "• Wi-Fi radio information (CoreWLAN), pings to the router and the Internet, and DNS response times\n• IP, MAC, and mDNS names of devices on your local network (manufacturers are looked up in a bundled table and never sent anywhere)\n• Wi-Fi–related lines from the macOS unified log (only when you load them)\n• Speed tests and load tests communicate with Apple and Cloudflare servers, respectively\nRouter and Mac settings are never changed." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "・Wi-Fi の電波情報（CoreWLAN）・ルーターとインターネットへの ping・DNS 応答時間\n・LAN 上の機器の IP / MAC / mDNS 名（メーカー名は同梱の表で照合し、外部には送りません）\n・macOS の統合ログのうち Wi-Fi 関連の行（読み込んだときだけ）\n・速度測定と負荷試験は、それぞれ Apple と Cloudflare のサーバーと通信します\nルーターや Mac の設定は一切変更しません。"
+          }
+        }
+      }
+    },
+    "↓%@ ↑%@" : {
+      "shouldTranslate" : false
+    }
+  },
+  "version" : "1.0"
+}

@@ -9,16 +9,16 @@ enum SidebarItem: String, CaseIterable, Identifiable, Hashable {
 
     var title: LocalizedStringKey {
         switch self {
-        case .overview: "概要"
-        case .latency: "遅延"
-        case .connection: "Wi-Fi 接続"
-        case .neighbors: "周辺の Wi-Fi"
-        case .processes: "アプリの通信"
-        case .devices: "LAN の機器"
-        case .speed: "速度測定"
-        case .loadTest: "負荷試験"
-        case .events: "Wi-Fi イベント"
-        case .report: "時間帯とレポート"
+        case .overview: "Overview"
+        case .latency: "Latency"
+        case .connection: "Wi-Fi Connection"
+        case .neighbors: "Nearby Wi-Fi"
+        case .processes: "App Traffic"
+        case .devices: "Local Devices"
+        case .speed: "Speed Test"
+        case .loadTest: "Load Test"
+        case .events: "Wi-Fi Events"
+        case .report: "Trends & Report"
         }
     }
 
@@ -44,9 +44,9 @@ enum SidebarItem: String, CaseIterable, Identifiable, Hashable {
     }
 
     static let sections: [(title: LocalizedStringKey, items: [SidebarItem])] = [
-        ("モニター", [.overview, .latency, .connection, .neighbors, .processes, .devices]),
-        ("診断", [.speed, .loadTest, .events]),
-        ("記録", [.report]),
+        ("Monitor", [.overview, .latency, .connection, .neighbors, .processes, .devices]),
+        ("Diagnostics", [.speed, .loadTest, .events]),
+        ("Records", [.report]),
     ]
 }
 
@@ -114,9 +114,9 @@ private struct SidebarRow: View {
         case .devices:
             let n = model.monitor.devices.onlineCount
             return n > 0 ? Text("\(n)") : nil
-        case .speed where model.speedTest.isRunning: return Text("計測中")
-        case .loadTest where model.loadTest.isRunning: return Text("計測中")
-        case .neighbors where model.neighbors.isScanning: return Text("スキャン中")
+        case .speed where model.speedTest.isRunning: return Text("Measuring")
+        case .loadTest where model.loadTest.isRunning: return Text("Measuring")
+        case .neighbors where model.neighbors.isScanning: return Text("Scanning")
         default: return nil
         }
     }
@@ -132,8 +132,8 @@ private struct SidebarStatus: View {
             Image(systemName: "dot.radiowaves.up.forward")
                 .foregroundStyle(.tint)
             VStack(alignment: .leading, spacing: 1) {
-                Text("常時計測中").font(.caption.weight(.semibold))
-                Text("ルーター \(Fmt.ms(w.gw.p50)) ms · ネット \(Fmt.ms(w.v4.p50)) ms")
+                Text("Monitoring").font(.caption.weight(.semibold))
+                Text("Router \(Fmt.ms(w.gw.p50)) ms · Internet \(Fmt.ms(w.v4.p50)) ms")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
                     .monospacedDigit()

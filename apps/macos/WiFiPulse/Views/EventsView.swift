@@ -21,23 +21,23 @@ struct EventsView: View {
                     .padding(24)
                 }
             } else if ev.isLoading {
-                ProgressView("統合ログを読んでいます…（数十秒かかることがあります）")
+                ProgressView("Reading the unified log… (this can take a few tens of seconds)")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 ContentUnavailableView {
-                    Label("Wi-Fi イベントを読み込む", systemImage: "list.bullet.rectangle")
+                    Label("Load Wi-Fi Events", systemImage: "list.bullet.rectangle")
                 } description: {
-                    Text("macOS の統合ログから、切断・ローミング・スキャン・レーダー検出（DFS）・AWDL など、遅延スパイクの原因になりうる出来事を抜き出します。症状が出た直後に読むのが効果的です。")
+                    Text("Extracts events from the macOS unified log that can cause latency spikes — disconnects, roaming, scans, radar detection (DFS), and AWDL. Load it right after you notice a problem.")
                 } actions: {
-                    Button("読み込む") { Task { await ev.load() } }
+                    Button("Load") { Task { await ev.load() } }
                         .buttonStyle(.glassProminent)
                 }
             }
         }
-        .navigationTitle("Wi-Fi イベント")
+        .navigationTitle("Wi-Fi Events")
         .toolbar {
             ToolbarItem(placement: .principal) {
-                Picker("期間", selection: $ev.span) {
+                Picker("Period", selection: $ev.span) {
                     ForEach(WiFiEvents.Span.allCases) { Text($0.label).tag($0) }
                 }
                 .pickerStyle(.segmented)
@@ -47,7 +47,7 @@ struct EventsView: View {
                 Button {
                     Task { await ev.load() }
                 } label: {
-                    Label("再読み込み", systemImage: "arrow.clockwise")
+                    Label("Reload", systemImage: "arrow.clockwise")
                 }
                 .disabled(ev.isLoading)
             }
@@ -58,8 +58,8 @@ struct EventsView: View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: 170), spacing: 12)], spacing: 12) {
             ForEach(WiFiEvents.Category.allCases) { c in
                 let n = r.counts[c] ?? 0
-                MetricTile(title: LocalizedStringKey(c.title), systemImage: c.symbol, value: "\(n)", unit: "件",
-                           caption: c == .scan ? "うち live scan \(r.liveScans) 件" : nil,
+                MetricTile(title: LocalizedStringKey(c.title), systemImage: c.symbol, value: "\(n)", unit: String(localized: "unit.events", defaultValue: "", comment: "件数の単位。英語では付けない"),
+                           caption: c == .scan ? String(localized: "Live scans: \(r.liveScans)") : nil,
                            level: level(c, n))
             }
         }
@@ -76,11 +76,11 @@ struct EventsView: View {
 
     private func timeline(_ r: WiFiEvents.Report) -> some View {
         let shown: Set<WiFiEvents.Category> = [.disconnect, .roam, .scan, .dfs]
-        return Card("10分ごとの件数", systemImage: "chart.bar.xaxis",
-                    subtitle: "直近\(ev_label(r.span)) · \(r.lineCount) 行のログを解析 · \(Fmt.time(r.generated)) 取得") {
+        return Card("Events per 10 minutes", systemImage: "chart.bar.xaxis",
+                    subtitle: String(localized: "Last \(ev_label(r.span)) · \(r.lineCount) log lines analyzed · Retrieved \(Fmt.time(r.generated))")) {
             Chart(r.buckets.filter { shown.contains($0.category) }) { b in
-                BarMark(x: .value("時刻", b.start, unit: .minute), y: .value("件数", b.count), width: .ratio(0.85))
-                    .foregroundStyle(by: .value("種類", b.category.title))
+                BarMark(x: .value("Time", b.start, unit: .minute), y: .value("Count", b.count), width: .ratio(0.85))
+                    .foregroundStyle(by: .value("Type", b.category.title))
             }
             .chartForegroundStyleScale([
                 WiFiEvents.Category.disconnect.title: Color.red,
@@ -98,9 +98,9 @@ struct EventsView: View {
     }
 
     private func requesters(_ r: WiFiEvents.Report) -> some View {
-        Card("誰がスキャンを要求したか", systemImage: "person.crop.circle.badge.questionmark") {
+        Card("Who Requested Scans", systemImage: "person.crop.circle.badge.questionmark") {
             if r.requesters.isEmpty {
-                Text("スキャン要求は見つかりませんでした").foregroundStyle(.secondary)
+                Text("No scan requests found").foregroundStyle(.secondary)
             } else {
                 let top = r.requesters.first?.count ?? 1
                 VStack(alignment: .leading, spacing: 6) {
@@ -116,7 +116,7 @@ struct EventsView: View {
                         }
                     }
                 }
-                Text("locationd = 位置情報サービス、sharingd = AirDrop の相手探索。自作の監視ツールや system_profiler も原因になります。")
+                Text("locationd = Location Services, sharingd = AirDrop discovery. Monitoring tools and system_profiler can also trigger scans.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -125,10 +125,10 @@ struct EventsView: View {
 
     private func awdl(_ r: WiFiEvents.Report) -> some View {
         let up = r.awdlState.contains("UP") && r.awdlState.contains("RUNNING")
-        return Card("AWDL の状態", systemImage: "airplayaudio") {
-            LevelBadge(text: up ? "動作中" : "停止中", level: up ? .warn : .good)
+        return Card("AWDL Status", systemImage: "airplayaudio") {
+            LevelBadge(text: up ? String(localized: "Active") : String(localized: "Inactive"), level: up ? .warn : .good)
             Text(WiFiEvents.Category.awdl.explanation).font(.callout)
-            Text("切り分けたいときは、通話中にターミナルで一時的に止めます（AirDrop・Sidecar・Handoff が止まります。再起動でも戻ります）:")
+            Text("To isolate it, temporarily disable it in Terminal during a call (AirDrop, Sidecar, and Handoff stop working; restarting also restores it):")
                 .font(.caption)
                 .foregroundStyle(.secondary)
             Text("sudo ifconfig awdl0 down\nsudo ifconfig awdl0 up")
@@ -141,7 +141,7 @@ struct EventsView: View {
     }
 
     private func details(_ r: WiFiEvents.Report) -> some View {
-        Card("種類ごとの説明とログ", systemImage: "text.magnifyingglass") {
+        Card("Explanations and Log Lines by Type", systemImage: "text.magnifyingglass") {
             ForEach(WiFiEvents.Category.allCases) { c in
                 DisclosureGroup {
                     VStack(alignment: .leading, spacing: 8) {
@@ -158,7 +158,7 @@ struct EventsView: View {
                     }
                     .padding(.vertical, 6)
                 } label: {
-                    Label("\(c.title)（\(r.counts[c] ?? 0)件）", systemImage: c.symbol)
+                    Label("\(c.title) (\(r.counts[c] ?? 0))", systemImage: c.symbol)
                 }
             }
         }

@@ -16,7 +16,7 @@ nonisolated struct Device: Codable, Identifiable, Hashable, Sendable {
     var online: Bool?
     var name: String?
 
-    var displayName: String { name ?? mdns ?? vendor_ja ?? vendor ?? (random == true ? "プライベートアドレスの端末" : "不明な機器") }
+    var displayName: String { name ?? mdns ?? vendor_ja ?? vendor ?? (random == true ? String(localized: "Device with a Private Address") : String(localized: "Unknown Device")) }
     var lastSeen: Date { Date(epochMs: last) }
     var firstSeen: Date { Date(epochMs: first) }
 
@@ -38,17 +38,17 @@ nonisolated struct Device: Codable, Identifiable, Hashable, Sendable {
 
     var kindLabel: String {
         switch kind {
-        case "router": "ルーター"
-        case "pc": "パソコン"
-        case "phone": "スマートフォン"
-        case "tablet": "タブレット"
-        case "game": "ゲーム機"
-        case "media": "テレビ・映像"
-        case "speaker": "スピーカー"
-        case "printer": "プリンター"
-        case "appliance": "家電"
-        case "iot": "IoT機器"
-        default: "不明"
+        case "router": String(localized: "Router", comment: "機器の種類")
+        case "pc": String(localized: "Computer")
+        case "phone": String(localized: "Smartphone")
+        case "tablet": String(localized: "Tablet")
+        case "game": String(localized: "Game Console")
+        case "media": String(localized: "TV / Video")
+        case "speaker": String(localized: "Speaker")
+        case "printer": String(localized: "Printer")
+        case "appliance": String(localized: "Appliance")
+        case "iot": String(localized: "IoT Device")
+        default: String(localized: "Unknown")
         }
     }
 }
@@ -225,21 +225,21 @@ final class DeviceScanner {
     // MARK: Classification
 
     private static let vendorRules: [(String, String, String)] = [
-        ("apple", "Apple", "apple"), ("nintendo", "任天堂", "game"),
-        ("sony interactive", "ソニー（PlayStation）", "game"), ("sony", "ソニー", "media"),
+        ("apple", "Apple", "apple"), ("nintendo", String(localized: "Nintendo"), "game"),
+        ("sony interactive", String(localized: "Sony (PlayStation)"), "game"), ("sony", String(localized: "Sony"), "media"),
         ("microsoft", "Microsoft", "pc"), ("amazon", "Amazon", "media"),
-        ("google", "Google", "media"), ("sercomm", "Sercomm（ISPレンタル機）", "router"),
-        ("sernet", "Sercomm（ISPレンタル機）", "router"), ("arcadyan", "Arcadyan", "router"),
-        ("buffalo", "バッファロー", "router"), ("nec platforms", "NEC", "router"),
+        ("google", "Google", "media"), ("sercomm", String(localized: "Sercomm (ISP-provided)"), "router"),
+        ("sernet", String(localized: "Sercomm (ISP-provided)"), "router"), ("arcadyan", "Arcadyan", "router"),
+        ("buffalo", String(localized: "Buffalo"), "router"), ("nec platforms", "NEC", "router"),
         ("tp-link", "TP-Link", "router"), ("aterm", "NEC Aterm", "router"),
-        ("seiko epson", "エプソン", "printer"), ("canon", "キヤノン", "printer"),
-        ("brother", "ブラザー", "printer"), ("sharp", "シャープ", "appliance"),
-        ("panasonic", "パナソニック", "appliance"), ("hitachi", "日立", "appliance"),
-        ("daikin", "ダイキン", "appliance"), ("roborock", "ロボロック", "appliance"),
+        ("seiko epson", String(localized: "Epson"), "printer"), ("canon", String(localized: "Canon"), "printer"),
+        ("brother", String(localized: "Brother"), "printer"), ("sharp", String(localized: "Sharp"), "appliance"),
+        ("panasonic", String(localized: "Panasonic"), "appliance"), ("hitachi", String(localized: "Hitachi"), "appliance"),
+        ("daikin", String(localized: "Daikin"), "appliance"), ("roborock", String(localized: "Roborock"), "appliance"),
         ("samsung", "Samsung", "phone"), ("xiaomi", "Xiaomi", "phone"),
         ("huawei", "Huawei", "phone"), ("oppo", "OPPO", "phone"),
-        ("espressif", "Espressif（IoT機器）", "iot"), ("tuya", "Tuya（スマート家電）", "iot"),
-        ("raspberry", "Raspberry Pi", "pc"), ("intel", "Intel（PC内蔵）", "pc"),
+        ("espressif", String(localized: "Espressif (IoT device)"), "iot"), ("tuya", String(localized: "Tuya (smart home)"), "iot"),
+        ("raspberry", "Raspberry Pi", "pc"), ("intel", String(localized: "Intel (built into PC)"), "pc"),
         ("sonos", "Sonos", "speaker"), ("bose", "Bose", "speaker"), ("anker", "Anker", "media"),
     ]
     private static let nameHints: [(String, String)] = [

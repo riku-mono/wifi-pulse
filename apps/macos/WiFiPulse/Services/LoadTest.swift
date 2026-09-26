@@ -10,9 +10,9 @@ final class LoadTest {
         var id: Self { self }
         var label: String {
             switch self {
-            case .both: "下り＋上り"
-            case .down: "下りのみ"
-            case .up: "上りのみ"
+            case .both: String(localized: "Download + Upload")
+            case .down: String(localized: "Download Only")
+            case .up: String(localized: "Upload Only")
             }
         }
     }
@@ -76,13 +76,13 @@ final class LoadTest {
     var totalSeconds: Int { makePlan().reduce(0) { $0 + $1.seconds + ($1.load == nil ? 0 : 2) } }
 
     func makePlan() -> [PhasePlan] {
-        var p = [PhasePlan(key: "idle", title: "無負荷", seconds: max(10, duration / 2), load: nil)]
+        var p = [PhasePlan(key: "idle", title: String(localized: "Idle"), seconds: max(10, duration / 2), load: nil)]
         if mode != .up {
-            p.append(PhasePlan(key: "down", title: "下りを埋める", seconds: duration, load: .down))
-            p.append(PhasePlan(key: "rest1", title: "回復待ち", seconds: 8, load: nil))
+            p.append(PhasePlan(key: "down", title: String(localized: "Saturate Download"), seconds: duration, load: .down))
+            p.append(PhasePlan(key: "rest1", title: String(localized: "Recovery"), seconds: 8, load: nil))
         }
         if mode != .down {
-            p.append(PhasePlan(key: "up", title: "上りを埋める", seconds: duration, load: .up))
+            p.append(PhasePlan(key: "up", title: String(localized: "Saturate Upload"), seconds: duration, load: .up))
         }
         return p
     }
@@ -90,7 +90,7 @@ final class LoadTest {
     func start(env: NetworkEnvironment) {
         guard !isRunning else { return }
         guard !env.gateway.isEmpty else {
-            error = "デフォルトゲートウェイが見つかりません。ネットワークに接続していますか？"
+            error = String(localized: "No default gateway found. Are you connected to a network?")
             return
         }
         task = Task { await run(env: env) }
@@ -139,8 +139,8 @@ final class LoadTest {
                 let g = gw.drain(), i = inet.drain()
                 gwRtts += g.rtts; gwLost += g.lost; inRtts += i.rtts; inLost += i.lost
                 let el = Date().timeIntervalSince(started)
-                if let m = g.rtts.max() { live.append(LivePoint(elapsed: el, series: "ルーター", ms: m)) }
-                if let m = i.rtts.max() { live.append(LivePoint(elapsed: el, series: "インターネット", ms: m)) }
+                if let m = g.rtts.max() { live.append(LivePoint(elapsed: el, series: SeriesName.router, ms: m)) }
+                if let m = i.rtts.max() { live.append(LivePoint(elapsed: el, series: SeriesName.internet, ms: m)) }
                 if let cur = InterfaceCounters.read(env.interface), let p = prev {
                     let dt = Date().timeIntervalSince(prevAt)
                     liveThroughput = (Double(cur.rx &- p.rx) * 8 / dt, Double(cur.tx &- p.tx) * 8 / dt)
@@ -160,7 +160,7 @@ final class LoadTest {
         liveThroughput = (0, 0)
 
         guard !Task.isCancelled else {
-            error = "中断しました"
+            error = String(localized: "Cancelled")
             return
         }
 
@@ -183,15 +183,15 @@ final class LoadTest {
 
     /// 無負荷時からの増加量で採点（DSLReports 方式に近い）。
     static func grade(idleP50: Double?, loadedP95: Double?) -> Grade {
-        guard let idle = idleP50, let loaded = loadedP95 else { return Grade(letter: "?", note: "測定できず") }
+        guard let idle = idleP50, let loaded = loadedP95 else { return Grade(letter: "?", note: String(localized: "Couldn’t measure")) }
         let d = loaded - idle
         return switch d {
-        case ..<5: Grade(letter: "A+", note: "ほぼ増えない。理想的")
-        case ..<30: Grade(letter: "A", note: "良好。通話やゲームに影響しない")
-        case ..<60: Grade(letter: "B", note: "わずかに影響。音が一瞬途切れることがある")
-        case ..<200: Grade(letter: "C", note: "はっきり影響。ダウンロード中は通話が乱れる")
-        case ..<400: Grade(letter: "D", note: "悪い。通話やゲームで数百ms〜1秒の遅れが出る")
-        default: Grade(letter: "F", note: "非常に悪い。通信中にほかの通信が数秒止まる")
+        case ..<5: Grade(letter: "A+", note: String(localized: "Barely increases. Ideal"))
+        case ..<30: Grade(letter: "A", note: String(localized: "Good. No effect on calls or games"))
+        case ..<60: Grade(letter: "B", note: String(localized: "Slight. Audio may cut out briefly"))
+        case ..<200: Grade(letter: "C", note: String(localized: "Noticeable. Calls break up during downloads"))
+        case ..<400: Grade(letter: "D", note: String(localized: "Bad. Calls and games lag by hundreds of milliseconds to a second"))
+        default: Grade(letter: "F", note: String(localized: "Very bad. Other traffic stalls for seconds during transfers"))
         }
     }
 
@@ -200,8 +200,8 @@ final class LoadTest {
         guard let v = record.verdict?[key], let gw95 = v.gw_p95, v.inet_p95 != nil,
               let idleGw = record.phases["idle"]?.gw?.p50, !["A+", "A"].contains(v.grade) else { return nil }
         return gw95 > idleGw + 100
-            ? "ルーター宛てでも待たされています。詰まっているのは Wi-Fi 区間かルーター本体です。電波・チャンネル・ルーターの処理能力を疑ってください。"
-            : "ルーターまでは速いのに外が遅い状態です。詰まっているのは回線（WAN）側のキューです。ルーターの QoS/SQM を有効にするか、上り帯域を実効値の90%程度に制限すると改善します。"
+            ? String(localized: "Even pings to the router are delayed, so the congestion is on the Wi-Fi segment or in the router itself. Suspect the signal, the channel, or the router’s processing power.")
+            : String(localized: "The router responds quickly but the Internet is slow, so the queue on the WAN side is congested. Enabling QoS/SQM on your router, or limiting upload bandwidth to about 90% of the actual speed, will help.")
     }
 }
 

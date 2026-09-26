@@ -1,3 +1,4 @@
+import OSLog
 import SwiftUI
 
 @main
@@ -45,6 +46,8 @@ final class AppModel {
     }
 
     init() {
+        Logger(subsystem: Bundle.main.bundleIdentifier ?? "WiFiPulse", category: "app")
+            .info("launch language=\(AppLanguage.current, privacy: .public) override=\(AppLanguage.override ?? "-", privacy: .public) system=\(AppLanguage.systemChoice, privacy: .public)")
         selection = UserDefaults.standard.string(forKey: "selectedView").flatMap(SidebarItem.init(rawValue:)) ?? .overview
         monitor.start()
     }
@@ -54,26 +57,26 @@ struct AppCommands: Commands {
     let model: AppModel
 
     var body: some Commands {
-        CommandMenu("計測") {
-            Button("速度を測る") {
+        CommandMenu("Measure") {
+            Button("Measure Speed") {
                 Task { await model.speedTest.run(interface: model.monitor.env.interface) }
             }
             .keyboardShortcut("t", modifiers: [.command, .shift])
             .disabled(model.speedTest.isRunning)
 
-            Button("周辺のWi-Fiをスキャン") {
+            Button("Scan Nearby Wi-Fi") {
                 model.selection = .neighbors
                 Task { await model.neighbors.scan() }
             }
             .keyboardShortcut("r", modifiers: [.command, .shift])
 
-            Button("LANの機器を探す") {
+            Button("Find Local Devices") {
                 model.monitor.devices.requestSweep()
             }
 
             Divider()
 
-            Button("データフォルダを開く") {
+            Button("Open Data Folder") {
                 try? FileManager.default.createDirectory(at: DataStore.folder, withIntermediateDirectories: true)
                 NSWorkspace.shared.open(DataStore.folder)
             }
