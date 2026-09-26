@@ -2244,22 +2244,22 @@
         }
       }
     },
-    "Lines are medians; bands extend to the maximum. Red vertical lines mark packet loss. Logarithmic scale." : {
+    "Lines are medians; bands extend to the maximum. Red vertical lines mark packet loss. Gray shading marks time left out of the score (speed tests, load tests, device scans). Logarithmic scale." : {
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "線は中央値、帯は最大値までの幅。赤い縦線はパケットロス。縦軸は対数。"
+            "value" : "線は中央値、帯は最大値までの幅。赤い縦線はパケットロス。灰色の帯はスコアから外した時間（速度測定・負荷試験・機器の検索）。縦軸は対数。"
           }
         }
       }
     },
-    "Lines show the maximum for each second, so spikes are visible as they happen." : {
+    "Lines show the maximum for each second, so spikes are visible as they happen. Gray shading marks time left out of the score (speed tests, load tests, device scans)." : {
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "線はそれぞれの秒の最大値。跳ね上がりがそのまま見えます。"
+            "value" : "線はそれぞれの秒の最大値。跳ね上がりがそのまま見えます。灰色の帯はスコアから外した時間（速度測定・負荷試験・機器の検索）。"
           }
         }
       }
@@ -2330,6 +2330,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "負荷試験"
+          }
+        }
+      }
+    },
+    "Load Test Running" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "負荷試験中"
           }
         }
       }
@@ -4195,6 +4205,16 @@
         }
       }
     },
+    "Speed Test Running" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "速度測定中"
+          }
+        }
+      }
+    },
     "Speed and Responsiveness" : {
       "localizations" : {
         "ja" : {
@@ -4441,6 +4461,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ルーター宛ては自動で決まります。宛先を変えると、それまでの記録とは比較しにくくなります。"
+          }
+        }
+      }
+    },
+    "The score is paused while the load test fills your connection, and resumes a few seconds after it ends." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "負荷試験で回線を埋めている間は、スコアを止めています。終わって数秒後に戻ります。"
+          }
+        }
+      }
+    },
+    "The score is paused while the speed test fills your connection, and resumes a few seconds after it ends." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "速度測定で回線を埋めている間は、スコアを止めています。終わって数秒後に戻ります。"
           }
         }
       }

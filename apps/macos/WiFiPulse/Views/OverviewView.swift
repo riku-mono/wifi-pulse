@@ -10,7 +10,7 @@ struct OverviewView: View {
                 HeroCard()
                 PathCard()
                 TilesGrid()
-                Card("Responsiveness (Last 2 Minutes)", systemImage: "waveform.path.ecg", subtitle: String(localized: "Lines show the maximum for each second, so spikes are visible as they happen.")) {
+                Card("Responsiveness (Last 2 Minutes)", systemImage: "waveform.path.ecg", subtitle: String(localized: "Lines show the maximum for each second, so spikes are visible as they happen. Gray shading marks time left out of the score (speed tests, load tests, device scans).")) {
                     RecentLatencyChart(seconds: 120)
                         .frame(height: 180)
                 }
@@ -182,6 +182,8 @@ struct LatencySample: Identifiable, Equatable {
     let router: Double?
     let internet: Double?
     let lost: Bool
+    /// 判定から外した秒（帯で示す）
+    var excluded = false
 }
 
 /// 直近 N 秒の「各秒の最大値」。履歴は `revision` を読んだときだけ参照する。
@@ -194,7 +196,7 @@ struct RecentLatencyChart: View {
         let m = model.monitor
         let _ = m.revision
         let samples = m.recent(seconds).map {
-            LatencySample(date: $0.date, router: $0.gw.rtts.max(), internet: $0.v4.rtts.max(), lost: $0.gw.lost + $0.v4.lost > 0)
+            LatencySample(date: $0.date, router: $0.gw.rtts.max(), internet: $0.v4.rtts.max(), lost: $0.gw.lost + $0.v4.lost > 0, excluded: $0.excluded != nil)
         }
         LatencyLineChart(samples: samples, compact: compact)
             .equatable()
@@ -215,6 +217,10 @@ struct LatencyLineChart: View, Equatable {
 
     var body: some View {
         Chart {
+            ForEach(LatencySeries.spans(samples.filter(\.excluded).map(\.date)), id: \.lowerBound) { r in
+                RectangleMark(xStart: .value("Time", r.lowerBound), xEnd: .value("Time", r.upperBound))
+                    .foregroundStyle(.gray.opacity(0.15))
+            }
             ForEach(samples) { s in
                 if let v = s.router {
                     LineMark(x: .value("Time", s.date), y: .value("ms", max(0.1, v)), series: .value("Target", SeriesName.router))
