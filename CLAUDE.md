@@ -7,6 +7,7 @@ Wi-Fi Pulse: Mac の Wi-Fi とネットワークを常時計測・診断する m
 
 - `apps/macos/` — Xcode プロジェクト（macOS 27 / Xcode 27 / Swift 6、既定のアクター分離は `MainActor`）
   - `WiFiPulse/{App,Core,Services,Views,Resources}`、`Info.plist` はフォルダの外
+  - `WiFiPulseTests/` — Swift Testing のユニットテスト（アプリをホストにして `@testable import WiFiPulse`）
   - Bundle ID `me.riku-mono.WiFiPulse`（所有ドメイン `riku-mono.me`。今後の識別子も `me.riku-mono.*`）
 - `apps/web/` — LP と Web 版サンプル（未着手）
 - `docs/` — `distribution.md`（Mac App Store に出せない理由・配布方針）、`localization.md`（多言語対応のルール）
@@ -20,11 +21,16 @@ Wi-Fi Pulse: Mac の Wi-Fi とネットワークを常時計測・診断する m
 cd apps/macos
 xcodebuild -project WiFiPulse.xcodeproj -scheme WiFiPulse -configuration Debug -derivedDataPath build/DerivedData.noindex build
 open build/DerivedData.noindex/Build/Products/Debug/WiFiPulse.app
+
+# テスト
+xcodebuild -project WiFiPulse.xcodeproj -scheme WiFiPulse -configuration Debug -derivedDataPath build/DerivedData.noindex test
 ```
 
 - `project.pbxproj` は手書きで、ファイルシステム同期グループを使っている。`WiFiPulse/` にファイルを置けばターゲットに入る。**ターゲットの追加（テストなど）は Xcode の UI で行う**。
 - ビルドしたアプリは LaunchServices に登録され、Spotlight に同じアプリが並ぶ。ビルド・起動の確認が済んだら `scripts/unregister-dev-builds.sh` で登録を外す（`/Applications` のものは残る）。ビルド先を `.noindex` にしてあるのは Spotlight の索引から外すため。
 - App Sandbox は無効（`nettop`・`log`・`ping` などを使うため）。署名はアドホック。
+- テストの実行時もアプリがホストとして起動する。`AppEntry`（`App/WiFiPulseApp.swift`）が `XCTestConfigurationFilePath` を見て、計測しない空のアプリで起動する（計測すると本物の記録フォルダに書き込むため）。
+- テストは外部コマンド・ネットワーク・記録フォルダに触れない純粋な関数を対象にする。入力はフィクスチャ文字列で与え、実機の出力を使うときは IP・MAC・プロセス名を合成値に置き換える。表示文言は言語で変わるので比較しない（`Level` や件数で確かめる）。
 
 ## 守ること
 
@@ -58,4 +64,4 @@ open build/DerivedData.noindex/Build/Products/Debug/WiFiPulse.app
 ## 進め方
 
 - main に直接コミットしない。ブランチ → PR（本文は日本語。確認したこと／できていないことをチェックリストで書く）。
-- 残りの作業は GitHub の Issue: #2 テスト（Swift Testing）、#3 アプリアイコン（Icon Composer）、#4 CI（macOS でビルド・テスト）、#5 署名・公証・配布（Developer Program 加入待ち）。
+- 残りの作業は GitHub の Issue: #2 テスト（残りは `Monitor.switchNetwork`）、#3 アプリアイコン（Icon Composer）、#4 CI（macOS でビルド・テスト）、#5 署名・公証・配布（Developer Program 加入待ち）。

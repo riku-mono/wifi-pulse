@@ -284,15 +284,40 @@ final class DeviceScanner {
     nonisolated static func mdnsName(_ ip: String, gateway: String) async -> String? {
         for server in [["@224.0.0.251", "-p", "5353"], ["@\(gateway)"]] {
             let out = await Shell.run("/usr/bin/dig", ["+short", "-x", ip] + server + ["+time=2", "+tries=1"], timeout: 6)
-            for line in out.split(separator: "\n") {
-                var name = line.trimmingCharacters(in: .whitespaces)
-                guard !name.isEmpty, !name.hasPrefix(";") else { continue }
-                if name.hasSuffix(".") { name.removeLast() }
-                if name.hasSuffix(".local") { name.removeLast(6) }
-                return name
-            }
+            if let name = hostName(fromDig: out) { return name }
         }
         return nil
+    }
+
+    /// `dig +short -x` の出力から名前を取り出す（最初の名前だけ。末尾の `.` と `.local` を外す）
+    nonisolated static func hostName(fromDig out: String) -> String? {
+        for line in out.split(separator: "\n") {
+            var name = line.trimmingCharacters(in: .whitespaces)
+            guard !name.isEmpty, !name.hasPrefix(";") else { continue }
+            if name.hasSuffix("."), !name.hasSuffix("\\.") { name.removeLast() }
+            if name.hasSuffix(".local") { name.removeLast(6) }
+            return unescapeDNS(name)
+        }
+        return nil
+    }
+
+    /// DNS の表記のエスケープを戻す。`\DDD` は10進のバイト（空白は `\032`、日本語は UTF-8 の1バイトずつ）、`\X` は X そのもの
+    nonisolated static func unescapeDNS(_ s: String) -> String {
+        var bytes: [UInt8] = []
+        var it = Array(s.utf8)[...]
+        while let c = it.popFirst() {
+            guard c == UInt8(ascii: "\\"), let next = it.first else { bytes.append(c); continue }
+            let digits = it.prefix(3)
+            if digits.count == 3, digits.allSatisfy({ (0x30...0x39).contains($0) }),
+               let v = UInt8(String(decoding: digits, as: UTF8.self)) {
+                bytes.append(v)
+                it.removeFirst(3)
+            } else {
+                bytes.append(next)
+                it.removeFirst()
+            }
+        }
+        return String(decoding: bytes, as: UTF8.self)
     }
 
     // MARK: Classification
