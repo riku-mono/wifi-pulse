@@ -3,14 +3,15 @@
 
     scripts/l10n-coverage.py                          # 表を表示
     scripts/l10n-coverage.py --require en=100         # en が 100% 未満なら終了コード 1
-    scripts/l10n-coverage.py --update README.md       # README の表を書き換える
-    scripts/l10n-coverage.py --check README.md        # README の表が最新でなければ終了コード 1
+    scripts/l10n-coverage.py --update README.md --update README.ja.md   # README の表を書き換える
+    scripts/l10n-coverage.py --check README.md --check README.ja.md     # README の表が最新でなければ終了コード 1
     scripts/l10n-coverage.py --json coverage.json     # 集計結果を JSON で保存
 
 数え方:
 - 対象は `shouldTranslate: false` でない文字列。ソースから消えた（`extractionState: stale`）ものは分母から除き、別に数える。
 - 翻訳済みは、その言語のすべての文字列ユニット（複数形などの variation を含む）が `translated` のもの。
 - ソース言語は常に 100%。
+- 表の見出しは、書き込むファイルの名前で決める（`*.ja.md` は日本語、それ以外は英語）。
 - GitHub Actions 上では、結果の表を Job Summary にも書き出す。
 
 外部ライブラリは使わない（macOS 標準・Ubuntu 標準の python3 で動く）。
@@ -110,12 +111,25 @@ def bar(pct: float, width: int = 10) -> str:
     return "█" * filled + "░" * (width - filled)
 
 
-def markdown(stats: list[CatalogStats]) -> str:
+LABELS = {
+    "ja": {"header": "| 言語 | 翻訳済み | カバレッジ | 要確認 | 未翻訳 |", "source": "（ソース）",
+           "note": "対象: {files}（翻訳不要 {skipped} 件・ソースから消えた文字列 {stale} 件は除外）"},
+    "en": {"header": "| Language | Translated | Coverage | Needs review | Untranslated |", "source": " (source)",
+           "note": "Catalogs: {files} (excluding {skipped} strings marked “don't translate” and {stale} stale strings)"},
+}
+
+
+def doc_language(path: str) -> str:
+    return "ja" if path.endswith(".ja.md") else "en"
+
+
+def markdown(stats: list[CatalogStats], lang: str = "ja") -> str:
     total, merged, source = merge(stats)
+    label = LABELS[lang]
     lines = [
-        "| 言語 | 翻訳済み | カバレッジ | 要確認 | 未翻訳 |",
+        label["header"],
         "|---|---:|---|---:|---:|",
-        f"| `{source}`（ソース） | {total} / {total} | {bar(100)} 100.0% | 0 | 0 |",
+        f"| `{source}`{label['source']} | {total} / {total} | {bar(100)} 100.0% | 0 | 0 |",
     ]
     for lang, ls in sorted(merged.items()):
         pct = ls.percent(total)
@@ -123,7 +137,7 @@ def markdown(stats: list[CatalogStats]) -> str:
     stale = sum(s.stale for s in stats)
     skipped = sum(s.skipped for s in stats)
     files = ", ".join(f"`{s.path}`" for s in stats)
-    lines += ["", f"対象: {files}（翻訳不要 {skipped} 件・ソースから消えた文字列 {stale} 件は除外）"]
+    lines += ["", label["note"].format(files=files, skipped=skipped, stale=stale)]
     return "\n".join(lines)
 
 
@@ -141,8 +155,10 @@ def main() -> int:
     ap.add_argument("--languages", default="", help="必ず表に出す言語（カンマ区切り。まだ1件も訳していない言語を載せるため）")
     ap.add_argument("--require", action="append", default=[], metavar="LANG=PCT",
                     help="この割合を下回ったら終了コード 1（例: en=100）。複数指定可")
-    ap.add_argument("--update", metavar="FILE", help="FILE のマーカーの間を表で書き換える")
-    ap.add_argument("--check", metavar="FILE", help="FILE の表が最新でなければ終了コード 1")
+    ap.add_argument("--update", metavar="FILE", action="append", default=[],
+                    help="FILE のマーカーの間を表で書き換える。複数指定可")
+    ap.add_argument("--check", metavar="FILE", action="append", default=[],
+                    help="FILE の表が最新でなければ終了コード 1。複数指定可")
     ap.add_argument("--json", metavar="FILE", help="集計結果を JSON で保存する")
     args = ap.parse_args()
 
@@ -176,13 +192,13 @@ def main() -> int:
             print(f"✗ {lang}: {got:.1f}%（基準 {pct}%）", file=sys.stderr)
             status = 1
 
-    if args.update:
-        text = open(args.update, encoding="utf-8").read()
-        open(args.update, "w", encoding="utf-8").write(replace_section(text, table))
-    if args.check:
-        text = open(args.check, encoding="utf-8").read()
-        if replace_section(text, table) != text:
-            print(f"✗ {args.check} のカバレッジ表が古いです。scripts/l10n-coverage.py --update {args.check} を実行してください",
+    for path in args.update:
+        text = open(path, encoding="utf-8").read()
+        open(path, "w", encoding="utf-8").write(replace_section(text, markdown(stats, doc_language(path))))
+    for path in args.check:
+        text = open(path, encoding="utf-8").read()
+        if replace_section(text, markdown(stats, doc_language(path))) != text:
+            print(f"✗ {path} のカバレッジ表が古いです。scripts/l10n-coverage.py --update {path} を実行してください",
                   file=sys.stderr)
             status = 1
     return status

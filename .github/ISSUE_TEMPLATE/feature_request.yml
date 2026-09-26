@@ -1,0 +1,26 @@
+name: Feature request / 機能の提案
+description: An idea to make Wi-Fi Pulse more useful. / 新しい機能や改善の提案
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: English or Japanese is fine. / 英語でも日本語でも構いません。
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / 困っていること
+      description: What are you trying to find out or do? / 何を知りたい・したいのか
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal / 提案
+      description: What would you like the app to do? / アプリにどうしてほしいか
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives / ほかの方法
+      description: Optional. Other apps or workarounds you've tried. / 任意。試したほかのアプリや回避策

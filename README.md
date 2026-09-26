@@ -1,97 +1,136 @@
 <p align="center"><img src="assets/app-icon.png" width="128" alt=""></p>
 
-# Wi-Fi Pulse
+<h1 align="center">Wi-Fi Pulse</h1>
 
-Mac の Wi-Fi とネットワークの状態を常時計測し、「遅いのはどこか」を切り分けるための macOS ネイティブアプリと、その周辺（LP・Web 版サンプル）のモノレポ。
+<p align="center">
+  Always-on Wi-Fi and network monitoring for your Mac —<br>
+  find out <em>where</em> it's slow: your Wi-Fi, your router, or your internet connection.
+</p>
 
-> **ステータス**: 開発初期（0.1.0 未リリース）。署名はローカル実行用のアドホック署名のみ。
+<p align="center">
+  <strong>English</strong> · <a href="README.ja.md">日本語</a>
+</p>
 
-## できること
+<p align="center">
+  <img src="https://img.shields.io/badge/macOS-27%2B-000000?logo=apple&logoColor=white" alt="macOS 27+">
+  <img src="https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white" alt="Swift 6">
+  <img src="https://img.shields.io/badge/SwiftUI-native-0A84FF" alt="SwiftUI">
+  <a href="https://github.com/riku-mono/wifi-pulse/actions/workflows/l10n.yml"><img src="https://github.com/riku-mono/wifi-pulse/actions/workflows/l10n.yml/badge.svg" alt="Localization"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue" alt="License: Apache-2.0"></a>
+</p>
 
-| 機能 | 内容 |
+> [!NOTE]
+> Early development — 0.1.0 is not released yet. Builds are ad-hoc signed for local use only.
+
+## Features
+
+| Feature | What it does |
 |---|---|
-| 常時計測 | ルーター宛て・インターネット宛て（IPv4/IPv6）の ping を同時に取り、Wi-Fi 区間と回線区間の遅延を分けて表示 |
-| Wi-Fi 接続 | RSSI・ノイズ・SN比・チャンネル・規格・リンク速度（CoreWLAN）、DFS チャンネルの警告 |
-| 周辺の Wi-Fi | スペクトラム表示（各 AP のチャンネル幅と強さ）、チャンネル別の混雑度とおすすめ、AP 一覧（規格・セキュリティ・BSS Load・メーカー） |
-| アプリの通信 | アプリ／プロセスごとの送受信量・接続先・RTT・TCP 再送（`nettop`） |
-| LAN の機器 | ARP・OUI（同梱のオフライン表）・mDNS 名による機器一覧 |
-| 診断 | `networkQuality` による速度と応答性（RPM）、バッファブロート試験、統合ログからの Wi-Fi イベント抽出 |
-| 記録 | 1分ごとの集計を保存し、時間帯別の傾向と所見を表示 |
-| メニューバー | 状態の常時表示。ウインドウを閉じても計測は続く |
+| **Always-on latency** | Pings your router and the internet (IPv4 / IPv6) side by side, so Wi-Fi delay and ISP delay show up separately |
+| **Wi-Fi connection** | RSSI, noise, SNR, channel, PHY mode and link rate (CoreWLAN), with DFS channel warnings |
+| **Nearby Wi-Fi** | Spectrum view, per-channel congestion with a suggested channel, and a list of access points |
+| **App traffic** | Per-app / per-process traffic, remote hosts, RTT and TCP retransmits (`nettop`) |
+| **LAN devices** | Devices on your network from ARP, an offline OUI table and mDNS names |
+| **Diagnostics** | Speed and responsiveness (RPM) via `networkQuality`, a bufferbloat test, and Wi-Fi events from the unified log |
+| **History** | Per-minute summaries per network, with time-of-day trends and findings |
+| **Menu bar** | Status at a glance; monitoring keeps running after you close the window |
 
-ルーターや Mac の設定は一切変更しない（読み取りのみ）。
+Wi-Fi Pulse only reads. It never changes your router or Mac settings.
 
-## リポジトリ構成
+## Requirements
+
+- macOS 27 or later
+- Xcode 27 or later (Swift 6) to build
+
+## Build and run
+
+```bash
+cd apps/macos
+open WiFiPulse.xcodeproj            # then ⌘R in Xcode
+```
+
+<details>
+<summary>From the command line</summary>
+
+```bash
+cd apps/macos
+xcodebuild -project WiFiPulse.xcodeproj -scheme WiFiPulse \
+  -configuration Debug -derivedDataPath build/DerivedData.noindex build
+open build/DerivedData.noindex/Build/Products/Debug/WiFiPulse.app
+
+# Unit tests
+xcodebuild -project WiFiPulse.xcodeproj -scheme WiFiPulse \
+  -configuration Debug -derivedDataPath build/DerivedData.noindex test
+```
+
+</details>
+
+Architecture and performance notes: [apps/macos/README.md](apps/macos/README.md) (Japanese).
+
+<details>
+<summary>Permissions</summary>
+
+| Permission | Used for | Without it |
+|---|---|---|
+| Location | SSID, BSSID and beacon details (macOS requires Location for these) | No network name, BSSID, vendor or channel utilization |
+| Local Network | The LAN device list | The device list stays empty |
+
+</details>
+
+<details>
+<summary>Your data</summary>
+
+Measurements are stored as JSON Lines in `~/Library/Application Support/WiFiPulse/` (you can change this in Settings).
+They include MAC addresses and device names, so be careful when sharing them.
+
+</details>
+
+## Languages
+
+English (source language) and Japanese. The app follows your system language by default; you can override it in Settings › General › Language.
+Strings live in String Catalogs (`.xcstrings`) — see [docs/localization.md](docs/localization.md).
+
+<!-- l10n-coverage:start -->
+| Language | Translated | Coverage | Needs review | Untranslated |
+|---|---:|---|---:|---:|
+| `en` (source) | 542 / 542 | ██████████ 100.0% | 0 | 0 |
+| `ja` | 542 / 542 | ██████████ 100.0% | 0 | 0 |
+
+Catalogs: `apps/macos/WiFiPulse/InfoPlist.xcstrings`, `apps/macos/WiFiPulse/Localizable.xcstrings` (excluding 32 strings marked “don't translate” and 0 stale strings)
+<!-- l10n-coverage:end -->
+
+## Distribution
+
+Some features (`nettop`, the unified log, running system commands) cannot run inside the App Sandbox, so Wi-Fi Pulse can't ship on the Mac App Store.
+The plan is direct distribution with Developer ID signing and notarization — see [docs/distribution.md](docs/distribution.md).
+
+## Repository layout
 
 ```
 wifi-pulse/
 ├── apps/
-│   ├── macos/      macOS アプリ（SwiftUI / Xcode プロジェクト）
-│   └── web/        LP と Web 版サンプル（予定）
-├── docs/           設計・配布・多言語対応に関する資料
-├── scripts/        開発用スクリプト（多言語カバレッジの集計など）
-├── CHANGELOG.md
-└── LICENSE
+│   ├── macos/      macOS app (SwiftUI, Xcode project)
+│   └── web/        Landing page and web sample (planned)
+├── assets/         App icon renders for the README and website
+├── docs/           Distribution and localization notes
+└── scripts/        Development scripts (localization coverage, etc.)
 ```
 
-## 必要な環境
+## Roadmap
 
-- macOS 27 以降
-- Xcode 27 以降（Swift 6）
+- [ ] Remaining unit tests: network switching ([#2](https://github.com/riku-mono/wifi-pulse/issues/2))
+- [x] App icon ([#3](https://github.com/riku-mono/wifi-pulse/issues/3))
+- [ ] CI: build and test on macOS ([#4](https://github.com/riku-mono/wifi-pulse/issues/4))
+- [ ] Developer ID signing, notarization and automatic updates ([#5](https://github.com/riku-mono/wifi-pulse/issues/5))
+- [ ] `apps/web`: landing page and web sample
 
-## ビルドと実行
+## Contributing
 
-```bash
-cd apps/macos
-open WiFiPulse.xcodeproj            # Xcode で ⌘R
+See [CONTRIBUTING.md](CONTRIBUTING.md). To report a security issue, see [SECURITY.md](SECURITY.md).
 
-# コマンドラインから
-xcodebuild -project WiFiPulse.xcodeproj -scheme WiFiPulse \
-  -configuration Debug -derivedDataPath build/DerivedData.noindex build
-open build/DerivedData.noindex/Build/Products/Debug/WiFiPulse.app
-```
+## License
 
-開発時のアーキテクチャやパフォーマンスの方針は [apps/macos/README.md](apps/macos/README.md) を参照。
+The source code is licensed under the [Apache License 2.0](LICENSE).
 
-## 権限
-
-| 権限 | 用途 | 未許可のとき |
-|---|---|---|
-| 位置情報 | SSID・BSSID・ビーコンの詳細（macOS の仕様で位置情報の許可が必要） | ネットワーク名・BSSID・メーカー・利用率が出ない |
-| ローカルネットワーク | LAN の機器一覧 | 機器一覧が空になる |
-
-## 対応言語
-
-英語（ソース言語）と日本語。表示言語は既定でシステム設定に従い、アプリの設定（一般 › 言語）か、システム設定 › 一般 › 言語と地域 › アプリケーション で変更できる。
-文言は String Catalog（`.xcstrings`）で管理している。追加・翻訳の手順は [docs/localization.md](docs/localization.md)。
-
-<!-- l10n-coverage:start -->
-| 言語 | 翻訳済み | カバレッジ | 要確認 | 未翻訳 |
-|---|---:|---|---:|---:|
-| `en`（ソース） | 542 / 542 | ██████████ 100.0% | 0 | 0 |
-| `ja` | 542 / 542 | ██████████ 100.0% | 0 | 0 |
-
-対象: `apps/macos/WiFiPulse/InfoPlist.xcstrings`, `apps/macos/WiFiPulse/Localizable.xcstrings`（翻訳不要 32 件・ソースから消えた文字列 0 件は除外）
-<!-- l10n-coverage:end -->
-
-## 配布について
-
-App Sandbox を使えない機能（`nettop`・統合ログ・システムコマンドの実行）があるため、Mac App Store では配布できない。
-Developer ID 署名＋公証による直接配布を想定している。詳しくは [docs/distribution.md](docs/distribution.md)。
-
-## データ
-
-計測記録は `~/Library/Application Support/WiFiPulse/` に JSON Lines で保存する（設定で変更可）。
-MAC アドレスや機器名を含むため、人に渡すときは注意すること。
-
-## ロードマップ
-
-- [ ] テストターゲット（#2）
-- [ ] アプリアイコン（#3）
-- [ ] CI（#4）
-- [ ] Developer ID 署名・公証・自動アップデート（#5）
-- [ ] `apps/web`: LP と Web 版サンプル
-
-## ライセンス
-
-All rights reserved. [LICENSE](LICENSE) を参照。
+The name “Wi-Fi Pulse” and the app icon are **not** covered by it — they remain © riku-mono, all rights reserved.
+If you distribute a fork, give it your own name and icon. See [TRADEMARKS.md](TRADEMARKS.md) and [NOTICE](NOTICE).

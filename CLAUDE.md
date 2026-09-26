@@ -1,7 +1,7 @@
 # CLAUDE.md
 
 Wi-Fi Pulse: Mac の Wi-Fi とネットワークを常時計測・診断する macOS ネイティブアプリ（SwiftUI）と、その周辺（LP・Web 版サンプル、予定）のモノレポ。
-全体像は [README.md](README.md)、アプリの設計は [apps/macos/README.md](apps/macos/README.md)。
+全体像は [README.md](README.md)（英語。日本語は [README.ja.md](README.ja.md)）、アプリの設計は [apps/macos/README.md](apps/macos/README.md)。
 
 ## 構成
 
@@ -14,6 +14,9 @@ Wi-Fi Pulse: Mac の Wi-Fi とネットワークを常時計測・診断する m
 - `scripts/l10n-coverage.py` — 言語別カバレッジ
 - `scripts/unregister-dev-builds.sh` — 開発用ビルドを LaunchServices の登録から外す
 - `.github/workflows/l10n.yml` — カバレッジの CI（Ubuntu）
+- `.github/ISSUE_TEMPLATE/`・`pull_request_template.md` — Issue・PR のテンプレート。`CONTRIBUTING.md`・`SECURITY.md`
+- `LICENSE`（Apache-2.0）・`NOTICE`・`TRADEMARKS.md` — コードは Apache-2.0、名前とアイコン（`AppIcon.icon`・`assets/`）は All rights reserved、`oui.tsv` は IEEE のデータ
+- `assets/` — README・LP 用のアプリアイコンの画像（`AppIcon.icon` を `ictool` で書き出したもの）
 
 ## ビルド・実行
 
@@ -39,7 +42,7 @@ xcodebuild -project WiFiPulse.xcodeproj -scheme WiFiPulse -configuration Debug -
 - `Text`/`Label`/`Button` などに直接渡す以外の文言は `String(localized:)`。常にリテラルを受ける自作の引数は `LocalizedStringKey`。
 - チャートの系列名は `SeriesName` の定数を使う（凡例と色の対応表のキーを兼ねる）。
 - 翻訳された文字列を比較・判定に使わない。文を細切れに連結しない（一覧は `formatted(.list(type: .and))`）。
-- 文言を変えたら `xcodebuild -exportLocalizations …` でカタログを同期 → 日本語訳 → `scripts/l10n-coverage.py --update README.md`。CI は en/ja 100% と README の表が最新であることを検査する。
+- 文言を変えたら `xcodebuild -exportLocalizations …` でカタログを同期 → 日本語訳 → `scripts/l10n-coverage.py --update README.md --update README.ja.md`。CI は en/ja 100% と両方の README の表が最新であることを検査する。
 - 表示言語は既定でシステム設定に従い、設定 › 一般 › 言語 で上書きできる（`Core/AppLanguage.swift`、アプリのドメインの `AppleLanguages`、再起動で反映）。
 
 ### パフォーマンス — 詳細は apps/macos/README.md
@@ -63,5 +66,6 @@ xcodebuild -project WiFiPulse.xcodeproj -scheme WiFiPulse -configuration Debug -
 
 ## 進め方
 
-- main に直接コミットしない。ブランチ → PR（本文は日本語。確認したこと／できていないことをチェックリストで書く）。
-- 残りの作業は GitHub の Issue: #2 テスト（残りは `Monitor.switchNetwork`）、#3 アプリアイコン（Icon Composer）、#4 CI（macOS でビルド・テスト）、#5 署名・公証・配布（Developer Program 加入待ち）。
+- main に直接コミットしない。ブランチ → PR（タイトル・本文は日本語、コミットメッセージは英語。形は `.github/pull_request_template.md`）。
+- README は英語が既定で、日本語は `README.ja.md`。内容を変えたら両方を直す。
+- 残りの作業は GitHub の Issue: #2 テスト（残りは `Monitor.switchNetwork`）、#4 CI（macOS でビルド・テスト）、#5 署名・公証・配布（Developer Program 加入待ち）。
