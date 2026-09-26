@@ -83,8 +83,13 @@ final class DeviceScanner {
 
     func requestSweep() {
         sweepRequested = true
-        loop?.cancel()
-        loop = Task { await run() }
+        // 前のループが止まってから始める（2つのループが await をはさんで registry を同時に書き換えないように）
+        let previous = loop
+        previous?.cancel()
+        loop = Task {
+            await previous?.value
+            await run()
+        }
     }
 
     func rename(_ mac: String, to name: String) {
@@ -104,7 +109,6 @@ final class DeviceScanner {
                 sweepRequested = false
                 isSweeping = true
                 await Self.sweep(interface: env.interface)
-                isSweeping = false
             }
             let arp = await Self.arpTable()
             if arpWorks != !arp.isEmpty { arpWorks = !arp.isEmpty }
@@ -122,29 +126,38 @@ final class DeviceScanner {
                 registry[mac] = d
                 online.insert(mac)
             }
+            // 見つかった機器はすぐ出す（mDNS名の逆引きを待つと、掃引のあと数秒「見つかりません」になる）
+            update(online: online, env: env)
+            isSweeping = false
             // mDNS名の逆引きは重いので2分に1回
             if Date().timeIntervalSince(lastNameLookup) > 120 {
                 lastNameLookup = Date()
                 for mac in online where registry[mac]?.mdns == nil {
                     if let ip = registry[mac]?.ip {
-                        registry[mac]?.mdns = await Self.mdnsName(ip, gateway: env.gateway)
+                        // 待っている間に registry へ書き込みが続かないよう、結果を受け取ってから入れる
+                        let name = await Self.mdnsName(ip, gateway: env.gateway)
+                        registry[mac]?.mdns = name
                     }
                 }
+                update(online: online, env: env)
             }
-            for mac in registry.keys {
-                registry[mac]?.online = online.contains(mac)
-                registry[mac]?.name = names[mac]
-                if let d = registry[mac] {
-                    let (label, kind) = Self.classify(d, env: env)
-                    registry[mac]?.vendor_ja = label
-                    registry[mac]?.kind = kind
-                }
-            }
-            publish()
             let snapshot = registry
             Task.detached(priority: .utility) { DataStore.writeJSON(snapshot, to: DataStore.devices) }
             try? await Task.sleep(for: Self.cycle)
         }
+    }
+
+    private func update(online: Set<String>, env: NetworkEnvironment) {
+        for mac in registry.keys {
+            registry[mac]?.online = online.contains(mac)
+            registry[mac]?.name = names[mac]
+            if let d = registry[mac] {
+                let (label, kind) = Self.classify(d, env: env)
+                registry[mac]?.vendor_ja = label
+                registry[mac]?.kind = kind
+            }
+        }
+        publish()
     }
 
     /// 変化があったときだけ書き換える（一覧の無駄な再描画を避ける）
