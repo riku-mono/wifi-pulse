@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NSLocationUsageDescription</key>
+	<string>接続中のWi-Fiのネットワーク名（SSID）とアクセスポイント（BSSID）を表示するために使います。位置そのものは記録しません。</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>接続中のWi-Fiのネットワーク名（SSID）とアクセスポイント（BSSID）を表示するために使います。位置そのものは記録しません。</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>ルーターまでの遅延を測り、LANにつながっている機器の一覧を作るために使います。</string>
+</dict>
+</plist>

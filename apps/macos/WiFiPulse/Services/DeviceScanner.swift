@@ -1,0 +1,299 @@
+import Foundation
+import Observation
+
+/// LAN 上の機器。devices.json に Python 版と同じく MAC をキーにした辞書で保存する。
+nonisolated struct Device: Codable, Identifiable, Hashable, Sendable {
+    var id: String { mac }
+    var mac: String
+    var ip: String?
+    var first: Int64
+    var last: Int64
+    var vendor: String?
+    var random: Bool?
+    var mdns: String?
+    var kind: String?
+    var vendor_ja: String?
+    var online: Bool?
+    var name: String?
+
+    var displayName: String { name ?? mdns ?? vendor_ja ?? vendor ?? (random == true ? "プライベートアドレスの端末" : "不明な機器") }
+    var lastSeen: Date { Date(epochMs: last) }
+    var firstSeen: Date { Date(epochMs: first) }
+
+    var symbol: String {
+        switch kind {
+        case "router": "wifi.router"
+        case "pc": "laptopcomputer"
+        case "phone": "iphone"
+        case "tablet": "ipad"
+        case "game": "gamecontroller"
+        case "media": "tv"
+        case "speaker": "homepod"
+        case "printer": "printer"
+        case "appliance": "washer"
+        case "iot": "sensor"
+        default: "questionmark.square.dashed"
+        }
+    }
+
+    var kindLabel: String {
+        switch kind {
+        case "router": "ルーター"
+        case "pc": "パソコン"
+        case "phone": "スマートフォン"
+        case "tablet": "タブレット"
+        case "game": "ゲーム機"
+        case "media": "テレビ・映像"
+        case "speaker": "スピーカー"
+        case "printer": "プリンター"
+        case "appliance": "家電"
+        case "iot": "IoT機器"
+        default: "不明"
+        }
+    }
+}
+
+/// ARP テーブル・OUI（オフライン）・mDNS 逆引きで LAN の機器一覧を作る。
+@Observable
+final class DeviceScanner {
+    private(set) var devices: [Device] = []
+    private(set) var isSweeping = false
+    private(set) var lastUpdate: Date?
+    private(set) var arpWorks = true
+    private(set) var onlineCount = 0
+
+    @ObservationIgnored private var registry: [String: Device] = [:]
+    @ObservationIgnored private var names: [String: String] = [:]
+    @ObservationIgnored private weak var monitor: Monitor?
+    @ObservationIgnored private var loop: Task<Void, Never>?
+    @ObservationIgnored private var sweepRequested = true
+    @ObservationIgnored private var lastNameLookup = Date.distantPast
+
+    static let cycle: Duration = .seconds(20)
+
+    func start(monitor: Monitor) {
+        guard loop == nil else { return }
+        self.monitor = monitor
+        registry = DataStore.readJSON(DataStore.devices, as: [String: Device].self) ?? [:]
+        names = DataStore.readJSON(DataStore.deviceNames, as: [String: String].self) ?? [:]
+        loop = Task { await run() }
+    }
+
+    func requestSweep() {
+        sweepRequested = true
+        loop?.cancel()
+        loop = Task { await run() }
+    }
+
+    func rename(_ mac: String, to name: String) {
+        let trimmed = String(name.trimmingCharacters(in: .whitespacesAndNewlines).prefix(40))
+        if trimmed.isEmpty { names.removeValue(forKey: mac) } else { names[mac] = trimmed }
+        registry[mac]?.name = names[mac]
+        let snapshot = names
+        Task.detached(priority: .utility) { DataStore.writeJSON(snapshot, to: DataStore.deviceNames) }
+        publish()
+    }
+
+    private func run() async {
+        while !Task.isCancelled {
+            guard let monitor else { return }
+            let env = monitor.env
+            if sweepRequested, !env.gateway.isEmpty {
+                sweepRequested = false
+                isSweeping = true
+                await Self.sweep(gateway: env.gateway)
+                isSweeping = false
+            }
+            let arp = await Self.arpTable()
+            if arpWorks != !arp.isEmpty { arpWorks = !arp.isEmpty }
+            let now = Date().epochMs
+            var online = Set<String>()
+            for (ip, mac) in arp {
+                var d = registry[mac] ?? Device(mac: mac, first: now, last: now)
+                d.ip = ip
+                d.last = now
+                if d.vendor == nil {
+                    d.vendor = await OUI.shared.vendor(for: mac)
+                    d.random = OUI.isRandomized(mac)
+                }
+                registry[mac] = d
+                online.insert(mac)
+            }
+            // mDNS名の逆引きは重いので2分に1回
+            if Date().timeIntervalSince(lastNameLookup) > 120 {
+                lastNameLookup = Date()
+                for mac in online where registry[mac]?.mdns == nil {
+                    if let ip = registry[mac]?.ip {
+                        registry[mac]?.mdns = await Self.mdnsName(ip, gateway: env.gateway)
+                    }
+                }
+            }
+            for mac in registry.keys {
+                registry[mac]?.online = online.contains(mac)
+                registry[mac]?.name = names[mac]
+                if let d = registry[mac] {
+                    let (label, kind) = Self.classify(d, env: env)
+                    registry[mac]?.vendor_ja = label
+                    registry[mac]?.kind = kind
+                }
+            }
+            publish()
+            let snapshot = registry
+            Task.detached(priority: .utility) { DataStore.writeJSON(snapshot, to: DataStore.devices) }
+            try? await Task.sleep(for: Self.cycle)
+        }
+    }
+
+    /// 変化があったときだけ書き換える（一覧の無駄な再描画を避ける）
+    private func publish() {
+        let sorted = registry.values.sorted {
+            if ($0.online ?? false) != ($1.online ?? false) { return $0.online ?? false }
+            return Self.ipSortKey($0.ip) < Self.ipSortKey($1.ip)
+        }
+        if sorted != devices { devices = sorted }
+        let online = sorted.filter { $0.online == true }.count
+        if online != onlineCount { onlineCount = online }
+    }
+
+    private static func ipSortKey(_ ip: String?) -> Int {
+        guard let ip else { return .max }
+        return ip.split(separator: ".").compactMap { Int($0) }.reduce(0) { $0 * 256 + $1 }
+    }
+
+    // MARK: Sources
+
+    /// ARP を埋めるため、同じ /24 の全アドレスへ UDP を1発ずつ投げる（中身は空、宛先は discard ポート）。
+    nonisolated static func sweep(gateway: String) async {
+        let base = gateway.split(separator: ".").dropLast().joined(separator: ".")
+        guard !base.isEmpty else { return }
+        await withCheckedContinuation { (cont: CheckedContinuation<Void, Never>) in
+            DispatchQueue.global(qos: .utility).async {
+                let fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)
+                if fd >= 0 {
+                    defer { close(fd) }
+                    for i in 1...254 {
+                        var addr = sockaddr_in()
+                        addr.sin_len = UInt8(MemoryLayout<sockaddr_in>.size)
+                        addr.sin_family = sa_family_t(AF_INET)
+                        addr.sin_port = in_port_t(9).bigEndian
+                        inet_pton(AF_INET, "\(base).\(i)", &addr.sin_addr)
+                        _ = withUnsafePointer(to: &addr) {
+                            $0.withMemoryRebound(to: sockaddr.self, capacity: 1) {
+                                sendto(fd, nil, 0, 0, $0, socklen_t(MemoryLayout<sockaddr_in>.size))
+                            }
+                        }
+                    }
+                }
+                cont.resume()
+            }
+        }
+        try? await Task.sleep(for: .seconds(3))
+    }
+
+    nonisolated static func arpTable() async -> [String: String] {
+        let out = await Shell.run("/usr/sbin/arp", ["-an"])
+        var table: [String: String] = [:]
+        for line in out.split(separator: "\n") where !line.contains("incomplete") {
+            guard let m = line.firstMatch(of: #/\((\d+\.\d+\.\d+\.\d+)\) at ([0-9a-fA-F:]{11,17})/#) else { continue }
+            let ip = String(m.1)
+            if ip.hasPrefix("224.") || ip.hasPrefix("239.") || ip.hasSuffix(".255") { continue }
+            table[ip] = normalize(String(m.2))
+        }
+        return table
+    }
+
+    nonisolated static func normalize(_ mac: String) -> String {
+        let parts = mac.split(separator: ":")
+        guard parts.count == 6 else { return mac.lowercased() }
+        return parts.map { String(format: "%02x", Int($0, radix: 16) ?? 0) }.joined(separator: ":")
+    }
+
+    nonisolated static func mdnsName(_ ip: String, gateway: String) async -> String? {
+        for server in [["@224.0.0.251", "-p", "5353"], ["@\(gateway)"]] {
+            let out = await Shell.run("/usr/bin/dig", ["+short", "-x", ip] + server + ["+time=2", "+tries=1"], timeout: 6)
+            for line in out.split(separator: "\n") {
+                var name = line.trimmingCharacters(in: .whitespaces)
+                guard !name.isEmpty, !name.hasPrefix(";") else { continue }
+                if name.hasSuffix(".") { name.removeLast() }
+                if name.hasSuffix(".local") { name.removeLast(6) }
+                return name
+            }
+        }
+        return nil
+    }
+
+    // MARK: Classification
+
+    private static let vendorRules: [(String, String, String)] = [
+        ("apple", "Apple", "apple"), ("nintendo", "任天堂", "game"),
+        ("sony interactive", "ソニー（PlayStation）", "game"), ("sony", "ソニー", "media"),
+        ("microsoft", "Microsoft", "pc"), ("amazon", "Amazon", "media"),
+        ("google", "Google", "media"), ("sercomm", "Sercomm（ISPレンタル機）", "router"),
+        ("sernet", "Sercomm（ISPレンタル機）", "router"), ("arcadyan", "Arcadyan", "router"),
+        ("buffalo", "バッファロー", "router"), ("nec platforms", "NEC", "router"),
+        ("tp-link", "TP-Link", "router"), ("aterm", "NEC Aterm", "router"),
+        ("seiko epson", "エプソン", "printer"), ("canon", "キヤノン", "printer"),
+        ("brother", "ブラザー", "printer"), ("sharp", "シャープ", "appliance"),
+        ("panasonic", "パナソニック", "appliance"), ("hitachi", "日立", "appliance"),
+        ("daikin", "ダイキン", "appliance"), ("roborock", "ロボロック", "appliance"),
+        ("samsung", "Samsung", "phone"), ("xiaomi", "Xiaomi", "phone"),
+        ("huawei", "Huawei", "phone"), ("oppo", "OPPO", "phone"),
+        ("espressif", "Espressif（IoT機器）", "iot"), ("tuya", "Tuya（スマート家電）", "iot"),
+        ("raspberry", "Raspberry Pi", "pc"), ("intel", "Intel（PC内蔵）", "pc"),
+        ("sonos", "Sonos", "speaker"), ("bose", "Bose", "speaker"), ("anker", "Anker", "media"),
+    ]
+    private static let nameHints: [(String, String)] = [
+        ("iphone", "phone"), ("android", "phone"), ("pixel", "phone"), ("galaxy", "phone"),
+        ("ipad", "tablet"), ("macbook", "pc"), ("imac", "pc"), ("mac-", "pc"), ("mac-mini", "pc"),
+        ("apple-tv", "media"), ("appletv", "media"), ("switch", "game"), ("playstation", "game"),
+        ("ps5", "game"), ("echo", "speaker"), ("homepod", "speaker"), ("alexa", "speaker"),
+        ("chromecast", "media"), ("nest", "media"), ("printer", "printer"), ("epson", "printer"),
+        ("tv", "media"), ("bravia", "media"), ("aquos", "media"), ("regza", "media"),
+        ("viera", "media"), ("roku", "media"), ("firetv", "media"),
+    ]
+
+    private static func classify(_ d: Device, env: NetworkEnvironment) -> (String?, String) {
+        let hay = "\(d.vendor ?? "") \(d.mdns ?? "")".lowercased()
+        var label = d.vendor
+        var kind = "unknown"
+        if let rule = vendorRules.first(where: { hay.contains($0.0) }) {
+            label = rule.1
+            kind = rule.2
+        }
+        let mdns = (d.mdns ?? "").lowercased()
+        if let hint = nameHints.first(where: { mdns.contains($0.0) }) { kind = hint.1 }
+        if kind == "apple" { kind = "unknown" }
+        if d.ip == env.gateway { kind = "router" } else if d.ip == env.selfIP { kind = "pc" }
+        return (label, kind)
+    }
+}
+
+/// MAC アドレス先頭3バイト → メーカー名（IEEE公開データをアプリに同梱。ネット通信なし）。
+actor OUI {
+    static let shared = OUI()
+    private var table: [String: String]?
+
+    func vendor(for mac: String) -> String? {
+        if table == nil { table = Self.load() }
+        let key = mac.replacingOccurrences(of: ":", with: "").uppercased().prefix(6)
+        return table?[String(key)]
+    }
+
+    private static func load() -> [String: String] {
+        guard let url = Bundle.main.url(forResource: "oui", withExtension: "tsv"),
+              let text = try? String(contentsOf: url, encoding: .utf8) else { return [:] }
+        var t: [String: String] = [:]
+        t.reserveCapacity(40000)
+        for line in text.split(separator: "\n") {
+            guard let tab = line.firstIndex(of: "\t") else { continue }
+            t[String(line[..<tab])] = String(line[line.index(after: tab)...])
+        }
+        return t
+    }
+
+    /// ローカル管理アドレス（iPhone/Mac のプライベート Wi-Fi アドレスなど）か
+    nonisolated static func isRandomized(_ mac: String) -> Bool {
+        guard let first = mac.split(separator: ":").first, let b = UInt8(first, radix: 16) else { return false }
+        return b & 0x02 != 0
+    }
+}
