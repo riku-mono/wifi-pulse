@@ -44,8 +44,8 @@ struct MenuBarPanel: View {
 
             Grid(alignment: .leading, horizontalSpacing: 12, verticalSpacing: 6) {
                 row("wifi", "電波", s.link.map { "\($0.rssi) dBm · \($0.bandLabel) ch\($0.channel ?? 0)" } ?? "—", Level.rssi(s.link?.rssi))
-                row("wifi.router", "ルーター", "\(Fmt.ms(s.w30.gw.p50)) ms（p95 \(Fmt.ms(s.w60.gw.p95))）", Level.gateway(s.w30.gw.p95))
-                row("globe.asia.australia", "ネット", "\(Fmt.ms(s.w30.v4.p50)) ms（p95 \(Fmt.ms(s.w60.v4.p95))）", Level.internet(s.w30.v4.p95))
+                row("wifi.router", "ルーター", String(localized: "\(Fmt.ms(s.w30.gw.p50)) ms（p95 \(Fmt.ms(s.w60.gw.p95))）"), Level.gateway(s.w30.gw.p95))
+                row("globe.asia.australia", "ネット", String(localized: "\(Fmt.ms(s.w30.v4.p50)) ms（p95 \(Fmt.ms(s.w60.v4.p95))）"), Level.internet(s.w30.v4.p95))
                 row("waveform", "ロス", "\(Fmt.pct(s.w60.worstLoss))%", Level.loss(s.w60.worstLoss))
                 row("arrow.up.arrow.down", "通信量", "↓\(Fmt.mbps(s.rx)) ↑\(Fmt.mbps(s.tx)) Mbps", .none)
             }
@@ -86,7 +86,7 @@ struct MenuBarPanel: View {
         .frame(width: 340)
     }
 
-    private func row(_ symbol: String, _ title: String, _ value: String, _ level: Level) -> some View {
+    private func row(_ symbol: String, _ title: LocalizedStringKey, _ value: String, _ level: Level) -> some View {
         GridRow {
             Label(title, systemImage: symbol).foregroundStyle(.secondary)
             Text(value).monospacedDigit()

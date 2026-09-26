@@ -30,7 +30,7 @@ final class SpeedTest {
         guard let data = out.data(using: .utf8),
               let j = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
               let dl = (j["dl_throughput"] as? NSNumber)?.doubleValue, dl > 0 else {
-            state = .failed("networkQuality の実行に失敗しました。ネットワーク接続を確認してください。")
+            state = .failed(String(localized: "networkQuality の実行に失敗しました。ネットワーク接続を確認してください。"))
             return
         }
         let now = Date()

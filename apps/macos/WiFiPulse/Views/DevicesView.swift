@@ -50,7 +50,7 @@ struct DevicesView: View {
                     TableColumn("IPアドレス") { Text($0.ip ?? "—").monospacedDigit() }
                         .width(min: 100, ideal: 120)
                     TableColumn("メーカー") { d in
-                        Text(d.vendor_ja ?? d.vendor ?? (d.random == true ? "プライベートアドレス" : "不明"))
+                        Text(d.vendor_ja ?? d.vendor ?? (d.random == true ? String(localized: "プライベートアドレス") : String(localized: "不明")))
                             .foregroundStyle(d.vendor == nil ? .secondary : .primary)
                     }
                     TableColumn("種類") { Text($0.kindLabel) }
@@ -133,7 +133,7 @@ private struct DeviceInspector: View {
                 Section("詳細") {
                     LabeledContent("IPアドレス", value: d.ip ?? "—")
                     LabeledContent("MACアドレス") { Text(d.mac).font(.callout.monospaced()).textSelection(.enabled) }
-                    LabeledContent("メーカー（OUI）", value: d.vendor ?? "不明")
+                    LabeledContent("メーカー（OUI）", value: d.vendor ?? String(localized: "不明"))
                     LabeledContent("mDNS 名", value: d.mdns ?? "—")
                     LabeledContent("初めて見た", value: d.firstSeen.formatted(date: .abbreviated, time: .shortened))
                     LabeledContent("最後に見た", value: d.lastSeen.formatted(date: .abbreviated, time: .shortened))

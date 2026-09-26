@@ -9,7 +9,7 @@ struct SpeedTestView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 Card("速度と応答性", systemImage: "speedometer",
-                     subtitle: "macOS 標準の networkQuality で測ります。回線を一時的に埋めるので、同居人がいれば一声かけてから。") {
+                     subtitle: String(localized: "macOS 標準の networkQuality で測ります。回線を一時的に埋めるので、同居人がいれば一声かけてから。")) {
                     runButton
                 } content: {
                     switch st.state {
@@ -38,18 +38,18 @@ struct SpeedTestView: View {
                 }
 
                 if st.history.count >= 2 {
-                    Card("これまでの結果", systemImage: "clock.arrow.circlepath", subtitle: "時間帯によって大きく違うなら、回線側の混雑が疑われます") {
+                    Card("これまでの結果", systemImage: "clock.arrow.circlepath", subtitle: String(localized: "時間帯によって大きく違うなら、回線側の混雑が疑われます")) {
                         Chart {
                             ForEach(st.history) { r in
-                                LineMark(x: .value("日時", r.date), y: .value("Mbps", r.dl), series: .value("方向", "下り"))
-                                    .foregroundStyle(by: .value("方向", "下り"))
+                                LineMark(x: .value("日時", r.date), y: .value("Mbps", r.dl), series: .value("方向", SeriesName.download))
+                                    .foregroundStyle(by: .value("方向", SeriesName.download))
                                     .symbol(.circle)
-                                LineMark(x: .value("日時", r.date), y: .value("Mbps", r.ul), series: .value("方向", "上り"))
-                                    .foregroundStyle(by: .value("方向", "上り"))
+                                LineMark(x: .value("日時", r.date), y: .value("Mbps", r.ul), series: .value("方向", SeriesName.upload))
+                                    .foregroundStyle(by: .value("方向", SeriesName.upload))
                                     .symbol(.square)
                             }
                         }
-                        .chartForegroundStyleScale(["下り": SeriesColor.rx, "上り": SeriesColor.tx])
+                        .chartForegroundStyleScale([SeriesName.download: SeriesColor.rx, SeriesName.upload: SeriesColor.tx])
                         .chartYAxisLabel("Mbps")
                         .frame(height: 200)
 
@@ -107,9 +107,9 @@ struct SpeedTestView: View {
 
     private func rpmWord(_ v: Double?) -> String {
         switch Level.rpm(v) {
-        case .good: "良い"
-        case .warn: "普通"
-        case .crit: "悪い — 回線が混むと通話が乱れます"
+        case .good: String(localized: "良い")
+        case .warn: String(localized: "普通")
+        case .crit: String(localized: "悪い — 回線が混むと通話が乱れます")
         case .none: "—"
         }
     }

@@ -10,12 +10,12 @@ final class WiFiEvents {
 
         var title: String {
             switch self {
-            case .disconnect: "切断・再接続"
-            case .roam: "ローミング"
-            case .scan: "スキャン要求"
-            case .dfs: "レーダー / チャンネル変更"
+            case .disconnect: String(localized: "切断・再接続")
+            case .roam: String(localized: "ローミング")
+            case .scan: String(localized: "スキャン要求")
+            case .dfs: String(localized: "レーダー / チャンネル変更")
             case .awdl: "AWDL"
-            case .btcoex: "Bluetooth共存"
+            case .btcoex: String(localized: "Bluetooth共存")
             }
         }
 
@@ -33,17 +33,17 @@ final class WiFiEvents {
         var explanation: String {
             switch self {
             case .disconnect:
-                "切断が1回でもあれば、その瞬間の通信は数秒止まります。reason code 3=離脱, 4=無通信タイムアウト, 8=AP側から切断。"
+                String(localized: "切断が1回でもあれば、その瞬間の通信は数秒止まります。reason code 3=離脱, 4=無通信タイムアウト, 8=AP側から切断。")
             case .roam:
-                "メッシュや中継器があると、端末が行ったり来たりして1〜3秒の断が繰り返し起きます。"
+                String(localized: "メッシュや中継器があると、端末が行ったり来たりして1〜3秒の断が繰り返し起きます。")
             case .scan:
-                "スキャン中はチャンネルを離れるので、1回あたり数百ms通信が止まります。locationd が多ければ位置情報サービス、sharingd なら AirDrop の相手探索です。"
+                String(localized: "スキャン中はチャンネルを離れるので、1回あたり数百ms通信が止まります。locationd が多ければ位置情報サービス、sharingd なら AirDrop の相手探索です。")
             case .dfs:
-                "5GHz の W53/W56 でこれが出るなら原因はほぼ確定。ルーターのチャンネルを W52（36/40/44/48ch）に固定すれば止まります。"
+                String(localized: "5GHz の W53/W56 でこれが出るなら原因はほぼ確定。ルーターのチャンネルを W52（36/40/44/48ch）に固定すれば止まります。")
             case .awdl:
-                "AirDrop・AirPlay・Handoff・Sidecar 用の通信。Wi-Fi チップが定期的に別チャンネルへ出張するため、周期的なスパイクが出ます。"
+                String(localized: "AirDrop・AirPlay・Handoff・Sidecar 用の通信。Wi-Fi チップが定期的に別チャンネルへ出張するため、周期的なスパイクが出ます。")
             case .btcoex:
-                "2.4GHz 帯で Bluetooth 機器と電波を分け合っている記録。多ければ 5GHz に寄せると改善することがあります。"
+                String(localized: "2.4GHz 帯で Bluetooth 機器と電波を分け合っている記録。多ければ 5GHz に寄せると改善することがあります。")
             }
         }
     }
@@ -72,10 +72,10 @@ final class WiFiEvents {
         var id: Self { self }
         var label: String {
             switch self {
-            case .h1: "1時間"
-            case .h2: "2時間"
-            case .h6: "6時間"
-            case .h24: "24時間"
+            case .h1: String(localized: "1時間")
+            case .h2: String(localized: "2時間")
+            case .h6: String(localized: "6時間")
+            case .h24: String(localized: "24時間")
             }
         }
     }

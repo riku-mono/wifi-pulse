@@ -131,7 +131,7 @@ struct ScoreRing: View {
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("総合スコア")
-        .accessibilityValue(score.map { "\($0)点" } ?? "測定中")
+        .accessibilityValue(score.map { String(localized: "\($0)点", comment: "総合スコアの読み上げ") } ?? String(localized: "測定中"))
     }
 }
 
@@ -202,15 +202,34 @@ struct PingStatsGrid: View {
     }
 }
 
+extension String {
+    /// 先頭だけ大文字にする（英語で文中用の語をタイルの見出しに使うとき用。日本語には影響しない）
+    var sentenceCased: String { prefix(1).localizedUppercase + dropFirst() }
+}
+
 extension Level {
     var accessibilityText: String {
         switch self {
-        case .none: "判定なし"
-        case .good: "良好"
-        case .warn: "注意"
-        case .crit: "要対応"
+        case .none: String(localized: "判定なし")
+        case .good: String(localized: "良好")
+        case .warn: String(localized: "注意")
+        case .crit: String(localized: "要対応")
         }
     }
+}
+
+/// チャートの系列名。系列の識別子と凡例の表示を兼ねるので、マークと色の対応表では必ずここの値を使う。
+enum SeriesName {
+    static var router: String { String(localized: "ルーター", comment: "チャートの系列名（Mac からルーターまでの遅延）") }
+    static var internet: String { String(localized: "インターネット", comment: "チャートの系列名（インターネットまでの遅延）") }
+    static let ipv4 = "IPv4"
+    static let ipv6 = "IPv6"
+    static var download: String { String(localized: "下り", comment: "チャートの系列名（ダウンロード）") }
+    static var upload: String { String(localized: "上り", comment: "チャートの系列名（アップロード）") }
+    static var internetMedian: String { String(localized: "インターネット（中央値）", comment: "チャートの系列名") }
+    static var routerMedian: String { String(localized: "ルーター（中央値）", comment: "チャートの系列名") }
+    static var other: String { String(localized: "その他", comment: "チャートの系列名（上位以外の合計）") }
+    static var exitedProcess: String { String(localized: "終了したプロセス", comment: "チャートの系列名（もう存在しないプロセス）") }
 }
 
 /// チャートの系列色。Wi-Fi区間（ルーター）とインターネットを常に同じ色で示す。

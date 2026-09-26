@@ -123,7 +123,7 @@ struct ProcessesView: View {
         }
     }
 
-    private func stat(_ title: String, _ value: String, _ symbol: String, _ color: Color) -> some View {
+    private func stat(_ title: LocalizedStringKey, _ value: String, _ symbol: String, _ color: Color) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Label(title, systemImage: symbol).font(.caption).foregroundStyle(color)
             Text(value).font(.title2.weight(.semibold)).monospacedDigit()
@@ -186,13 +186,13 @@ private struct TopTalkersChart: View, Equatable {
         for b in buckets { for (k, v) in b.rates { sums[k, default: 0] += v } }
         let top = sums.sorted { ($0.value, $1.key) > ($1.value, $0.key) }.prefix(5).map(\.key)
         // 色は名前順で固定して割り当てる（順位が入れ替わっても色が変わらないように）
-        let domain = Array(Set(top.map { names[$0] ?? "終了したプロセス" })).sorted() + ["その他"]
+        let domain = Array(Set(top.map { names[$0] ?? SeriesName.exitedProcess })).sorted() + [SeriesName.other]
         var points: [Point] = []
         for b in buckets {
             var other = 0.0
             for (k, v) in b.rates where !top.contains(k) { other += v }
-            for k in top { points.append(Point(date: b.date, name: names[k] ?? "終了したプロセス", value: b.rates[k] ?? 0)) }
-            points.append(Point(date: b.date, name: "その他", value: other))
+            for k in top { points.append(Point(date: b.date, name: names[k] ?? SeriesName.exitedProcess, value: b.rates[k] ?? 0)) }
+            points.append(Point(date: b.date, name: SeriesName.other, value: other))
         }
         return Chart(points) { p in
             AreaMark(x: .value("時刻", p.date), y: .value("bytes/s", p.value), stacking: .standard)
@@ -306,7 +306,7 @@ private struct ConnectionRow: View {
                     .font(.caption2.weight(.semibold))
                     .padding(.horizontal, 5)
                     .background(conn.proto == "TCP" ? Color.blue.opacity(0.15) : Color.purple.opacity(0.15), in: .capsule)
-                Text(conn.isListening ? "待ち受け :\(conn.localPort)" : (name ?? conn.remoteHost))
+                Text(conn.isListening ? String(localized: "待ち受け :\(conn.localPort)") : (name ?? conn.remoteHost))
                     .lineLimit(1)
                     .truncationMode(.middle)
                 if !conn.isListening { Text(":\(conn.remotePort)").foregroundStyle(.secondary) }

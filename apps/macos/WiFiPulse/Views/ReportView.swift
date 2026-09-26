@@ -15,7 +15,7 @@ struct ReportView: View {
             VStack(alignment: .leading, spacing: 16) {
                 coverage
                 Card("時間帯ごとの傾向", systemImage: "calendar.day.timeline.left",
-                     subtitle: "1分ごとの記録を時刻別にまとめた中央値。特定の時間帯だけ悪いなら回線側（ISPの輻輳）が疑われます。") {
+                     subtitle: String(localized: "1分ごとの記録を時刻別にまとめた中央値。特定の時間帯だけ悪いなら回線側（ISPの輻輳）が疑われます。")) {
                     Picker("曜日", selection: $filter) {
                         ForEach(DayFilter.allCases) { Text($0.label).tag($0) }
                     }
@@ -31,11 +31,11 @@ struct ReportView: View {
                         Chart(rows.filter { $0.minutes > 0 }) { h in
                             if let v = h.v4 {
                                 BarMark(x: .value("時", h.hour), y: .value("ms", v), width: .ratio(0.7))
-                                    .foregroundStyle(by: .value("系列", "インターネット（中央値）"))
+                                    .foregroundStyle(by: .value("系列", SeriesName.internetMedian))
                             }
                             if let g = h.gw {
                                 PointMark(x: .value("時", h.hour), y: .value("ms", g))
-                                    .foregroundStyle(by: .value("系列", "ルーター（中央値）"))
+                                    .foregroundStyle(by: .value("系列", SeriesName.routerMedian))
                                     .symbolSize(40)
                             }
                             if let p = h.v495 {
@@ -44,7 +44,7 @@ struct ReportView: View {
                                     .lineStyle(StrokeStyle(lineWidth: 2))
                             }
                         }
-                        .chartForegroundStyleScale(["インターネット（中央値）": SeriesColor.inet4, "ルーター（中央値）": SeriesColor.router])
+                        .chartForegroundStyleScale([SeriesName.internetMedian: SeriesColor.inet4, SeriesName.routerMedian: SeriesColor.router])
                         .chartXScale(domain: 0...23)
                         .chartXAxis { AxisMarks(values: Array(stride(from: 0, through: 23, by: 3))) { v in
                             AxisGridLine(); AxisValueLabel { if let h = v.as(Int.self) { Text("\(h)時") } }
@@ -68,10 +68,10 @@ struct ReportView: View {
                 }
 
                 Card("所見（深刻な順）", systemImage: "stethoscope",
-                     subtitle: "記録された計測結果から、気になる点を深刻な順に並べています") {
+                     subtitle: String(localized: "記録された計測結果から、気になる点を深刻な順に並べています")) {
                     if findings.isEmpty {
-                        ObservationRow(level: .good, text: "目立つ異常は見つかりませんでした。",
-                                       detail: "ただし症状が出る時間帯のデータが無いだけの可能性があります。常時計測を続け、症状が出た時刻をメモしておくと突き合わせが最短です。")
+                        ObservationRow(level: .good, text: String(localized: "目立つ異常は見つかりませんでした。"),
+                                       detail: String(localized: "ただし症状が出る時間帯のデータが無いだけの可能性があります。常時計測を続け、症状が出た時刻をメモしておくと突き合わせが最短です。"))
                     } else {
                         VStack(alignment: .leading, spacing: 12) {
                             ForEach(findings) { f in
@@ -118,12 +118,12 @@ struct ReportView: View {
 
     private var coverage: some View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: 170), spacing: 12)], spacing: 12) {
-            MetricTile(title: "常時計測", systemImage: "clock", value: String(format: "%.1f", Double(records.minutes.count) / 60), unit: "時間",
-                       caption: records.minutes.first.map { "\(Fmt.stamp($0.date)) から" } ?? "記録なし",
+            MetricTile(title: "常時計測", systemImage: "clock", value: String(format: "%.1f", Double(records.minutes.count) / 60), unit: String(localized: "時間"),
+                       caption: records.minutes.first.map { String(localized: "\(Fmt.stamp($0.date)) から") } ?? String(localized: "記録なし"),
                        level: records.minutes.count >= 120 ? .good : records.minutes.isEmpty ? .none : .warn)
-            MetricTile(title: "速度測定", systemImage: "speedometer", value: "\(records.speed.count)", unit: "回")
-            MetricTile(title: "負荷試験", systemImage: "chart.line.uptrend.xyaxis", value: "\(records.loads.count)", unit: "回",
-                       caption: records.loads.isEmpty ? "混雑時の遅れを調べる検査" : records.loads.last?.worst_grade.map { "直近の判定 \($0)" })
+            MetricTile(title: "速度測定", systemImage: "speedometer", value: "\(records.speed.count)", unit: String(localized: "回"))
+            MetricTile(title: "負荷試験", systemImage: "chart.line.uptrend.xyaxis", value: "\(records.loads.count)", unit: String(localized: "回"),
+                       caption: records.loads.isEmpty ? String(localized: "混雑時の遅れを調べる検査") : records.loads.last?.worst_grade.map { String(localized: "直近の判定 \($0)") })
         }
     }
 }

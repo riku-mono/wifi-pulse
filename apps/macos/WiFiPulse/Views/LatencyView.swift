@@ -59,26 +59,26 @@ private struct LatencyContent: View, Equatable {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 Card("遅延の推移", systemImage: "waveform.path.ecg",
-                     subtitle: "線は中央値、帯は最大値までの幅。赤い縦線はパケットロス。縦軸は対数。") {
+                     subtitle: String(localized: "線は中央値、帯は最大値までの幅。赤い縦線はパケットロス。縦軸は対数。")) {
                     LatencyBandChart(series: series).equatable()
                         .frame(height: 280)
                 }
 
                 HStack(alignment: .top, spacing: 16) {
-                    Card("統計", systemImage: "tablecells", subtitle: "直近\(range.rawValue / 60)分") {
+                    Card("統計", systemImage: "tablecells", subtitle: String(localized: "直近\(range.rawValue / 60)分")) {
                         PingStatsGrid(rows: [
-                            ("ルーター \(m.env.gateway)", w.gw),
+                            (String(localized: "ルーター \(m.env.gateway)"), w.gw),
                             ("IPv4 \(m.inet4Target)", w.v4),
                             ("IPv6", w.v6),
                         ])
                     }
-                    Card("遅延の分布", systemImage: "chart.bar", subtitle: "ping 1回ごとの件数") {
+                    Card("遅延の分布", systemImage: "chart.bar", subtitle: String(localized: "ping 1回ごとの件数")) {
                         HistogramChart(bins: HistogramChart.bins(slice)).equatable()
                             .frame(height: 160)
                     }
                 }
 
-                Card("DNS の応答時間", systemImage: "character.book.closed", subtitle: "ルーターの DNS に www.apple.com を問い合わせた時間（10秒ごと）") {
+                Card("DNS の応答時間", systemImage: "character.book.closed", subtitle: String(localized: "ルーターの DNS に www.apple.com を問い合わせた時間（10秒ごと）")) {
                     DNSChart(samples: m.dns).equatable()
                         .frame(height: 120)
                 }
@@ -118,7 +118,7 @@ struct LatencySeries: Equatable {
         out.reserveCapacity(buckets.count * 3)
         for (i, b) in buckets.sorted(by: { $0.key < $1.key }) {
             let d = start.addingTimeInterval(Double(i) * size)
-            for (name, vals) in [("ルーター", b.gw), ("IPv4", b.v4), ("IPv6", b.v6)] {
+            for (name, vals) in [(SeriesName.router, b.gw), (SeriesName.ipv4, b.v4), (SeriesName.ipv6, b.v6)] {
                 if let p = median(vals), let mx = vals.max() {
                     out.append(Point(date: d, series: name, p50: max(0.1, p), max: max(0.1, mx)))
                 }
@@ -148,7 +148,7 @@ private struct LatencyBandChart: View, Equatable {
             }
         }
         .chartXScale(domain: series.domain)
-        .chartForegroundStyleScale(["ルーター": SeriesColor.router, "IPv4": SeriesColor.inet4, "IPv6": SeriesColor.inet6])
+        .chartForegroundStyleScale([SeriesName.router: SeriesColor.router, SeriesName.ipv4: SeriesColor.inet4, SeriesName.ipv6: SeriesColor.inet6])
         .chartYScale(type: .log)
         .chartYAxisLabel("ms")
         .chartLegend(position: .top, alignment: .trailing)
@@ -178,7 +178,7 @@ private struct HistogramChart: View, Equatable {
             }
             return c.indices.map { Bin(label: label($0), series: series, count: c[$0]) }
         }
-        return count(\.gw, "ルーター") + count(\.v4, "IPv4")
+        return count(\.gw, SeriesName.router) + count(\.v4, SeriesName.ipv4)
     }
 
     var body: some View {
@@ -187,7 +187,7 @@ private struct HistogramChart: View, Equatable {
                 .foregroundStyle(by: .value("宛先", b.series))
                 .position(by: .value("宛先", b.series))
         }
-        .chartForegroundStyleScale(["ルーター": SeriesColor.router, "IPv4": SeriesColor.inet4])
+        .chartForegroundStyleScale([SeriesName.router: SeriesColor.router, SeriesName.ipv4: SeriesColor.inet4])
         .chartXAxisLabel("ms")
         .chartLegend(.hidden)
         .transaction { $0.animation = nil }

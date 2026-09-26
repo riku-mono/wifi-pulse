@@ -1,0 +1,91 @@
+{
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "CFBundleDisplayName" : {
+      "comment" : "Bundle display name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wi-Fi Pulse"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wi-Fi Pulse"
+          }
+        }
+      }
+    },
+    "CFBundleName" : {
+      "comment" : "Bundle name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WiFiPulse"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WiFiPulse"
+          }
+        }
+      }
+    },
+    "NSLocalNetworkUsageDescription" : {
+      "comment" : "Privacy - Local Network Usage Description",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Used to measure latency to your router and to list devices on your local network."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ルーターまでの遅延を測り、LANにつながっている機器の一覧を作るために使います。"
+          }
+        }
+      }
+    },
+    "NSLocationUsageDescription" : {
+      "comment" : "Privacy - Location Usage Description",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Used to show the name (SSID) and access point (BSSID) of the connected Wi-Fi network. Your location itself is never recorded."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "接続中のWi-Fiのネットワーク名（SSID）とアクセスポイント（BSSID）を表示するために使います。位置そのものは記録しません。"
+          }
+        }
+      }
+    },
+    "NSLocationWhenInUseUsageDescription" : {
+      "comment" : "Privacy - Location When In Use Usage Description",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Used to show the name (SSID) and access point (BSSID) of the connected Wi-Fi network. Your location itself is never recorded."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "接続中のWi-Fiのネットワーク名（SSID）とアクセスポイント（BSSID）を表示するために使います。位置そのものは記録しません。"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

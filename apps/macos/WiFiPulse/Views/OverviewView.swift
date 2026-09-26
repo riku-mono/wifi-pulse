@@ -10,7 +10,7 @@ struct OverviewView: View {
                 HeroCard()
                 PathCard()
                 TilesGrid()
-                Card("反応の速さ（直近2分）", systemImage: "waveform.path.ecg", subtitle: "線はそれぞれの秒の最大値。跳ね上がりがそのまま見えます。") {
+                Card("反応の速さ（直近2分）", systemImage: "waveform.path.ecg", subtitle: String(localized: "線はそれぞれの秒の最大値。跳ね上がりがそのまま見えます。")) {
                     RecentLatencyChart(seconds: 120)
                         .frame(height: 180)
                 }
@@ -89,8 +89,8 @@ private struct TilesGrid: View {
         let lastDNS = m.dns.last?.ms
         LazyVGrid(columns: [GridItem(.adaptive(minimum: 200), spacing: 12)], spacing: 12) {
             MetricTile(title: "電波", systemImage: "wifi",
-                       value: link?.strengthWord ?? "—",
-                       caption: link.map { "\($0.rssi) dBm · SNR \($0.snr) dB · \($0.bandLabel)" } ?? "Wi-Fiに接続していません",
+                       value: link?.strengthWord.sentenceCased ?? "—",
+                       caption: link.map { "\($0.rssi) dBm · SNR \($0.snr) dB · \($0.bandLabel)" } ?? String(localized: "Wi-Fiに接続していません"),
                        level: Level.rssi(link?.rssi))
             MetricTile(title: "インターネットまで", systemImage: "globe.asia.australia",
                        value: Fmt.ms(s.w30.v4.p50), unit: "ms",
@@ -102,14 +102,14 @@ private struct TilesGrid: View {
                        level: Level.gateway(s.w30.gw.p95))
             MetricTile(title: "安定性", systemImage: "waveform",
                        value: stab,
-                       caption: "途切れ \(Fmt.pct(s.w60.worstLoss))% · 揺らぎ \(Fmt.ms(s.w60.v4.jitter)) ms",
+                       caption: String(localized: "途切れ \(Fmt.pct(s.w60.worstLoss))% · 揺らぎ \(Fmt.ms(s.w60.v4.jitter)) ms"),
                        level: stabLevel)
             MetricTile(title: "いまの通信量", systemImage: "arrow.up.arrow.down",
                        value: "↓\(Fmt.mbps(s.rx))", unit: "Mbps",
-                       caption: "↑ \(Fmt.mbps(s.tx)) Mbps" + (s.rx < 5e5 && s.tx < 5e5 ? "（ほぼ待機中）" : "（通信中）"))
+                       caption: "↑ \(Fmt.mbps(s.tx)) Mbps" + (s.rx < 5e5 && s.tx < 5e5 ? String(localized: "（ほぼ待機中）") : String(localized: "（通信中）")))
             MetricTile(title: "DNS 応答", systemImage: "character.book.closed",
                        value: Fmt.ms(lastDNS), unit: "ms",
-                       caption: "ルーターのDNSへ10秒ごとに問い合わせ",
+                       caption: String(localized: "ルーターのDNSへ10秒ごとに問い合わせ"),
                        level: Level.dns(lastDNS))
         }
     }
@@ -123,7 +123,7 @@ struct PathDiagram: View {
 
     var body: some View {
         Card("どこで遅れているか", systemImage: "point.3.connected.trianglepath.dotted",
-             subtitle: "ルーター宛てとインターネット宛ての ping を同時に測り、区間ごとの遅延に分けています（直近60秒の中央値）") {
+             subtitle: String(localized: "ルーター宛てとインターネット宛ての ping を同時に測り、区間ごとの遅延に分けています（直近60秒の中央値）")) {
             HStack(spacing: 0) {
                 node("このMac", "laptopcomputer")
                 segment("Wi-Fi区間", ms: window.gw.p50,
@@ -139,7 +139,7 @@ struct PathDiagram: View {
         }
     }
 
-    private func node(_ title: String, _ symbol: String) -> some View {
+    private func node(_ title: LocalizedStringKey, _ symbol: String) -> some View {
         VStack(spacing: 6) {
             Image(systemName: symbol)
                 .font(.title2)
@@ -151,7 +151,7 @@ struct PathDiagram: View {
         .fixedSize()
     }
 
-    private func segment(_ title: String, ms: Double?, level: Level, emphasized: Bool) -> some View {
+    private func segment(_ title: LocalizedStringKey, ms: Double?, level: Level, emphasized: Bool) -> some View {
         VStack(spacing: 6) {
             HStack(spacing: 4) {
                 Text(Fmt.ms(ms)).font(.title3.weight(.semibold)).monospacedDigit()
@@ -209,12 +209,12 @@ struct LatencyLineChart: View, Equatable {
         Chart {
             ForEach(samples) { s in
                 if let v = s.router {
-                    LineMark(x: .value("時刻", s.date), y: .value("ms", max(0.1, v)), series: .value("宛先", "ルーター"))
-                        .foregroundStyle(by: .value("宛先", "ルーター"))
+                    LineMark(x: .value("時刻", s.date), y: .value("ms", max(0.1, v)), series: .value("宛先", SeriesName.router))
+                        .foregroundStyle(by: .value("宛先", SeriesName.router))
                 }
                 if let v = s.internet {
-                    LineMark(x: .value("時刻", s.date), y: .value("ms", max(0.1, v)), series: .value("宛先", "インターネット"))
-                        .foregroundStyle(by: .value("宛先", "インターネット"))
+                    LineMark(x: .value("時刻", s.date), y: .value("ms", max(0.1, v)), series: .value("宛先", SeriesName.internet))
+                        .foregroundStyle(by: .value("宛先", SeriesName.internet))
                 }
                 if s.lost {
                     RuleMark(x: .value("時刻", s.date))
@@ -223,7 +223,7 @@ struct LatencyLineChart: View, Equatable {
                 }
             }
         }
-        .chartForegroundStyleScale(["ルーター": SeriesColor.router, "インターネット": SeriesColor.inet4])
+        .chartForegroundStyleScale([SeriesName.router: SeriesColor.router, SeriesName.internet: SeriesColor.inet4])
         .chartYScale(type: .log)
         .chartYAxisLabel(compact ? "" : "ms")
         .chartYAxis(compact ? .hidden : .automatic)

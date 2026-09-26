@@ -43,9 +43,9 @@ nonisolated enum RemoteScope: Sendable {
     var label: String {
         switch self {
         case .none: "—"
-        case .loopback: "このMac"
+        case .loopback: String(localized: "このMac")
         case .lan: "LAN"
-        case .internet: "インターネット"
+        case .internet: String(localized: "インターネット")
         }
     }
 }
@@ -150,7 +150,7 @@ final class ProcessMonitor {
         var master: Int32 = -1, slave: Int32 = -1
         var size = winsize(ws_row: 50, ws_col: 1000, ws_xpixel: 0, ws_ypixel: 0)
         guard openpty(&master, &slave, nil, nil, &size) == 0 else {
-            failure = "疑似端末を開けませんでした"
+            failure = String(localized: "疑似端末を開けませんでした")
             return
         }
         var attrs = termios()
@@ -178,7 +178,7 @@ final class ProcessMonitor {
             try p.run()
         } catch {
             close(master); close(slave)
-            failure = "nettop を起動できませんでした"
+            failure = String(localized: "nettop を起動できませんでした")
             return
         }
         close(slave) // 子プロセス側だけが持つ
@@ -222,7 +222,7 @@ final class ProcessMonitor {
         parser?.detach()
         parser = nil
         isRunning = false
-        failure = "nettop が終了しました（\(status)）。再起動します…"
+        failure = String(localized: "nettop が終了しました（\(status)）。再起動します…")
         Task {
             try? await Task.sleep(for: .seconds(2))
             if gen == generation, !isRunning { start() }

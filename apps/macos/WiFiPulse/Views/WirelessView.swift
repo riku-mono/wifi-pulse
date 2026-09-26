@@ -12,7 +12,7 @@ struct WirelessView: View {
                     LocationBanner()
                 }
                 LinkSection()
-                Card("信号とノイズ（直近10分）", systemImage: "chart.xyaxis.line", subtitle: "5秒ごとの中央値。間の幅が SN比で、広いほど余裕があります。") {
+                Card("信号とノイズ（直近10分）", systemImage: "chart.xyaxis.line", subtitle: String(localized: "5秒ごとの中央値。間の幅が SN比で、広いほど余裕があります。")) {
                     SignalHistory()
                         .frame(height: 240)
                 }
@@ -56,8 +56,8 @@ private struct LinkSection: View {
                 if link.isDFS {
                     Card {
                         ObservationRow(level: .warn,
-                                       text: "\(link.channel ?? 0)ch は DFS 対象（W53/W56）です",
-                                       detail: "気象・航空レーダーを検出すると、ルーターは最大60秒まったく送信できなくなります。通信が数十秒止まる症状の典型原因です。ルーターのチャンネルを W52（36/40/44/48ch）に固定すると止まります。")
+                                       text: String(localized: "\(link.channel ?? 0)ch は DFS 対象（W53/W56）です"),
+                                       detail: String(localized: "気象・航空レーダーを検出すると、ルーターは最大60秒まったく送信できなくなります。通信が数十秒止まる症状の典型原因です。ルーターのチャンネルを W52（36/40/44/48ch）に固定すると止まります。"))
                     }
                 }
                 LinkCard(link: link).equatable()
@@ -76,12 +76,12 @@ private struct LinkCard: View, Equatable {
         Card("接続中のネットワーク", systemImage: "wifi") {
             HStack(spacing: 12) {
                 SignalBars(bars: link.bars).tint(Level.rssi(link.rssi).tint)
-                Text(link.ssid ?? "（ネットワーク名は非表示）")
+                Text(link.ssid ?? String(localized: "（ネットワーク名は非表示）"))
                     .font(.title2.weight(.semibold))
                     .lineLimit(1)
             }
             Grid(alignment: .leading, horizontalSpacing: 24, verticalSpacing: 8) {
-                row("電波強度", "\(link.rssi) dBm（\(link.strengthWord)）", level: Level.rssi(link.rssi))
+                row("電波強度", String(localized: "\(link.rssi) dBm（\(link.strengthWord)）"), level: Level.rssi(link.rssi))
                 row("ノイズ", "\(link.noise) dBm")
                 row("SN比", "\(link.snr) dB", level: link.snr >= 25 ? .good : link.snr >= 15 ? .warn : .crit)
                 row("バンド / チャンネル", "\(link.bandLabel) · \(link.channelLabel)", level: link.isDFS ? .warn : .none)
@@ -94,7 +94,7 @@ private struct LinkCard: View, Equatable {
         }
     }
 
-    private func row(_ title: String, _ value: String, level: Level = .none) -> some View {
+    private func row(_ title: LocalizedStringKey, _ value: String, level: Level = .none) -> some View {
         GridRow {
             Text(title).foregroundStyle(.secondary)
             HStack(spacing: 6) {

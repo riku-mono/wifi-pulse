@@ -26,7 +26,8 @@ wifi-pulse/
 ├── apps/
 │   ├── macos/      macOS アプリ（SwiftUI / Xcode プロジェクト）
 │   └── web/        LP と Web 版サンプル（予定）
-├── docs/           設計・配布に関する資料
+├── docs/           設計・配布・多言語対応に関する資料
+├── scripts/        開発用スクリプト（多言語カバレッジの集計など）
 ├── CHANGELOG.md
 └── LICENSE
 ```
@@ -57,6 +58,19 @@ open build/DerivedData/Build/Products/Debug/WiFiPulse.app
 | 位置情報 | SSID・BSSID・ビーコンの詳細（macOS の仕様で位置情報の許可が必要） | ネットワーク名・BSSID・メーカー・利用率が出ない |
 | ローカルネットワーク | LAN の機器一覧 | 機器一覧が空になる |
 
+## 対応言語
+
+日本語（ソース言語）と英語。文言は String Catalog（`.xcstrings`）で管理している。追加・翻訳の手順は [docs/localization.md](docs/localization.md)。
+
+<!-- l10n-coverage:start -->
+| 言語 | 翻訳済み | カバレッジ | 要確認 | 未翻訳 |
+|---|---:|---|---:|---:|
+| `ja`（ソース） | 529 / 529 | ██████████ 100.0% | 0 | 0 |
+| `en` | 529 / 529 | ██████████ 100.0% | 0 | 0 |
+
+対象: `apps/macos/WiFiPulse/InfoPlist.xcstrings`, `apps/macos/WiFiPulse/Localizable.xcstrings`（翻訳不要 28 件・ソースから消えた文字列 0 件は除外）
+<!-- l10n-coverage:end -->
+
 ## 配布について
 
 App Sandbox を使えない機能（`nettop`・統合ログ・システムコマンドの実行）があるため、Mac App Store では配布できない。
@@ -72,7 +86,6 @@ MAC アドレスや機器名を含むため、人に渡すときは注意する�
 - [ ] テストターゲット（#2）
 - [ ] アプリアイコン（#3）
 - [ ] CI（#4）
-- [ ] 多言語対応と言語別カバレッジの管理（#1）
 - [ ] Developer ID 署名・公証・自動アップデート（#5）
 - [ ] `apps/web`: LP と Web 版サンプル
 

@@ -58,8 +58,8 @@ struct EventsView: View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: 170), spacing: 12)], spacing: 12) {
             ForEach(WiFiEvents.Category.allCases) { c in
                 let n = r.counts[c] ?? 0
-                MetricTile(title: LocalizedStringKey(c.title), systemImage: c.symbol, value: "\(n)", unit: "件",
-                           caption: c == .scan ? "うち live scan \(r.liveScans) 件" : nil,
+                MetricTile(title: LocalizedStringKey(c.title), systemImage: c.symbol, value: "\(n)", unit: String(localized: "件"),
+                           caption: c == .scan ? String(localized: "うち live scan \(r.liveScans) 件") : nil,
                            level: level(c, n))
             }
         }
@@ -77,7 +77,7 @@ struct EventsView: View {
     private func timeline(_ r: WiFiEvents.Report) -> some View {
         let shown: Set<WiFiEvents.Category> = [.disconnect, .roam, .scan, .dfs]
         return Card("10分ごとの件数", systemImage: "chart.bar.xaxis",
-                    subtitle: "直近\(ev_label(r.span)) · \(r.lineCount) 行のログを解析 · \(Fmt.time(r.generated)) 取得") {
+                    subtitle: String(localized: "直近\(ev_label(r.span)) · \(r.lineCount) 行のログを解析 · \(Fmt.time(r.generated)) 取得")) {
             Chart(r.buckets.filter { shown.contains($0.category) }) { b in
                 BarMark(x: .value("時刻", b.start, unit: .minute), y: .value("件数", b.count), width: .ratio(0.85))
                     .foregroundStyle(by: .value("種類", b.category.title))
@@ -126,7 +126,7 @@ struct EventsView: View {
     private func awdl(_ r: WiFiEvents.Report) -> some View {
         let up = r.awdlState.contains("UP") && r.awdlState.contains("RUNNING")
         return Card("AWDL の状態", systemImage: "airplayaudio") {
-            LevelBadge(text: up ? "動作中" : "停止中", level: up ? .warn : .good)
+            LevelBadge(text: up ? String(localized: "動作中") : String(localized: "停止中"), level: up ? .warn : .good)
             Text(WiFiEvents.Category.awdl.explanation).font(.callout)
             Text("切り分けたいときは、通話中にターミナルで一時的に止めます（AirDrop・Sidecar・Handoff が止まります。再起動でも戻ります）:")
                 .font(.caption)
