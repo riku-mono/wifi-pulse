@@ -16,7 +16,7 @@ Wi-Fi Pulse の主要機能のいくつかは、この2つと両立しない。
 | Wi-Fi イベント | `/usr/bin/log show` | ✕ | 他プロセス（airportd など）の統合ログは読めない。公開 API の `OSLogStore` で読めるのは自プロセスのログだけ |
 | 速度測定 | `/usr/bin/networkQuality` | ✕ | システムのコマンドラインツールをサンドボックス内から実行できない。自前で実装し直せば可能 |
 | 常時計測の ping | `/sbin/ping` | △ | コマンドは実行できないが、ICMP ソケット（`SOCK_DGRAM` / `IPPROTO_ICMP`）で自前実装すれば `network.client` 権限で動く見込み（要検証） |
-| LAN の機器 | `arp`・`dig`・UDP スイープ | △ | コマンドは不可。`sysctl` での ARP テーブル取得・Bonjour（`NWBrowser`）への置き換えが必要 |
+| LAN の機器 | ARP 表（sysctl）・`dig`・UDP スイープ | △ | ARP 表は sysctl で読むようにした。`dig` は Bonjour（`NWBrowser`）への置き換えが必要 |
 | 経路の取得 | `route`・`ipconfig`・`networksetup` | △ | SystemConfiguration などの API で置き換えが必要 |
 | Wi-Fi 接続・周辺スキャン | CoreWLAN | ○？ | 位置情報の許可があれば使える見込み（要検証） |
 | 負荷試験 | URLSession | ○ | `network.client` 権限で動く |

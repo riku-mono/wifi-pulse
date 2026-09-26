@@ -70,19 +70,9 @@ nonisolated struct NetworkEnvironment: Equatable, Sendable {
 
     /// 接続直後は ARP 表にまだ載っていないことがあるので、無ければ1回 ping してから引き直す。
     static func routerMAC(_ gateway: String) async -> String {
-        func lookup() async -> String? {
-            let out = await Shell.run("/usr/sbin/arp", ["-n", gateway])
-            return parseARP(out)
-        }
-        if let mac = await lookup() { return mac }
+        if let mac = DeviceScanner.readARP()[gateway] { return mac }
         _ = await Shell.run("/sbin/ping", ["-c", "1", "-t", "1", gateway], timeout: 2)
-        return await lookup() ?? ""
-    }
-
-    /// `arp -n` の1行から MAC を取り出す（`? (192.168.1.1) at 0:1a:2b:3c:4d:5e on en0 ...`）。
-    static func parseARP(_ out: String) -> String? {
-        guard let m = out.firstMatch(of: #/\) at ([0-9a-fA-F:]{11,17})/#) else { return nil }
-        return DeviceScanner.normalize(String(m.1))
+        return DeviceScanner.readARP()[gateway] ?? ""
     }
 }
 
