@@ -47,7 +47,7 @@ nonisolated struct AccessPoint: Identifiable, Hashable, Sendable {
 
     var isDFS: Bool { band == .ghz5 && ((52...64).contains(channel) || (100...144).contains(channel)) }
     var isHidden: Bool { (ssid ?? "").isEmpty }
-    var displayName: String { isHidden ? String(localized: "（非公開ネットワーク）") : ssid! }
+    var displayName: String { isHidden ? String(localized: "(hidden network)") : ssid! }
     var generationLabel: String { generation.map { "Wi-Fi \($0)" } ?? "—" }
 
     // Table の並べ替え用（Optional は Comparable でないため）
@@ -111,10 +111,10 @@ final class NeighborScanner {
         var id: Self { self }
         var label: String {
             switch self {
-            case .off: String(localized: "自動スキャンしない")
-            case .s30: String(localized: "30秒ごと")
-            case .s60: String(localized: "1分ごと")
-            case .s120: String(localized: "2分ごと")
+            case .off: String(localized: "Don’t Auto-Scan")
+            case .s30: String(localized: "Every 30 seconds")
+            case .s60: String(localized: "Every minute")
+            case .s120: String(localized: "Every 2 minutes")
             }
         }
     }
@@ -261,7 +261,7 @@ final class NeighborScanner {
     @concurrent
     nonisolated static func performScan() async -> Result<[RawNetwork], any Error> {
         guard let iface = CWWiFiClient.shared().interface() else {
-            return .failure(NSError(domain: "WiFiPulse", code: 1, userInfo: [NSLocalizedDescriptionKey: String(localized: "Wi-Fiインターフェースが見つかりません")]))
+            return .failure(NSError(domain: "WiFiPulse", code: 1, userInfo: [NSLocalizedDescriptionKey: String(localized: "No Wi-Fi interface found")]))
         }
         do {
             let nets = try iface.scanForNetworks(withSSID: nil)
@@ -303,16 +303,16 @@ final class NeighborScanner {
     }
 
     nonisolated static func securityLabel(_ n: CWNetwork) -> String {
-        if n.supportsSecurity(.wpa3Enterprise) { return String(localized: "WPA3 エンタープライズ") }
+        if n.supportsSecurity(.wpa3Enterprise) { return String(localized: "WPA3 Enterprise") }
         if n.supportsSecurity(.wpa3Personal) && !n.supportsSecurity(.wpa2Personal) { return "WPA3" }
         if n.supportsSecurity(.wpa3Transition) || (n.supportsSecurity(.wpa3Personal) && n.supportsSecurity(.wpa2Personal)) { return "WPA2/WPA3" }
-        if n.supportsSecurity(.wpa2Enterprise) || n.supportsSecurity(.enterprise) { return String(localized: "WPA2 エンタープライズ") }
+        if n.supportsSecurity(.wpa2Enterprise) || n.supportsSecurity(.enterprise) { return String(localized: "WPA2 Enterprise") }
         if n.supportsSecurity(.wpa2Personal) { return "WPA2" }
         if n.supportsSecurity(.wpaPersonal) || n.supportsSecurity(.wpaPersonalMixed) { return "WPA" }
-        if n.supportsSecurity(.OWE) || n.supportsSecurity(.oweTransition) { return String(localized: "OWE（暗号化オープン）") }
-        if n.supportsSecurity(.WEP) || n.supportsSecurity(.dynamicWEP) { return String(localized: "WEP（危険）") }
-        if n.supportsSecurity(.none) { return String(localized: "なし（オープン）") }
-        return String(localized: "不明")
+        if n.supportsSecurity(.OWE) || n.supportsSecurity(.oweTransition) { return String(localized: "OWE (Enhanced Open)") }
+        if n.supportsSecurity(.WEP) || n.supportsSecurity(.dynamicWEP) { return String(localized: "WEP (insecure)") }
+        if n.supportsSecurity(.none) { return String(localized: "None (open)") }
+        return String(localized: "Unknown")
     }
 }
 

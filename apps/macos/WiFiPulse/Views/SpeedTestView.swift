@@ -8,8 +8,8 @@ struct SpeedTestView: View {
         let st = model.speedTest
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                Card("速度と応答性", systemImage: "speedometer",
-                     subtitle: String(localized: "macOS 標準の networkQuality で測ります。回線を一時的に埋めるので、同居人がいれば一声かけてから。")) {
+                Card("Speed and Responsiveness", systemImage: "speedometer",
+                     subtitle: String(localized: "Uses macOS’s built-in networkQuality. It briefly saturates your connection, so let others on your network know first.")) {
                     runButton
                 } content: {
                     switch st.state {
@@ -17,7 +17,7 @@ struct SpeedTestView: View {
                         HStack(spacing: 14) {
                             ProgressView().controlSize(.large)
                             VStack(alignment: .leading) {
-                                Text("測定しています…").font(.headline)
+                                Text("Measuring…").font(.headline)
                                 Text(timerInterval: started...started.addingTimeInterval(3600), countsDown: false)
                                     .monospacedDigit()
                                     .foregroundStyle(.secondary)
@@ -32,20 +32,20 @@ struct SpeedTestView: View {
                     if let r = st.latest, !st.isRunning {
                         result(r)
                     } else if st.latest == nil, !st.isRunning {
-                        ContentUnavailableView("まだ測っていません", systemImage: "speedometer",
-                                               description: Text("「速度を測る」を押すと、下り・上りの速度と、回線が埋まったときの応答性（RPM）を測ります。"))
+                        ContentUnavailableView("No Measurements Yet", systemImage: "speedometer",
+                                               description: Text("Click Measure Speed to test download and upload speed, and responsiveness (RPM) while the connection is saturated."))
                     }
                 }
 
                 if st.history.count >= 2 {
-                    Card("これまでの結果", systemImage: "clock.arrow.circlepath", subtitle: String(localized: "時間帯によって大きく違うなら、回線側の混雑が疑われます")) {
+                    Card("History", systemImage: "clock.arrow.circlepath", subtitle: String(localized: "Large differences by time of day suggest congestion at your ISP")) {
                         Chart {
                             ForEach(st.history) { r in
-                                LineMark(x: .value("日時", r.date), y: .value("Mbps", r.dl), series: .value("方向", SeriesName.download))
-                                    .foregroundStyle(by: .value("方向", SeriesName.download))
+                                LineMark(x: .value("Date", r.date), y: .value("Mbps", r.dl), series: .value("Direction", SeriesName.download))
+                                    .foregroundStyle(by: .value("Direction", SeriesName.download))
                                     .symbol(.circle)
-                                LineMark(x: .value("日時", r.date), y: .value("Mbps", r.ul), series: .value("方向", SeriesName.upload))
-                                    .foregroundStyle(by: .value("方向", SeriesName.upload))
+                                LineMark(x: .value("Date", r.date), y: .value("Mbps", r.ul), series: .value("Direction", SeriesName.upload))
+                                    .foregroundStyle(by: .value("Direction", SeriesName.upload))
                                     .symbol(.square)
                             }
                         }
@@ -54,12 +54,12 @@ struct SpeedTestView: View {
                         .frame(height: 200)
 
                         Table(st.history.reversed()) {
-                            TableColumn("日時") { Text(Fmt.stamp($0.date)) }
-                            TableColumn("下り") { Text("\(String(format: "%.1f", $0.dl)) Mbps").monospacedDigit() }
-                            TableColumn("上り") { Text("\(String(format: "%.1f", $0.ul)) Mbps").monospacedDigit() }
-                            TableColumn("応答性 ↓") { r in rpmText(r.dl_rpm) }
-                            TableColumn("応答性 ↑") { r in rpmText(r.ul_rpm) }
-                            TableColumn("無負荷RTT") { Text("\(Fmt.ms($0.base_rtt)) ms").monospacedDigit() }
+                            TableColumn("Date") { Text(Fmt.stamp($0.date)) }
+                            TableColumn("Download") { Text("\(String(format: "%.1f", $0.dl)) Mbps").monospacedDigit() }
+                            TableColumn("Upload") { Text("\(String(format: "%.1f", $0.ul)) Mbps").monospacedDigit() }
+                            TableColumn("Responsiveness ↓") { r in rpmText(r.dl_rpm) }
+                            TableColumn("Responsiveness ↑") { r in rpmText(r.ul_rpm) }
+                            TableColumn("Idle RTT") { Text("\(Fmt.ms($0.base_rtt)) ms").monospacedDigit() }
                         }
                         .frame(minHeight: 200)
                         .scrollContentBackground(.hidden)
@@ -68,14 +68,14 @@ struct SpeedTestView: View {
             }
             .padding(24)
         }
-        .navigationTitle("速度測定")
+        .navigationTitle("Speed Test")
     }
 
     private var runButton: some View {
         Button {
             Task { await model.speedTest.run(interface: model.monitor.env.interface) }
         } label: {
-            Label("速度を測る", systemImage: "play.fill")
+            Label("Measure Speed", systemImage: "play.fill")
         }
         .buttonStyle(.glassProminent)
         .controlSize(.large)
@@ -91,15 +91,15 @@ struct SpeedTestView: View {
     private func result(_ r: SpeedTestRecord) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 180), spacing: 12)], spacing: 12) {
-                MetricTile(title: "下り", systemImage: "arrow.down.circle", value: String(format: "%.1f", r.dl), unit: "Mbps")
-                MetricTile(title: "上り", systemImage: "arrow.up.circle", value: String(format: "%.1f", r.ul), unit: "Mbps")
-                MetricTile(title: "応答性（下り負荷時）", systemImage: "hare", value: r.dl_rpm.map { "\(Int($0))" } ?? "—", unit: "RPM",
+                MetricTile(title: "Download", systemImage: "arrow.down.circle", value: String(format: "%.1f", r.dl), unit: "Mbps")
+                MetricTile(title: "Upload", systemImage: "arrow.up.circle", value: String(format: "%.1f", r.ul), unit: "Mbps")
+                MetricTile(title: "Responsiveness (Download Load)", systemImage: "hare", value: r.dl_rpm.map { "\(Int($0))" } ?? "—", unit: "RPM",
                            caption: rpmWord(r.dl_rpm), level: Level.rpm(r.dl_rpm))
-                MetricTile(title: "応答性（上り負荷時）", systemImage: "hare", value: r.ul_rpm.map { "\(Int($0))" } ?? "—", unit: "RPM",
+                MetricTile(title: "Responsiveness (Upload Load)", systemImage: "hare", value: r.ul_rpm.map { "\(Int($0))" } ?? "—", unit: "RPM",
                            caption: rpmWord(r.ul_rpm), level: Level.rpm(r.ul_rpm))
-                MetricTile(title: "無負荷時の往復", systemImage: "arrow.left.arrow.right", value: Fmt.ms(r.base_rtt), unit: "ms")
+                MetricTile(title: "Idle Round Trip", systemImage: "arrow.left.arrow.right", value: Fmt.ms(r.base_rtt), unit: "ms")
             }
-            Text("\(r.date.formatted(date: .abbreviated, time: .shortened)) に測定 · 応答性（RPM）は「回線が埋まっているときに1分あたり何往復できるか」。Apple の目安は 良い=800以上、普通=300〜800、悪い=300未満。300未満ならバッファブロートを疑い、「負荷試験」で区間を切り分けてください。")
+            Text("Measured \(r.date.formatted(date: .abbreviated, time: .shortened)) · Responsiveness (RPM) is how many round trips per minute the connection can make while it is saturated. Apple’s guide: good = 800 or more, fair = 300–800, poor = under 300. Under 300 suggests bufferbloat; use Load Test to find which segment is responsible.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -107,9 +107,9 @@ struct SpeedTestView: View {
 
     private func rpmWord(_ v: Double?) -> String {
         switch Level.rpm(v) {
-        case .good: String(localized: "良い")
-        case .warn: String(localized: "普通")
-        case .crit: String(localized: "悪い — 回線が混むと通話が乱れます")
+        case .good: String(localized: "Good")
+        case .warn: String(localized: "fair")
+        case .crit: String(localized: "Poor — calls break up when the connection is busy")
         case .none: "—"
         }
     }

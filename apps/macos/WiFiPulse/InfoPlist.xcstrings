@@ -1,46 +1,39 @@
 {
-  "sourceLanguage" : "ja",
+  "sourceLanguage" : "en",
   "strings" : {
     "CFBundleDisplayName" : {
       "comment" : "Bundle display name",
+      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wi-Fi Pulse"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Wi-Fi Pulse"
           }
         }
-      }
+      },
+      "shouldTranslate" : false
     },
     "CFBundleName" : {
       "comment" : "Bundle name",
+      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "WiFiPulse"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "WiFiPulse"
           }
         }
-      }
+      },
+      "shouldTranslate" : false
     },
     "NSLocalNetworkUsageDescription" : {
       "comment" : "Privacy - Local Network Usage Description",
+      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Used to measure latency to your router and to list devices on your local network."
           }
         },
@@ -54,10 +47,11 @@
     },
     "NSLocationUsageDescription" : {
       "comment" : "Privacy - Location Usage Description",
+      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Used to show the name (SSID) and access point (BSSID) of the connected Wi-Fi network. Your location itself is never recorded."
           }
         },
@@ -71,10 +65,11 @@
     },
     "NSLocationWhenInUseUsageDescription" : {
       "comment" : "Privacy - Location When In Use Usage Description",
+      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Used to show the name (SSID) and access point (BSSID) of the connected Wi-Fi network. Your location itself is never recorded."
           }
         },

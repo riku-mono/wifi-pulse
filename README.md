@@ -60,15 +60,16 @@ open build/DerivedData/Build/Products/Debug/WiFiPulse.app
 
 ## 対応言語
 
-日本語（ソース言語）と英語。文言は String Catalog（`.xcstrings`）で管理している。追加・翻訳の手順は [docs/localization.md](docs/localization.md)。
+英語（ソース言語）と日本語。表示言語は既定でシステム設定に従い、アプリの設定（一般 › 言語）か、システム設定 › 一般 › 言語と地域 › アプリケーション で変更できる。
+文言は String Catalog（`.xcstrings`）で管理している。追加・翻訳の手順は [docs/localization.md](docs/localization.md)。
 
 <!-- l10n-coverage:start -->
 | 言語 | 翻訳済み | カバレッジ | 要確認 | 未翻訳 |
 |---|---:|---|---:|---:|
-| `ja`（ソース） | 529 / 529 | ██████████ 100.0% | 0 | 0 |
-| `en` | 529 / 529 | ██████████ 100.0% | 0 | 0 |
+| `en`（ソース） | 522 / 522 | ██████████ 100.0% | 0 | 0 |
+| `ja` | 522 / 522 | ██████████ 100.0% | 0 | 0 |
 
-対象: `apps/macos/WiFiPulse/InfoPlist.xcstrings`, `apps/macos/WiFiPulse/Localizable.xcstrings`（翻訳不要 28 件・ソースから消えた文字列 0 件は除外）
+対象: `apps/macos/WiFiPulse/InfoPlist.xcstrings`, `apps/macos/WiFiPulse/Localizable.xcstrings`（翻訳不要 32 件・ソースから消えた文字列 0 件は除外）
 <!-- l10n-coverage:end -->
 
 ## 配布について

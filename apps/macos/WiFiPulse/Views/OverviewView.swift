@@ -10,7 +10,7 @@ struct OverviewView: View {
                 HeroCard()
                 PathCard()
                 TilesGrid()
-                Card("反応の速さ（直近2分）", systemImage: "waveform.path.ecg", subtitle: String(localized: "線はそれぞれの秒の最大値。跳ね上がりがそのまま見えます。")) {
+                Card("Responsiveness (Last 2 Minutes)", systemImage: "waveform.path.ecg", subtitle: String(localized: "Lines show the maximum for each second, so spikes are visible as they happen.")) {
                     RecentLatencyChart(seconds: 120)
                         .frame(height: 180)
                 }
@@ -19,17 +19,17 @@ struct OverviewView: View {
             .frame(maxWidth: 1100)
             .frame(maxWidth: .infinity)
         }
-        .navigationTitle("概要")
+        .navigationTitle("Overview")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button {
                     model.selection = .speed
                     Task { await model.speedTest.run(interface: model.monitor.env.interface) }
                 } label: {
-                    Label("速度を測る", systemImage: "speedometer")
+                    Label("Measure Speed", systemImage: "speedometer")
                 }
                 .disabled(model.speedTest.isRunning)
-                .help("networkQuality で速度と応答性を測ります")
+                .help("Measure speed and responsiveness with networkQuality")
             }
         }
     }
@@ -56,7 +56,7 @@ private struct HeroCard: View {
                         Text(s.bottleneck.text).font(.callout)
                     }
                     Label {
-                        Text("\(Text("いまは「\(band.name)」。").bold())\(band.note)")
+                        Text("\(Text("It’s \(band.name) now. ").bold())\(band.note)")
                     } icon: {
                         Image(systemName: "clock")
                     }
@@ -88,28 +88,28 @@ private struct TilesGrid: View {
         let (stab, stabLevel) = Analysis.stability(s.w60)
         let lastDNS = m.dns.last?.ms
         LazyVGrid(columns: [GridItem(.adaptive(minimum: 200), spacing: 12)], spacing: 12) {
-            MetricTile(title: "電波", systemImage: "wifi",
+            MetricTile(title: "Signal", systemImage: "wifi",
                        value: link?.strengthWord.sentenceCased ?? "—",
-                       caption: link.map { "\($0.rssi) dBm · SNR \($0.snr) dB · \($0.bandLabel)" } ?? String(localized: "Wi-Fiに接続していません"),
+                       caption: link.map { "\($0.rssi) dBm · SNR \($0.snr) dB · \($0.bandLabel)" } ?? String(localized: "Not connected to Wi-Fi"),
                        level: Level.rssi(link?.rssi))
-            MetricTile(title: "インターネットまで", systemImage: "globe.asia.australia",
+            MetricTile(title: "To the Internet", systemImage: "globe.asia.australia",
                        value: Fmt.ms(s.w30.v4.p50), unit: "ms",
                        caption: "p95 \(Fmt.ms(s.w60.v4.p95)) ms · IPv6 \(Fmt.ms(s.w60.v6.p50)) ms",
                        level: Level.internet(s.w30.v4.p95))
-            MetricTile(title: "ルーターまで", systemImage: "wifi.router",
+            MetricTile(title: "To the Router", systemImage: "wifi.router",
                        value: Fmt.ms(s.w30.gw.p50), unit: "ms",
                        caption: "p95 \(Fmt.ms(s.w60.gw.p95)) ms · \(m.env.gateway.isEmpty ? "—" : m.env.gateway)",
                        level: Level.gateway(s.w30.gw.p95))
-            MetricTile(title: "安定性", systemImage: "waveform",
+            MetricTile(title: "Stability", systemImage: "waveform",
                        value: stab,
-                       caption: String(localized: "途切れ \(Fmt.pct(s.w60.worstLoss))% · 揺らぎ \(Fmt.ms(s.w60.v4.jitter)) ms"),
+                       caption: String(localized: "Loss \(Fmt.pct(s.w60.worstLoss))% · Jitter \(Fmt.ms(s.w60.v4.jitter)) ms"),
                        level: stabLevel)
-            MetricTile(title: "いまの通信量", systemImage: "arrow.up.arrow.down",
+            MetricTile(title: "Current Traffic", systemImage: "arrow.up.arrow.down",
                        value: "↓\(Fmt.mbps(s.rx))", unit: "Mbps",
-                       caption: "↑ \(Fmt.mbps(s.tx)) Mbps" + (s.rx < 5e5 && s.tx < 5e5 ? String(localized: "（ほぼ待機中）") : String(localized: "（通信中）")))
-            MetricTile(title: "DNS 応答", systemImage: "character.book.closed",
+                       caption: "↑ \(Fmt.mbps(s.tx)) Mbps" + (s.rx < 5e5 && s.tx < 5e5 ? String(localized: " (mostly idle)") : String(localized: " (active)")))
+            MetricTile(title: "DNS Response", systemImage: "character.book.closed",
                        value: Fmt.ms(lastDNS), unit: "ms",
-                       caption: String(localized: "ルーターのDNSへ10秒ごとに問い合わせ"),
+                       caption: String(localized: "Queries your router’s DNS every 10 seconds"),
                        level: Level.dns(lastDNS))
         }
     }
@@ -122,18 +122,18 @@ struct PathDiagram: View {
     let highlight: Analysis.Segment?
 
     var body: some View {
-        Card("どこで遅れているか", systemImage: "point.3.connected.trianglepath.dotted",
-             subtitle: String(localized: "ルーター宛てとインターネット宛ての ping を同時に測り、区間ごとの遅延に分けています（直近60秒の中央値）")) {
+        Card("Where the Delay Is", systemImage: "point.3.connected.trianglepath.dotted",
+             subtitle: String(localized: "Pings to the router and to the Internet run at the same time and are split into per-segment latency (median of the last 60 seconds)")) {
             HStack(spacing: 0) {
-                node("このMac", "laptopcomputer")
-                segment("Wi-Fi区間", ms: window.gw.p50,
+                node("This Mac", "laptopcomputer")
+                segment("Wi-Fi segment", ms: window.gw.p50,
                         level: max(Level.gateway(window.gw.p95), Level.loss(window.gw.loss)),
                         emphasized: highlight == .wifi)
-                node("ルーター", "wifi.router")
-                segment("回線区間", ms: window.wanP50,
+                node("Router", "wifi.router")
+                segment("Internet line", ms: window.wanP50,
                         level: max(Level.internet(window.v4.p95), Level.loss(window.v4.loss)),
                         emphasized: highlight == .wan)
-                node("インターネット", "globe.asia.australia")
+                node("Internet", "globe.asia.australia")
             }
             .frame(maxWidth: .infinity)
         }
@@ -209,15 +209,15 @@ struct LatencyLineChart: View, Equatable {
         Chart {
             ForEach(samples) { s in
                 if let v = s.router {
-                    LineMark(x: .value("時刻", s.date), y: .value("ms", max(0.1, v)), series: .value("宛先", SeriesName.router))
-                        .foregroundStyle(by: .value("宛先", SeriesName.router))
+                    LineMark(x: .value("Time", s.date), y: .value("ms", max(0.1, v)), series: .value("Target", SeriesName.router))
+                        .foregroundStyle(by: .value("Target", SeriesName.router))
                 }
                 if let v = s.internet {
-                    LineMark(x: .value("時刻", s.date), y: .value("ms", max(0.1, v)), series: .value("宛先", SeriesName.internet))
-                        .foregroundStyle(by: .value("宛先", SeriesName.internet))
+                    LineMark(x: .value("Time", s.date), y: .value("ms", max(0.1, v)), series: .value("Target", SeriesName.internet))
+                        .foregroundStyle(by: .value("Target", SeriesName.internet))
                 }
                 if s.lost {
-                    RuleMark(x: .value("時刻", s.date))
+                    RuleMark(x: .value("Time", s.date))
                         .foregroundStyle(.red.opacity(0.5))
                         .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 3]))
                 }

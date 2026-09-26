@@ -25,7 +25,7 @@ struct ProcessesView: View {
                 .padding([.horizontal, .top], 20)
                 .padding(.bottom, 12)
             Table(rows, selection: $selection, sortOrder: $sortOrder) {
-                TableColumn("アプリ / プロセス", value: \.name) { row in
+                TableColumn("App / Process", value: \.name) { row in
                     HStack(spacing: 8) {
                         if let icon = pm.icon(for: row) {
                             Image(nsImage: icon).resizable().frame(width: 18, height: 18)
@@ -36,26 +36,26 @@ struct ProcessesView: View {
                         if row.pids.count > 1 {
                             Text("\(row.pids.count)").font(.caption2).foregroundStyle(.secondary)
                                 .padding(.horizontal, 5).background(.quaternary, in: .capsule)
-                                .help("\(row.pids.count) 個のプロセスをまとめて表示しています")
+                                .help("Combining \(row.pids.count) processes")
                         }
                     }
                 }
                 .width(min: 180, ideal: 240)
-                TableColumn("受信", value: \.rxRate) { Text(Rate.text($0.rxRate)).monospacedDigit().foregroundStyle(Rate.style($0.rxRate)) }
+                TableColumn("Received", value: \.rxRate) { Text(Rate.text($0.rxRate)).monospacedDigit().foregroundStyle(Rate.style($0.rxRate)) }
                     .width(min: 70, ideal: 85)
-                TableColumn("送信", value: \.txRate) { Text(Rate.text($0.txRate)).monospacedDigit().foregroundStyle(Rate.style($0.txRate)) }
+                TableColumn("Sent", value: \.txRate) { Text(Rate.text($0.txRate)).monospacedDigit().foregroundStyle(Rate.style($0.txRate)) }
                     .width(min: 70, ideal: 85)
-                TableColumn("累計", value: \.total) { row in
+                TableColumn("Total", value: \.total) { row in
                     Text("↓\(Rate.bytes(row.rxTotal)) ↑\(Rate.bytes(row.txTotal))").monospacedDigit().foregroundStyle(.secondary)
                 }
                 .width(min: 120, ideal: 150)
-                TableColumn("接続", value: \.connectionCount) { row in
+                TableColumn("Connections", value: \.connectionCount) { row in
                     Text(row.connectionCount == 0 ? "—" : "\(row.established)/\(row.connectionCount)").monospacedDigit()
                 }
                 .width(55)
                 TableColumn("RTT", value: \.rttSort) { Text($0.rtt.map { "\(Fmt.ms($0)) ms" } ?? "—").monospacedDigit() }
                     .width(70)
-                TableColumn("再送", value: \.retransmitTotal) { row in
+                TableColumn("Retransmits", value: \.retransmitTotal) { row in
                     Text(row.retransmitTotal == 0 ? "—" : Rate.bytes(row.retransmitTotal))
                         .monospacedDigit()
                         .foregroundStyle(row.retransmitTotal > 0 ? .orange : .secondary)
@@ -64,19 +64,19 @@ struct ProcessesView: View {
             }
             .overlay {
                 if let failure = pm.failure {
-                    ContentUnavailableView("通信量を取得できません", systemImage: "exclamationmark.triangle", description: Text(failure))
+                    ContentUnavailableView("Can’t Get Traffic Data", systemImage: "exclamationmark.triangle", description: Text(failure))
                 } else if !pm.isRunning {
-                    ContentUnavailableView("計測を開始しています…", systemImage: "app.connected.to.app.below.fill")
+                    ContentUnavailableView("Starting measurement…", systemImage: "app.connected.to.app.below.fill")
                 } else if pm.lastUpdate == nil {
-                    ProgressView("最初のデータを待っています…")
+                    ProgressView("Waiting for the first data…")
                 } else if rows.isEmpty {
-                    ContentUnavailableView(activeOnly ? "いま通信しているアプリはありません" : "該当するアプリはありません",
+                    ContentUnavailableView(activeOnly ? "No Apps Are Using the Network" : "No Matching Apps",
                                            systemImage: "app.connected.to.app.below.fill")
                 }
             }
         }
-        .navigationTitle("アプリの通信")
-        .searchable(text: $search, placement: .toolbar, prompt: "アプリ名")
+        .navigationTitle("App Traffic")
+        .searchable(text: $search, placement: .toolbar, prompt: "App Name")
         .inspector(isPresented: $showInspector) {
             ProcessInspector(row: pm.rows.first { $0.id == selection })
                 .inspectorColumnWidth(min: 300, ideal: 360, max: 480)
@@ -84,17 +84,17 @@ struct ProcessesView: View {
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
                 Toggle(isOn: $pm.groupByApp) {
-                    Label("アプリごとにまとめる", systemImage: "square.stack.3d.up")
+                    Label("Group by App", systemImage: "square.stack.3d.up")
                 }
-                .help("ヘルパープロセスを親のアプリにまとめて表示します")
+                .help("Show helper processes combined with their parent app")
                 Toggle(isOn: $activeOnly) {
-                    Label("通信中のみ", systemImage: "line.3.horizontal.decrease")
+                    Label("Active Only", systemImage: "line.3.horizontal.decrease")
                 }
-                .help("直近\(Int(ProcessMonitor.lingerSeconds))秒以内に通信があったものだけを表示します")
+                .help("Show only apps with traffic in the last \(Int(ProcessMonitor.lingerSeconds)) seconds")
                 Button {
                     showInspector.toggle()
                 } label: {
-                    Label("インスペクタ", systemImage: "sidebar.trailing")
+                    Label("Inspector", systemImage: "sidebar.trailing")
                 }
             }
         }
@@ -108,11 +108,11 @@ struct ProcessesView: View {
         return HStack(alignment: .top, spacing: 16) {
             VStack(alignment: .leading, spacing: 10) {
                 HStack(spacing: 18) {
-                    stat("受信", Rate.text(pm.totalRx), "arrow.down.circle", SeriesColor.rx)
-                    stat("送信", Rate.text(pm.totalTx), "arrow.up.circle", SeriesColor.tx)
-                    stat("接続", "\(pm.connectionCount)", "point.3.connected.trianglepath.dotted", .secondary)
+                    stat("Received", Rate.text(pm.totalRx), "arrow.down.circle", SeriesColor.rx)
+                    stat("Sent", Rate.text(pm.totalTx), "arrow.up.circle", SeriesColor.tx)
+                    stat("Connections", "\(pm.connectionCount)", "point.3.connected.trianglepath.dotted", .secondary)
                 }
-                Text("nettop で \(ProcessMonitor.interval) 秒ごとに集計。累計はこの画面を開いてからの量です。")
+                Text("Sampled by nettop every \(ProcessMonitor.interval) seconds. Totals count from when this view was opened.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -195,8 +195,8 @@ private struct TopTalkersChart: View, Equatable {
             points.append(Point(date: b.date, name: SeriesName.other, value: other))
         }
         return Chart(points) { p in
-            AreaMark(x: .value("時刻", p.date), y: .value("bytes/s", p.value), stacking: .standard)
-                .foregroundStyle(by: .value("アプリ", p.name))
+            AreaMark(x: .value("Time", p.date), y: .value("bytes/s", p.value), stacking: .standard)
+                .foregroundStyle(by: .value("App", p.name))
         }
         .chartForegroundStyleScale(domain: domain)
         .chartYAxis {
@@ -210,7 +210,7 @@ private struct TopTalkersChart: View, Equatable {
         .transaction { $0.animation = nil }
         .overlay {
             if buckets.count < 2 {
-                Text("通信量の推移を集めています…（10秒ごとに更新）").font(.caption).foregroundStyle(.secondary)
+                Text("Collecting traffic history… (updates every 10 seconds)").font(.caption).foregroundStyle(.secondary)
             }
         }
     }
@@ -246,9 +246,9 @@ private struct ProcessInspector: View {
                         }
                     }
                     Chart(history, id: \.0) { d, v in
-                        AreaMark(x: .value("時刻", d), y: .value("bytes/s", v))
+                        AreaMark(x: .value("Time", d), y: .value("bytes/s", v))
                             .foregroundStyle(.tint.opacity(0.3))
-                        LineMark(x: .value("時刻", d), y: .value("bytes/s", v))
+                        LineMark(x: .value("Time", d), y: .value("bytes/s", v))
                     }
                     .chartXAxis(.hidden)
                     .chartYAxis {
@@ -259,11 +259,11 @@ private struct ProcessInspector: View {
                     }
                     .frame(height: 90)
                     .transaction { $0.animation = nil }
-                    LabeledContent("いま", value: "↓\(Rate.text(row.rxRate))  ↑\(Rate.text(row.txRate))")
-                    LabeledContent("累計", value: "↓\(Rate.bytes(row.rxTotal))  ↑\(Rate.bytes(row.txTotal))")
-                    LabeledContent("TCP 再送", value: Rate.bytes(row.retransmitTotal))
+                    LabeledContent("Now", value: "↓\(Rate.text(row.rxRate))  ↑\(Rate.text(row.txRate))")
+                    LabeledContent("Total", value: "↓\(Rate.bytes(row.rxTotal))  ↑\(Rate.bytes(row.txTotal))")
+                    LabeledContent("TCP Retransmissions", value: Rate.bytes(row.retransmitTotal))
                     if let path = row.bundlePath {
-                        LabeledContent("場所") { Text(path).font(.caption).lineLimit(2).truncationMode(.middle).textSelection(.enabled) }
+                        LabeledContent("Path") { Text(path).font(.caption).lineLimit(2).truncationMode(.middle).textSelection(.enabled) }
                     }
                 }
                 Section {
@@ -271,13 +271,13 @@ private struct ProcessInspector: View {
                         ConnectionRow(conn: c, name: names[c.remoteHost])
                     }
                     if conns.isEmpty {
-                        Text("接続はありません").foregroundStyle(.secondary)
+                        Text("No connections").foregroundStyle(.secondary)
                     }
                 } header: {
                     HStack {
-                        Text("接続（\(conns.count)）")
+                        Text("Connections (\(conns.count))")
                         Spacer()
-                        Toggle("待ち受けも表示", isOn: $showListening).toggleStyle(.checkbox).font(.caption)
+                        Toggle("Show Listening", isOn: $showListening).toggleStyle(.checkbox).font(.caption)
                     }
                 }
             }
@@ -289,8 +289,8 @@ private struct ProcessInspector: View {
                 }
             }
         } else {
-            ContentUnavailableView("アプリを選択", systemImage: "cursorarrow.click.2",
-                                   description: Text("一覧から選ぶと、通信量の推移と接続先の一覧を表示します。"))
+            ContentUnavailableView("Select an App", systemImage: "cursorarrow.click.2",
+                                   description: Text("Select one in the list to see its traffic history and connections."))
         }
     }
 }
@@ -306,7 +306,7 @@ private struct ConnectionRow: View {
                     .font(.caption2.weight(.semibold))
                     .padding(.horizontal, 5)
                     .background(conn.proto == "TCP" ? Color.blue.opacity(0.15) : Color.purple.opacity(0.15), in: .capsule)
-                Text(conn.isListening ? String(localized: "待ち受け :\(conn.localPort)") : (name ?? conn.remoteHost))
+                Text(conn.isListening ? String(localized: "Listening :\(conn.localPort)") : (name ?? conn.remoteHost))
                     .lineLimit(1)
                     .truncationMode(.middle)
                 if !conn.isListening { Text(":\(conn.remotePort)").foregroundStyle(.secondary) }
@@ -321,7 +321,7 @@ private struct ConnectionRow: View {
                 if !conn.interface.isEmpty { Text(conn.interface) }
                 if !conn.state.isEmpty { Text(conn.state) }
                 if let rtt = conn.rttMs { Text("RTT \(Fmt.ms(rtt)) ms") }
-                if conn.retransmitTotal > 0 { Text("再送 \(Rate.bytes(conn.retransmitTotal))").foregroundStyle(.orange) }
+                if conn.retransmitTotal > 0 { Text("Retransmitted \(Rate.bytes(conn.retransmitTotal))").foregroundStyle(.orange) }
             }
             .font(.caption2)
             .foregroundStyle(.secondary)

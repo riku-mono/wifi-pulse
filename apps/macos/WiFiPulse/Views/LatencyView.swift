@@ -10,9 +10,9 @@ struct LatencyView: View {
         var id: Self { self }
         var label: LocalizedStringKey {
             switch self {
-            case .m2: "2分"
-            case .m10: "10分"
-            case .m60: "60分"
+            case .m2: "2 min"
+            case .m10: "10 min"
+            case .m60: "60 min"
             }
         }
         /// 何秒ごとに描き直すか。範囲が広いほど1秒の変化は見えないので間引く。
@@ -29,10 +29,10 @@ struct LatencyView: View {
         let key = model.monitor.revision / range.refreshEvery
         LatencyContent(range: range, key: key)
             .equatable()
-            .navigationTitle("遅延")
+            .navigationTitle("Latency")
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Picker("表示範囲", selection: $range) {
+                    Picker("Range", selection: $range) {
                         ForEach(Range.allCases) { Text($0.label).tag($0) }
                     }
                     .pickerStyle(.segmented)
@@ -58,27 +58,27 @@ private struct LatencyContent: View, Equatable {
 
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                Card("遅延の推移", systemImage: "waveform.path.ecg",
-                     subtitle: String(localized: "線は中央値、帯は最大値までの幅。赤い縦線はパケットロス。縦軸は対数。")) {
+                Card("Latency Over Time", systemImage: "waveform.path.ecg",
+                     subtitle: String(localized: "Lines are medians; bands extend to the maximum. Red vertical lines mark packet loss. Logarithmic scale.")) {
                     LatencyBandChart(series: series).equatable()
                         .frame(height: 280)
                 }
 
                 HStack(alignment: .top, spacing: 16) {
-                    Card("統計", systemImage: "tablecells", subtitle: String(localized: "直近\(range.rawValue / 60)分")) {
+                    Card("Statistics", systemImage: "tablecells", subtitle: String(localized: "Last \(range.rawValue / 60) min")) {
                         PingStatsGrid(rows: [
-                            (String(localized: "ルーター \(m.env.gateway)"), w.gw),
+                            (String(localized: "Router \(m.env.gateway)"), w.gw),
                             ("IPv4 \(m.inet4Target)", w.v4),
                             ("IPv6", w.v6),
                         ])
                     }
-                    Card("遅延の分布", systemImage: "chart.bar", subtitle: String(localized: "ping 1回ごとの件数")) {
+                    Card("Latency Distribution", systemImage: "chart.bar", subtitle: String(localized: "Count per ping")) {
                         HistogramChart(bins: HistogramChart.bins(slice)).equatable()
                             .frame(height: 160)
                     }
                 }
 
-                Card("DNS の応答時間", systemImage: "character.book.closed", subtitle: String(localized: "ルーターの DNS に www.apple.com を問い合わせた時間（10秒ごと）")) {
+                Card("DNS Response Time", systemImage: "character.book.closed", subtitle: String(localized: "Time to resolve www.apple.com via your router’s DNS (every 10 seconds)")) {
                     DNSChart(samples: m.dns).equatable()
                         .frame(height: 120)
                 }
@@ -134,15 +134,15 @@ private struct LatencyBandChart: View, Equatable {
     var body: some View {
         Chart {
             ForEach(series.points) { p in
-                AreaMark(x: .value("時刻", p.date), yStart: .value("中央値", p.p50), yEnd: .value("最大", p.max),
-                         series: .value("宛先", p.series))
-                    .foregroundStyle(by: .value("宛先", p.series))
+                AreaMark(x: .value("Time", p.date), yStart: .value("Median", p.p50), yEnd: .value("Max", p.max),
+                         series: .value("Target", p.series))
+                    .foregroundStyle(by: .value("Target", p.series))
                     .opacity(0.18)
-                LineMark(x: .value("時刻", p.date), y: .value("ms", p.p50), series: .value("宛先", p.series))
-                    .foregroundStyle(by: .value("宛先", p.series))
+                LineMark(x: .value("Time", p.date), y: .value("ms", p.p50), series: .value("Target", p.series))
+                    .foregroundStyle(by: .value("Target", p.series))
             }
             ForEach(series.losses, id: \.self) { d in
-                RuleMark(x: .value("ロス", d))
+                RuleMark(x: .value("Loss", d))
                     .foregroundStyle(.red.opacity(0.45))
                     .lineStyle(StrokeStyle(lineWidth: 1))
             }
@@ -183,9 +183,9 @@ private struct HistogramChart: View, Equatable {
 
     var body: some View {
         Chart(bins) { b in
-            BarMark(x: .value("ms", b.label), y: .value("回数", b.count))
-                .foregroundStyle(by: .value("宛先", b.series))
-                .position(by: .value("宛先", b.series))
+            BarMark(x: .value("ms", b.label), y: .value("Count", b.count))
+                .foregroundStyle(by: .value("Target", b.series))
+                .position(by: .value("Target", b.series))
         }
         .chartForegroundStyleScale([SeriesName.router: SeriesColor.router, SeriesName.ipv4: SeriesColor.inet4])
         .chartXAxisLabel("ms")
@@ -200,10 +200,10 @@ private struct DNSChart: View, Equatable {
     var body: some View {
         Chart(samples) { s in
             if let ms = s.ms {
-                BarMark(x: .value("時刻", s.date, unit: .second), y: .value("ms", ms), width: .fixed(4))
+                BarMark(x: .value("Time", s.date, unit: .second), y: .value("ms", ms), width: .fixed(4))
                     .foregroundStyle(Level.dns(ms).tint)
             } else {
-                RuleMark(x: .value("時刻", s.date)).foregroundStyle(.red)
+                RuleMark(x: .value("Time", s.date)).foregroundStyle(.red)
             }
         }
         .chartYAxisLabel("ms")

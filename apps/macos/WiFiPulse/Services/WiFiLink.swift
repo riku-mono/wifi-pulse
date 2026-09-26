@@ -35,7 +35,7 @@ nonisolated struct LinkSample: Hashable, Sendable {
     }
 
     var strengthWord: String {
-        rssi >= -55 ? String(localized: "非常に強い") : rssi >= -65 ? String(localized: "強い") : rssi >= -72 ? String(localized: "普通") : rssi >= -80 ? String(localized: "弱い") : String(localized: "とても弱い")
+        rssi >= -55 ? String(localized: "very strong") : rssi >= -65 ? String(localized: "strong") : rssi >= -72 ? String(localized: "fair") : rssi >= -80 ? String(localized: "weak") : String(localized: "very weak")
     }
 }
 
@@ -84,7 +84,7 @@ nonisolated enum WiFiLink {
             DispatchQueue.global(qos: .userInitiated).async {
                 let started = Date()
                 guard let iface = CWWiFiClient.shared().interface() else {
-                    cont.resume(returning: ScanResult(date: started, duration: 0, networks: [], error: String(localized: "Wi-Fiインターフェースが見つかりません")))
+                    cont.resume(returning: ScanResult(date: started, duration: 0, networks: [], error: String(localized: "No Wi-Fi interface found")))
                     return
                 }
                 do {
@@ -155,11 +155,11 @@ final class LocationAccess: NSObject, CLLocationManagerDelegate {
 
     var statusText: String {
         switch status {
-        case .notDetermined: String(localized: "未確認")
-        case .restricted: String(localized: "制限されています")
-        case .denied: String(localized: "許可されていません")
-        case .authorizedAlways, .authorized: String(localized: "許可済み")
-        default: String(localized: "不明")
+        case .notDetermined: String(localized: "Not Determined")
+        case .restricted: String(localized: "Restricted")
+        case .denied: String(localized: "Denied")
+        case .authorizedAlways, .authorized: String(localized: "Allowed")
+        default: String(localized: "Unknown")
         }
     }
 

@@ -50,9 +50,9 @@ struct LiveSnapshot: Equatable {
     var w30 = WindowStats.empty(30)
     var w60 = WindowStats.empty(60)
     var score: Int?
-    var verdict = String(localized: "測定中…")
+    var verdict = String(localized: "Measuring…")
     var level = Level.none
-    var bottleneck = Analysis.Bottleneck(level: .none, tag: String(localized: "判定中"), text: String(localized: "データを集めています。"), segment: nil)
+    var bottleneck = Analysis.Bottleneck(level: .none, tag: String(localized: "Evaluating"), text: String(localized: "Collecting data."), segment: nil)
     var rx: Double = 0
     var tx: Double = 0
 }
@@ -85,12 +85,12 @@ final class Monitor {
     private(set) var env = NetworkEnvironment()
     private(set) var live = LiveSnapshot()
     private(set) var menu = MenuState()
-    private(set) var networkTitle = String(localized: "接続確認中")
+    private(set) var networkTitle = String(localized: "Checking connection")
     private(set) var connection = ConnectionInfo()
     private(set) var revision = 0
     private(set) var dns: [DNSSample] = []
     private(set) var isRunning = false
-    private(set) var pathStatus = String(localized: "接続確認中")
+    private(set) var pathStatus = String(localized: "Checking connection")
     /// 保存された1分集計が更新されるたびに増える（時間帯グラフの再読み込み用）
     private(set) var minuteRevision = 0
 
@@ -121,9 +121,9 @@ final class Monitor {
         }
         pathMonitor.pathUpdateHandler = { [weak self] path in
             let text = switch path.status {
-            case .satisfied: path.usesInterfaceType(.wifi) ? String(localized: "Wi-Fi接続") : path.usesInterfaceType(.wiredEthernet) ? String(localized: "有線接続") : String(localized: "接続中")
-            case .unsatisfied: String(localized: "未接続")
-            default: String(localized: "接続確認中")
+            case .satisfied: path.usesInterfaceType(.wifi) ? String(localized: "Wi-Fi") : path.usesInterfaceType(.wiredEthernet) ? String(localized: "Wired") : String(localized: "Connected")
+            case .unsatisfied: String(localized: "Not connected")
+            default: String(localized: "Checking connection")
             }
             Task { @MainActor in await self?.networkChanged(text) }
         }
