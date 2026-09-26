@@ -45,8 +45,8 @@ open WiFiPulse.xcodeproj            # Xcode で ⌘R
 
 # コマンドラインから
 xcodebuild -project WiFiPulse.xcodeproj -scheme WiFiPulse \
-  -configuration Debug -derivedDataPath build/DerivedData build
-open build/DerivedData/Build/Products/Debug/WiFiPulse.app
+  -configuration Debug -derivedDataPath build/DerivedData.noindex build
+open build/DerivedData.noindex/Build/Products/Debug/WiFiPulse.app
 ```
 
 開発時のアーキテクチャやパフォーマンスの方針は [apps/macos/README.md](apps/macos/README.md) を参照。

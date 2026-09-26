@@ -11,17 +11,19 @@ Wi-Fi Pulse: Mac の Wi-Fi とネットワークを常時計測・診断する m
 - `apps/web/` — LP と Web 版サンプル（未着手）
 - `docs/` — `distribution.md`（Mac App Store に出せない理由・配布方針）、`localization.md`（多言語対応のルール）
 - `scripts/l10n-coverage.py` — 言語別カバレッジ
+- `scripts/unregister-dev-builds.sh` — 開発用ビルドを LaunchServices の登録から外す
 - `.github/workflows/l10n.yml` — カバレッジの CI（Ubuntu）
 
 ## ビルド・実行
 
 ```bash
 cd apps/macos
-xcodebuild -project WiFiPulse.xcodeproj -scheme WiFiPulse -configuration Debug -derivedDataPath build/DerivedData build
-open build/DerivedData/Build/Products/Debug/WiFiPulse.app
+xcodebuild -project WiFiPulse.xcodeproj -scheme WiFiPulse -configuration Debug -derivedDataPath build/DerivedData.noindex build
+open build/DerivedData.noindex/Build/Products/Debug/WiFiPulse.app
 ```
 
 - `project.pbxproj` は手書きで、ファイルシステム同期グループを使っている。`WiFiPulse/` にファイルを置けばターゲットに入る。**ターゲットの追加（テストなど）は Xcode の UI で行う**。
+- ビルドしたアプリは LaunchServices に登録され、Spotlight に同じアプリが並ぶ。ビルド・起動の確認が済んだら `scripts/unregister-dev-builds.sh` で登録を外す（`/Applications` のものは残る）。ビルド先を `.noindex` にしてあるのは Spotlight の索引から外すため。
 - App Sandbox は無効（`nettop`・`log`・`ping` などを使うため）。署名はアドホック。
 
 ## 守ること
