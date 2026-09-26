@@ -66,7 +66,7 @@ struct ConnectionInfo: Equatable {
 }
 
 /// メニューバーのアイコン用。変化したときだけ更新する。
-struct MenuState: Equatable {
+struct MenuState: Hashable {
     var level = Level.none
     var bars = 0
     var connected = false

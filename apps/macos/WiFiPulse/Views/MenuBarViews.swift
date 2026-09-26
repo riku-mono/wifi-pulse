@@ -5,17 +5,8 @@ struct MenuBarLabel: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
-        let m = model.monitor.menu
-        Group {
-            if !m.connected {
-                Image(systemName: "wifi.slash")
-            } else if m.level == .crit {
-                Image(systemName: "wifi.exclamationmark")
-            } else {
-                Image(systemName: "wifi", variableValue: Double(m.bars) / 4)
-            }
-        }
-        .accessibilityLabel("Wi-Fi Pulse")
+        Image(nsImage: MenuBarIcon.image(for: model.monitor.menu))
+            .accessibilityLabel("Wi-Fi Pulse")
     }
 }
 
@@ -28,28 +19,8 @@ struct MenuBarPanel: View {
         let m = model.monitor
         let s = m.live
 
-        VStack(alignment: .leading, spacing: 14) {
-            HStack(spacing: 14) {
-                ScoreRing(score: s.score, level: s.level, lineWidth: 6)
-                    .frame(width: 64, height: 64)
-                    .scaleEffect(0.62)
-                    .frame(width: 44, height: 44)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(s.verdict).font(.title3.weight(.bold))
-                    Text(s.link?.ssid ?? m.pathStatus).font(.caption).foregroundStyle(.secondary)
-                }
-                Spacer()
-                LevelBadge(text: s.bottleneck.tag, level: s.bottleneck.level).font(.caption)
-            }
-
-            Grid(alignment: .leading, horizontalSpacing: 12, verticalSpacing: 6) {
-                row("wifi", "Signal", s.link.map { "\($0.rssi) dBm · \($0.bandLabel) ch\($0.channel ?? 0)" } ?? "—", Level.rssi(s.link?.rssi))
-                row("wifi.router", "Router", String(localized: "\(Fmt.ms(s.w30.gw.p50)) ms (p95 \(Fmt.ms(s.w60.gw.p95)))"), Level.gateway(s.w30.gw.p95))
-                row("globe.asia.australia", "Internet", String(localized: "\(Fmt.ms(s.w30.v4.p50)) ms (p95 \(Fmt.ms(s.w60.v4.p95)))"), Level.internet(s.w30.v4.p95))
-                row("waveform", "Loss", "\(Fmt.pct(s.w60.worstLoss))%", Level.loss(s.w60.worstLoss))
-                row("arrow.up.arrow.down", "Traffic", "↓\(Fmt.mbps(s.rx)) ↑\(Fmt.mbps(s.tx)) Mbps", .none)
-            }
-            .font(.callout)
+        VStack(alignment: .leading, spacing: 12) {
+            MenuBarSummary(live: s, subtitle: s.link?.ssid ?? m.pathStatus)
 
             RecentLatencyChart(seconds: 90, compact: true)
                 .frame(height: 70)
@@ -86,20 +57,66 @@ struct MenuBarPanel: View {
         .frame(width: 340)
     }
 
+    private func openMain(_ item: SidebarItem) {
+        model.selection = item
+        openWindow(id: "main")
+        NSApp.activate()
+    }
+}
+
+/// パネルの上半分（スコアと各項目）。モデルに触らず `LiveSnapshot` だけから描く
+struct MenuBarSummary: View {
+    let live: LiveSnapshot
+    let subtitle: String
+
+    var body: some View {
+        let s = live
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 12) {
+                ScoreRing(score: s.score, level: s.level, lineWidth: 5)
+                    .frame(width: 48, height: 48)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(s.verdict)
+                        .font(.title3.weight(.bold))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                    Text(subtitle)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                }
+                .layoutPriority(1)
+                Spacer(minLength: 4)
+                LevelBadge(text: s.bottleneck.tag, level: s.bottleneck.level, compact: true)
+                    .fixedSize()
+            }
+
+            // 判定の記号と表示する p95 は同じ窓（直近30秒）から出す
+            Grid(alignment: .leading, horizontalSpacing: 8, verticalSpacing: 6) {
+                row("wifi", "Signal", s.link.map { "\($0.rssi) dBm · \($0.bandLabel) ch\($0.channel ?? 0)" } ?? "—", Level.rssi(s.link?.rssi))
+                row("wifi.router", "Router", String(localized: "\(Fmt.ms(s.w30.gw.p50)) ms (p95 \(Fmt.ms(s.w30.gw.p95)))"), Level.gateway(s.w30.gw.p95))
+                row("globe.asia.australia", "Internet", String(localized: "\(Fmt.ms(s.w30.v4.p50)) ms (p95 \(Fmt.ms(s.w30.v4.p95)))"), Level.internet(s.w30.v4.p95))
+                row("waveform", "Loss", "\(Fmt.pct(s.w60.worstLoss))%", Level.loss(s.w60.worstLoss))
+                row("arrow.up.arrow.down", "Traffic", "↓\(Fmt.mbps(s.rx)) ↑\(Fmt.mbps(s.tx)) Mbps", .none)
+            }
+            .font(.callout)
+        }
+    }
+
     private func row(_ symbol: String, _ title: LocalizedStringKey, _ value: String, _ level: Level) -> some View {
         GridRow {
-            Label(title, systemImage: symbol).foregroundStyle(.secondary)
+            // 記号ごとに幅が違うので、列の幅を固定して項目名の左端をそろえる
+            Image(systemName: symbol)
+                .foregroundStyle(.secondary)
+                .frame(width: 20)
+                .accessibilityHidden(true)
+            Text(title).foregroundStyle(.secondary)
             Text(value).monospacedDigit()
             Image(systemName: level.symbol)
                 .foregroundStyle(level.tint)
                 .opacity(level == .none ? 0 : 1)
                 .accessibilityLabel(level.accessibilityText)
         }
-    }
-
-    private func openMain(_ item: SidebarItem) {
-        model.selection = item
-        openWindow(id: "main")
-        NSApp.activate()
     }
 }
