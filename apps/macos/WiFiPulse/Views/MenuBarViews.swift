@@ -65,7 +65,7 @@ struct MenuBarPanel: View {
                     .buttonStyle(.glassProminent)
                     Button {
                         openMain(.speed)
-                        Task { await model.speedTest.run(interface: m.env.interface) }
+                        Task { await model.speedTest.run(env: m.env) }
                     } label: {
                         Label("Speed", systemImage: "speedometer")
                     }

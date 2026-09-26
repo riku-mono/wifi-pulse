@@ -6,6 +6,8 @@ struct SpeedTestView: View {
 
     var body: some View {
         let st = model.speedTest
+        let network = model.monitor.network
+        let history = st.history.filter { $0.net == network }
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 Card("Speed and Responsiveness", systemImage: "speedometer",
@@ -37,10 +39,10 @@ struct SpeedTestView: View {
                     }
                 }
 
-                if st.history.count >= 2 {
-                    Card("History", systemImage: "clock.arrow.circlepath", subtitle: String(localized: "Large differences by time of day suggest congestion at your ISP")) {
+                if history.count >= 2 {
+                    Card("History", systemImage: "clock.arrow.circlepath", subtitle: String(localized: "Results on this network. Large differences by time of day suggest congestion at your ISP")) {
                         Chart {
-                            ForEach(st.history) { r in
+                            ForEach(history) { r in
                                 LineMark(x: .value("Date", r.date), y: .value("Mbps", r.dl), series: .value("Direction", SeriesName.download))
                                     .foregroundStyle(by: .value("Direction", SeriesName.download))
                                     .symbol(.circle)
@@ -53,7 +55,7 @@ struct SpeedTestView: View {
                         .chartYAxisLabel("Mbps")
                         .frame(height: 200)
 
-                        Table(st.history.reversed()) {
+                        Table(history.reversed()) {
                             TableColumn("Date") { Text(Fmt.stamp($0.date)) }
                             TableColumn("Download") { Text("\(String(format: "%.1f", $0.dl)) Mbps").monospacedDigit() }
                             TableColumn("Upload") { Text("\(String(format: "%.1f", $0.ul)) Mbps").monospacedDigit() }
@@ -73,7 +75,7 @@ struct SpeedTestView: View {
 
     private var runButton: some View {
         Button {
-            Task { await model.speedTest.run(interface: model.monitor.env.interface) }
+            Task { await model.speedTest.run(env: model.monitor.env) }
         } label: {
             Label("Measure Speed", systemImage: "play.fill")
         }

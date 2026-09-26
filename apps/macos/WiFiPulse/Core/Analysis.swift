@@ -150,12 +150,12 @@ nonisolated struct RecordSet: Sendable {
     var speed: [SpeedTestRecord] = []
     var loads: [LoadTestRecord] = []
 
-    static func load(hours: Int?) -> RecordSet {
+    static func load(hours: Int?, network: NetworkFilter) -> RecordSet {
         let cutoff = hours.map { Date().addingTimeInterval(-Double($0) * 3600).epochMs } ?? 0
         return RecordSet(
-            minutes: DataStore.load(DataStore.minutes, as: MinuteRow.self).filter { $0.t >= cutoff },
-            speed: DataStore.load(DataStore.speedtests, as: SpeedTestRecord.self).filter { $0.t >= cutoff },
-            loads: DataStore.load(DataStore.loadtests, as: LoadTestRecord.self).filter { $0.t >= cutoff }
+            minutes: DataStore.load(DataStore.minutes, as: MinuteRow.self).filter { $0.t >= cutoff && network.includes($0.net) },
+            speed: DataStore.load(DataStore.speedtests, as: SpeedTestRecord.self).filter { $0.t >= cutoff && network.includes($0.net) },
+            loads: DataStore.load(DataStore.loadtests, as: LoadTestRecord.self).filter { $0.t >= cutoff && network.includes($0.net) }
         )
     }
 }
@@ -257,9 +257,10 @@ enum Report {
         return f.sorted { $0.severity > $1.severity }
     }
 
-    static func markdown(_ r: RecordSet, findings: [Finding]) -> String {
+    static func markdown(_ r: RecordSet, findings: [Finding], network: String) -> String {
         var out = [String(localized: "# Network Diagnostics Report"), "", String(localized: "Generated: \(Date().formatted(date: .numeric, time: .standard))"), ""]
         out.append(String(localized: "## Collected data"))
+        out.append(String(localized: "- Network: \(network)"))
         out.append(String(localized: "- Continuous monitoring: \(r.minutes.count) min (\(String(format: "%.1f", Double(r.minutes.count) / 60)) h)"))
         out.append(String(localized: "- Speed tests: \(r.speed.count) / Load tests: \(r.loads.count)"))
         out.append("")

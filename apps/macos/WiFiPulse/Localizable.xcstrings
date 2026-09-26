@@ -322,6 +322,16 @@
         }
       }
     },
+    "- Network: %@" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "- ネットワーク: %@"
+          }
+        }
+      }
+    },
     "- Speed tests: %lld / Load tests: %lld" : {
       "localizations" : {
         "ja" : {
@@ -510,6 +520,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "すべて"
+          }
+        }
+      }
+    },
+    "All Networks" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すべてのネットワーク"
           }
         }
       }
@@ -2064,16 +2084,6 @@
         }
       }
     },
-    "Large differences by time of day suggest congestion at your ISP" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "時間帯によって大きく違うなら、回線側の混雑が疑われます"
-          }
-        }
-      }
-    },
     "Last %@ · %lld log lines analyzed · Retrieved %@" : {
       "localizations" : {
         "ja" : {
@@ -2643,6 +2653,32 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ネットワーク"
+          }
+        }
+      }
+    },
+    "Network at %@" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ のネットワーク"
+          }
+        }
+      }
+    },
+    "Network at %@ (router …%@)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Network at %1$@ (router …%2$@)"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ のネットワーク（ルーター …%2$@）"
           }
         }
       }
@@ -3347,6 +3383,16 @@
         }
       }
     },
+    "Records are kept separately for each network (router)." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "記録はネットワーク（ルーター）ごとに分けています。"
+          }
+        }
+      }
+    },
     "Records are stored as JSON Lines, the same format as the Wi-Fi Pulse diagnostic kit. Point this at the kit’s data folder to analyze them with tools/report.py as well." : {
       "localizations" : {
         "ja" : {
@@ -3513,6 +3559,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "制限されています"
+          }
+        }
+      }
+    },
+    "Results on this network. Large differences by time of day suggest congestion at your ISP" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このネットワークでの結果。時間帯によって大きく違うなら、回線側の混雑が疑われます"
           }
         }
       }
@@ -4429,6 +4485,26 @@
         }
       }
     },
+    "This Network" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このネットワーク"
+          }
+        }
+      }
+    },
+    "This Network (%@)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このネットワーク（%@）"
+          }
+        }
+      }
+    },
     "This can’t be undone." : {
       "localizations" : {
         "ja" : {
@@ -4615,6 +4691,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "不明な機器"
+          }
+        }
+      }
+    },
+    "Unknown Network" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不明なネットワーク"
           }
         }
       }

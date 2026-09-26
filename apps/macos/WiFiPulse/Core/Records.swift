@@ -21,6 +21,10 @@ nonisolated struct MinuteRow: Codable, Sendable, Identifiable {
     var lv4: Double?
     var rx: Double
     var tx: Double
+    /// ネットワークの識別子（`NetworkEnvironment.networkID`）。この項目が入る前の記録は nil
+    var net: String?
+    /// その1分でつながっていたアクセスポイント（位置情報の許可があるときだけ）
+    var bssid: String?
 
     var date: Date { Date(epochMs: t) }
 }
@@ -36,6 +40,7 @@ nonisolated struct SpeedTestRecord: Codable, Sendable, Identifiable {
     var dl_rpm: Double?
     var ul_rpm: Double?
     var base_rtt: Double?
+    var net: String?
 
     var date: Date { Date(epochMs: t) }
 }
@@ -64,8 +69,37 @@ nonisolated struct LoadTestRecord: Codable, Sendable, Identifiable {
     var phases: [String: Phase]
     var verdict: [String: Verdict]?
     var worst_grade: String?
+    var net: String?
 
     var date: Date { Date(epochMs: t) }
+}
+
+/// これまでに計測したネットワーク（networks.json に識別子をキーにした辞書で保存）
+nonisolated struct KnownNetwork: Codable, Sendable, Identifiable, Hashable {
+    var id: String
+    var ssid: String?
+    var gateway: String
+    var first: Int64
+
+    var displayName: String {
+        if let ssid, !ssid.isEmpty { return ssid }
+        // SSID が取れない（位置情報の許可が無い・有線）ときはルーターで見分ける
+        if id.hasPrefix("ip:") { return String(localized: "Network at \(gateway)") }
+        return String(localized: "Network at \(gateway) (router …\(String(id.suffix(5))))")
+    }
+}
+
+/// レポートなどで、どのネットワークの記録を見るか
+nonisolated enum NetworkFilter: Hashable, Sendable {
+    case all
+    case network(String)
+
+    func includes(_ net: String?) -> Bool {
+        switch self {
+        case .all: true
+        case .network(let id): net == id
+        }
+    }
 }
 
 /// data フォルダの読み書き。
@@ -88,6 +122,7 @@ nonisolated enum DataStore {
     static let loadtests = "loadtests.jsonl"
     static let devices = "devices.json"
     static let deviceNames = "device_names.json"
+    static let networks = "networks.json"
 
     static func url(_ name: String) -> URL { folder.appending(path: name) }
 
@@ -127,7 +162,7 @@ nonisolated enum DataStore {
 
     /// 計測記録を消す（OUI表などアプリ同梱のものには触らない）。
     static func deleteRecords() {
-        for name in [minutes, speedtests, loadtests, devices, deviceNames] {
+        for name in [minutes, speedtests, loadtests, devices, deviceNames, networks] {
             try? FileManager.default.removeItem(at: url(name))
         }
     }

@@ -15,6 +15,8 @@ nonisolated struct Device: Codable, Identifiable, Hashable, Sendable {
     var vendor_ja: String?
     var online: Bool?
     var name: String?
+    /// 最後に見えたネットワークの識別子（`NetworkEnvironment.networkID`）
+    var net: String?
 
     var displayName: String { name ?? mdns ?? vendor_ja ?? vendor ?? (random == true ? String(localized: "Device with a Private Address") : String(localized: "Unknown Device")) }
     var lastSeen: Date { Date(epochMs: last) }
@@ -101,7 +103,7 @@ final class DeviceScanner {
             if sweepRequested, !env.gateway.isEmpty {
                 sweepRequested = false
                 isSweeping = true
-                await Self.sweep(gateway: env.gateway)
+                await Self.sweep(interface: env.interface)
                 isSweeping = false
             }
             let arp = await Self.arpTable()
@@ -112,6 +114,7 @@ final class DeviceScanner {
                 var d = registry[mac] ?? Device(mac: mac, first: now, last: now)
                 d.ip = ip
                 d.last = now
+                d.net = env.networkID
                 if d.vendor == nil {
                     d.vendor = await OUI.shared.vendor(for: mac)
                     d.random = OUI.isRandomized(mac)
@@ -162,21 +165,21 @@ final class DeviceScanner {
 
     // MARK: Sources
 
-    /// ARP を埋めるため、同じ /24 の全アドレスへ UDP を1発ずつ投げる（中身は空、宛先は discard ポート）。
-    nonisolated static func sweep(gateway: String) async {
-        let base = gateway.split(separator: ".").dropLast().joined(separator: ".")
-        guard !base.isEmpty else { return }
+    /// ARP を埋めるため、同じサブネット（広くても /24）の全アドレスへ UDP を1発ずつ投げる（中身は空、宛先は discard ポート）。
+    nonisolated static func sweep(interface: String) async {
+        let targets = sweepTargets(interface: interface)
+        guard !targets.isEmpty else { return }
         await withCheckedContinuation { (cont: CheckedContinuation<Void, Never>) in
             DispatchQueue.global(qos: .utility).async {
                 let fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)
                 if fd >= 0 {
                     defer { close(fd) }
-                    for i in 1...254 {
+                    for target in targets {
                         var addr = sockaddr_in()
                         addr.sin_len = UInt8(MemoryLayout<sockaddr_in>.size)
                         addr.sin_family = sa_family_t(AF_INET)
                         addr.sin_port = in_port_t(9).bigEndian
-                        inet_pton(AF_INET, "\(base).\(i)", &addr.sin_addr)
+                        addr.sin_addr.s_addr = target.bigEndian
                         _ = withUnsafePointer(to: &addr) {
                             $0.withMemoryRebound(to: sockaddr.self, capacity: 1) {
                                 sendto(fd, nil, 0, 0, $0, socklen_t(MemoryLayout<sockaddr_in>.size))
@@ -188,6 +191,37 @@ final class DeviceScanner {
             }
         }
         try? await Task.sleep(for: .seconds(3))
+    }
+
+    /// 掃引する宛先（ホストバイト順）。ARP を使わないリンクや1対1のリンク（iPhone のテザリングで
+    /// 192.0.0.2/32 になるときなど）には LAN が無く、サブネットの外へ投げると sendto がカーネル内で
+    /// 回り続けて CPU を 100% 使うので、何も投げない。
+    nonisolated static func sweepTargets(interface: String) -> [UInt32] {
+        var head: UnsafeMutablePointer<ifaddrs>?
+        guard getifaddrs(&head) == 0, let first = head else { return [] }
+        defer { freeifaddrs(head) }
+        var cursor: UnsafeMutablePointer<ifaddrs>? = first
+        while let ifa = cursor {
+            defer { cursor = ifa.pointee.ifa_next }
+            guard String(cString: ifa.pointee.ifa_name) == interface,
+                  let addr = ifa.pointee.ifa_addr, addr.pointee.sa_family == UInt8(AF_INET),
+                  let mask = ifa.pointee.ifa_netmask else { continue }
+            let flags = Int32(ifa.pointee.ifa_flags)
+            if flags & (IFF_NOARP | IFF_POINTOPOINT) != 0 { return [] }
+            let ip = addr.withMemoryRebound(to: sockaddr_in.self, capacity: 1) { UInt32(bigEndian: $0.pointee.sin_addr.s_addr) }
+            let netmask = mask.withMemoryRebound(to: sockaddr_in.self, capacity: 1) { UInt32(bigEndian: $0.pointee.sin_addr.s_addr) }
+            return sweepTargets(ip: ip, netmask: netmask)
+        }
+        return []
+    }
+
+    /// サブネット内のホスト（ネットワーク・ブロードキャストのアドレスと自分を除く）。/24 より広ければ自分の /24 に絞る。
+    nonisolated static func sweepTargets(ip: UInt32, netmask: UInt32) -> [UInt32] {
+        let mask = netmask | 0xFFFF_FF00
+        guard mask <= 0xFFFF_FFFC else { return [] }  // /31・/32 には相手がいない
+        let network = ip & mask
+        let broadcast = network | ~mask
+        return (network + 1 ..< broadcast).filter { $0 != ip }
     }
 
     nonisolated static func arpTable() async -> [String: String] {

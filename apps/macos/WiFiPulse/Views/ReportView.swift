@@ -6,6 +6,8 @@ struct ReportView: View {
     @State private var records = RecordSet()
     @State private var filter: DayFilter = .all
     @State private var hours: Int? = nil
+    /// nil はいまのネットワーク（切り替わったら追従する）
+    @State private var scope: NetworkFilter?
     @State private var copied = false
 
     var body: some View {
@@ -87,6 +89,7 @@ struct ReportView: View {
         .navigationTitle("Trends & Report")
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
+                networkPicker
                 Picker("Scope", selection: $hours) {
                     Text("All Records").tag(Int?.none)
                     Text("Last 24 Hours").tag(Int?.some(24))
@@ -95,7 +98,7 @@ struct ReportView: View {
                 .fixedSize()
                 Button {
                     NSPasteboard.general.clearContents()
-                    NSPasteboard.general.setString(Report.markdown(records, findings: findings), forType: .string)
+                    NSPasteboard.general.setString(Report.markdown(records, findings: findings, network: scopeName), forType: .string)
                     copied = true
                 } label: {
                     Label(copied ? "Copied" : "Copy as Markdown", systemImage: copied ? "checkmark" : "doc.on.doc")
@@ -109,11 +112,44 @@ struct ReportView: View {
                 }
             }
         }
-        .task(id: "\(hours ?? -1)-\(model.monitor.minuteRevision)-\(model.speedTest.history.count)-\(model.loadTest.history.count)") {
-            let h = hours
-            records = await Task.detached(priority: .utility) { RecordSet.load(hours: h) }.value
+        .task(id: "\(hours ?? -1)-\(String(describing: effectiveScope))-\(model.monitor.minuteRevision)-\(model.speedTest.history.count)-\(model.loadTest.history.count)") {
+            let h = hours, n = effectiveScope
+            records = await Task.detached(priority: .utility) { RecordSet.load(hours: h, network: n) }.value
         }
         .onChange(of: records.minutes.count) { copied = false }
+    }
+
+    private var effectiveScope: NetworkFilter { scope ?? model.monitor.network.map(NetworkFilter.network) ?? .all }
+
+    private func name(_ id: String) -> String {
+        model.monitor.networks[id]?.displayName ?? String(localized: "Unknown Network")
+    }
+
+    private var scopeName: String {
+        switch effectiveScope {
+        case .all: String(localized: "All Networks")
+        case .network(let id): name(id)
+        }
+    }
+
+    /// 既定はいまのネットワーク。ほかの場所で計測した記録もここから選んで見られる
+    private var networkPicker: some View {
+        let current = model.monitor.network
+        let others = model.monitor.networks.values
+            .filter { $0.id != current }
+            .sorted { $0.first > $1.first }
+        return Picker("Network", selection: $scope) {
+            Text(current.map { String(localized: "This Network (\(name($0)))") } ?? String(localized: "This Network"))
+                .tag(NetworkFilter?.none)
+            if !others.isEmpty {
+                Divider()
+                ForEach(others) { Text($0.displayName).tag(NetworkFilter?.some(.network($0.id))) }
+            }
+            Divider()
+            Text("All Networks").tag(NetworkFilter?.some(.all))
+        }
+        .fixedSize()
+        .help("Records are kept separately for each network (router).")
     }
 
     private var coverage: some View {

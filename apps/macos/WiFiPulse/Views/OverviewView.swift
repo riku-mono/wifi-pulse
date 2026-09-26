@@ -24,7 +24,7 @@ struct OverviewView: View {
             ToolbarItem(placement: .primaryAction) {
                 Button {
                     model.selection = .speed
-                    Task { await model.speedTest.run(interface: model.monitor.env.interface) }
+                    Task { await model.speedTest.run(env: model.monitor.env) }
                 } label: {
                     Label("Measure Speed", systemImage: "speedometer")
                 }
