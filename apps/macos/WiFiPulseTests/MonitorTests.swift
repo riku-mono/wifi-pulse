@@ -47,6 +47,15 @@ struct ExclusionTests {
         #expect(row.lgw == 0)
         #expect(row.t == Self.start.addingTimeInterval(10).epochMs)
         #expect(row.net == "net")
+        #expect(row.self_s == 10)
+    }
+
+    /// 除いた秒が無ければ `self_s` は書かない（Python 版キットと古い記録の形のまま）
+    @Test func minuteRowOmitsSelfSecondsWhenNothingExcluded() throws {
+        let row = try #require(Monitor.minuteRow((0..<60).map { Self.tick($0, gw: 8) }, network: nil))
+        #expect(row.self_s == nil)
+        let line = String(decoding: try #require(DataStore.line(row)), as: UTF8.self)
+        #expect(!line.contains("self_s"))
     }
 
     /// 残りが数秒だけなら 1分集計を書かない
@@ -68,8 +77,41 @@ struct ExclusionTests {
         #expect(Monitor.progress(at: Self.start.addingTimeInterval(-5), end: end, length: 10) == 0)
     }
 
-    @Test func onlyWarmupPausesJudgement() {
+    /// 数秒で終わる掃引だけは表示を止めない
+    @Test func pausesJudgement() {
         #expect(Exclusion.warmup.pausesJudgement)
+        #expect(Exclusion.speedTest.pausesJudgement)
+        #expect(Exclusion.loadTest.pausesJudgement)
         #expect(!Exclusion.lanScan.pausesJudgement)
+    }
+
+    /// 測定が終わってからも `tail` 秒は印を付け続ける
+    @Test func selfLoadMarkerKeepsTheTail() {
+        var m = SelfLoadMarker()
+        func at(_ s: Double) -> Date { Self.start.addingTimeInterval(s) }
+        #expect(m.mark(nil, at: at(0)) == nil)
+        #expect(m.mark(.speedTest, at: at(1)) == .speedTest)
+        #expect(m.mark(.speedTest, at: at(20)) == .speedTest)
+        #expect(m.mark(nil, at: at(21)) == .speedTest)
+        #expect(m.mark(nil, at: at(20 + SelfLoadMarker.tail - 1)) == .speedTest)
+        #expect(m.mark(nil, at: at(20 + SelfLoadMarker.tail)) == nil)
+        #expect(m.mark(.loadTest, at: at(40)) == .loadTest)
+        #expect(m.mark(nil, at: at(41)) == .loadTest)
+    }
+
+    /// 帯は続いている秒ごとにまとめる（`Tick.date` はその1秒の終わりなので、1秒前から始める）
+    @Test func excludedSpans() {
+        func at(_ s: Double) -> Date { Self.start.addingTimeInterval(s) }
+        #expect(LatencySeries.spans([]).isEmpty)
+        let spans = LatencySeries.spans([3, 4, 5, 10, 11].map(at))
+        #expect(spans == [at(2)...at(5), at(9)...at(11)])
+    }
+
+    @Test func latencySeriesCarriesExcludedSpans() {
+        let ticks = (0..<30).map { Self.tick($0, gw: 8, excluded: (10..<15).contains($0) ? .speedTest : nil) }
+        let series = LatencySeries.make(ticks[...], seconds: 30)
+        #expect(series.excluded == [Self.start.addingTimeInterval(9)...Self.start.addingTimeInterval(14)])
+        // 線は消さない
+        #expect(series.points.contains { $0.date >= Self.start.addingTimeInterval(10) && $0.date <= Self.start.addingTimeInterval(14) })
     }
 }

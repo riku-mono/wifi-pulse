@@ -25,9 +25,30 @@ nonisolated enum Exclusion: Sendable, Hashable {
     /// LAN の掃引。約1000個の宛先へ ARP のブロードキャストが飛び、ルーター宛ての ping が
     /// 1〜2秒 100 ms 超に跳ねる・落ちる（家の Wi-Fi で 8 ms → 100〜160 ms を確認）
     case lanScan
+    /// このアプリの速度測定・負荷試験。自分で回線を埋めているので、その間の遅延・ロスは普段の状態ではない
+    case speedTest
+    case loadTest
 
     /// 判定を止めて理由を表示するか。数秒で終わるものは黙って外し、スコアは残りの秒から出す
-    var pausesJudgement: Bool { self == .warmup }
+    var pausesJudgement: Bool { self != .lanScan }
+}
+
+/// 自分でかけた負荷（速度測定・負荷試験）の印。終わってからも `tail` 秒は付け続ける
+/// （回線やルーターのキューが引くまで遅延が高いまま残ることがある。家の Wi-Fi では `networkQuality` の間
+/// 100〜250 ms・終わった次の秒に 10 ms 前後へ戻ったが、キューの深いルーターを見込んで余裕を取る）
+nonisolated struct SelfLoadMarker {
+    static let tail: TimeInterval = 5
+    private var last: (reason: Exclusion, at: Date)?
+
+    /// `running` はいま実行中のもの。印を付ける理由を返す
+    mutating func mark(_ running: Exclusion?, at date: Date) -> Exclusion? {
+        if let running {
+            last = (running, date)
+            return running
+        }
+        if let last, date.timeIntervalSince(last.at) < Self.tail { return last.reason }
+        return nil
+    }
 }
 
 /// 判定を止めている間の表示
@@ -40,6 +61,8 @@ struct JudgementPause: Equatable {
         switch reason {
         case .warmup: String(localized: "Getting Ready")
         case .lanScan: String(localized: "Scanning for Devices")
+        case .speedTest: String(localized: "Speed Test Running")
+        case .loadTest: String(localized: "Load Test Running")
         }
     }
 
@@ -47,6 +70,8 @@ struct JudgementPause: Equatable {
         switch reason {
         case .warmup: String(localized: "Waiting a few seconds after launch so start-up activity doesn’t affect the score.")
         case .lanScan: String(localized: "Looking for devices on your network. The score resumes shortly.")
+        case .speedTest: String(localized: "The score is paused while the speed test fills your connection, and resumes a few seconds after it ends.")
+        case .loadTest: String(localized: "The score is paused while the load test fills your connection, and resumes a few seconds after it ends.")
         }
     }
 }
@@ -149,6 +174,9 @@ final class Monitor {
     @ObservationIgnored private var loops: [Task<Void, Never>] = []
     @ObservationIgnored private let pathMonitor = NWPathMonitor()
     @ObservationIgnored private var warmupEnd: Date?
+    @ObservationIgnored private var selfLoadMarker = SelfLoadMarker()
+    /// このアプリがいま回線に負荷をかけているか（速度測定・負荷試験）。`AppModel` が設定する
+    @ObservationIgnored var selfLoad: () -> Exclusion? = { nil }
 
     var inet4Target: String { UserDefaults.standard.string(forKey: "inet4Target") ?? "1.1.1.1" }
     var inet6Target: String { UserDefaults.standard.string(forKey: "inet6Target") ?? "2001:4860:4860::8888" }
@@ -318,9 +346,14 @@ final class Monitor {
         s.rx = rx
         s.tx = tx
         if let excluded, excluded.pausesJudgement {
-            // 窓は空（スコアは nil）。何を待っているかと進み具合を出す
-            s.pause = JudgementPause(reason: excluded, progress: warmupEnd.map { Self.progress(at: raw.date, end: $0, length: Self.warmupSeconds) })
-            s.verdict = s.pause?.title ?? s.verdict
+            // スコアの代わりに、何を待っているか（慣らし運転なら進み具合も）を出す
+            let progress = excluded == .warmup ? warmupEnd.map { Self.progress(at: raw.date, end: $0, length: Self.warmupSeconds) } : nil
+            let pause = JudgementPause(reason: excluded, progress: progress)
+            s.pause = pause
+            s.score = nil
+            s.verdict = pause.title
+            s.level = .none
+            s.bottleneck = LiveSnapshot().bottleneck
         }
         live = s
         revision &+= 1
@@ -350,6 +383,7 @@ final class Monitor {
     /// 1分ぶんの生データを集計する。外す秒（`Tick.excluded`）は除き、残りが数秒だけなら意味が無いので nil
     nonisolated static func minuteRow(_ all: [Tick], network: String?) -> MinuteRow? {
         let ts = all.filter { $0.excluded == nil }
+        // 1分の大半が測定中などで残りが少なければ、その1分は捨てる（数秒ぶんの値は時間帯の集計を歪める）
         guard ts.count >= minimumPartialMinute else { return nil }
         func pct(_ kp: KeyPath<Tick, Pinger.Batch>, _ q: Double) -> Double? {
             percentile(ts.flatMap { $0[keyPath: kp].rtts }.sorted(), q)
@@ -371,13 +405,15 @@ final class Monitor {
             rx: (ts.reduce(0) { $0 + $1.rx } / Double(ts.count)).rounded(),
             tx: (ts.reduce(0) { $0 + $1.tx } / Double(ts.count)).rounded(),
             net: network,
-            bssid: links.last { $0.bssid != nil }?.bssid
+            bssid: links.last { $0.bssid != nil }?.bssid,
+            self_s: all.count > ts.count ? all.count - ts.count : nil
         )
     }
 
     /// この秒を判定・集計から外すか
     private func exclusion(at date: Date) -> Exclusion? {
         if let warmupEnd, date < warmupEnd { return .warmup }
+        if let load = selfLoadMarker.mark(selfLoad(), at: date) { return load }
         if devices.isSweeping { return .lanScan }
         return nil
     }

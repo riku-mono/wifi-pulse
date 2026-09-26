@@ -59,7 +59,7 @@ private struct LatencyContent: View, Equatable {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 Card("Latency Over Time", systemImage: "waveform.path.ecg",
-                     subtitle: String(localized: "Lines are medians; bands extend to the maximum. Red vertical lines mark packet loss. Logarithmic scale.")) {
+                     subtitle: String(localized: "Lines are medians; bands extend to the maximum. Red vertical lines mark packet loss. Gray shading marks time left out of the score (speed tests, load tests, device scans). Logarithmic scale.")) {
                     LatencyBandChart(series: series).equatable()
                         .frame(height: 280)
                 }
@@ -98,7 +98,22 @@ struct LatencySeries: Equatable {
     }
     var points: [Point] = []
     var losses: [Date] = []
+    /// 判定から外した区間（グラフに帯で示す）
+    var excluded: [ClosedRange<Date>] = []
     var domain: ClosedRange<Date> = Date()...Date()
+
+    /// 判定から外した秒（`Tick.date` はその1秒の終わり）を、続いている区間にまとめる
+    nonisolated static func spans(_ dates: [Date]) -> [ClosedRange<Date>] {
+        var out: [ClosedRange<Date>] = []
+        for d in dates {
+            if let last = out.last, d.timeIntervalSince(last.upperBound) <= 1.5 {
+                out[out.count - 1] = last.lowerBound...d
+            } else {
+                out.append(d.addingTimeInterval(-1)...d)
+            }
+        }
+        return out
+    }
 
     /// 表示範囲を約240区間に分け、区間ごとの中央値と最大値を出す
     static func make(_ ticks: ArraySlice<Tick>, seconds: Int) -> LatencySeries {
@@ -124,7 +139,7 @@ struct LatencySeries: Equatable {
                 }
             }
         }
-        return LatencySeries(points: out, losses: losses, domain: start...end)
+        return LatencySeries(points: out, losses: losses, excluded: spans(ticks.filter { $0.excluded != nil }.map(\.date)), domain: start...end)
     }
 }
 
@@ -133,6 +148,10 @@ private struct LatencyBandChart: View, Equatable {
 
     var body: some View {
         Chart {
+            ForEach(series.excluded, id: \.lowerBound) { r in
+                RectangleMark(xStart: .value("Time", r.lowerBound), xEnd: .value("Time", r.upperBound))
+                    .foregroundStyle(.gray.opacity(0.15))
+            }
             ForEach(series.points) { p in
                 AreaMark(x: .value("Time", p.date), yStart: .value("Median", p.p50), yEnd: .value("Max", p.max),
                          series: .value("Target", p.series))
@@ -173,7 +192,8 @@ private struct HistogramChart: View, Equatable {
     static func bins(_ slice: ArraySlice<Tick>) -> [Bin] {
         func count(_ kp: KeyPath<Tick, Pinger.Batch>, _ series: String) -> [Bin] {
             var c = Array(repeating: 0, count: edges.count)
-            for t in slice {
+            // 隣の統計と同じく、判定から外した秒は数えない
+            for t in slice where t.excluded == nil {
                 for v in t[keyPath: kp].rtts { c[(edges.lastIndex { v >= $0 }) ?? 0] += 1 }
             }
             return c.indices.map { Bin(label: label($0), series: series, count: c[$0]) }

@@ -66,6 +66,9 @@ final class AppModel {
         Logger(subsystem: Bundle.main.bundleIdentifier ?? "WiFiPulse", category: "app")
             .info("launch language=\(AppLanguage.current, privacy: .public) override=\(AppLanguage.override ?? "-", privacy: .public) system=\(AppLanguage.systemChoice, privacy: .public)")
         selection = UserDefaults.standard.string(forKey: "selectedView").flatMap(SidebarItem.init(rawValue:)) ?? .overview
+        monitor.selfLoad = { [speedTest, loadTest] in
+            speedTest.isRunning ? .speedTest : loadTest.isRunning ? .loadTest : nil
+        }
         monitor.start()
     }
 }
