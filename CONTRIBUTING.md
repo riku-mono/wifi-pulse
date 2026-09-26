@@ -4,7 +4,8 @@ Thanks for your interest! Issues and pull requests are welcome in English or Jap
 （日本語での Issue・PR も歓迎します。）
 
 > [!NOTE]
-> The source code is not open source (see [LICENSE](LICENSE)). By submitting a contribution, you agree that it may be used and distributed as part of Wi-Fi Pulse under the project's license.
+> Contributions are licensed under the [Apache License 2.0](LICENSE), like the rest of the code (section 5 of the License).
+> The name “Wi-Fi Pulse” and the app icon are not part of that — see [TRADEMARKS.md](TRADEMARKS.md).
 
 ## Before you start
 

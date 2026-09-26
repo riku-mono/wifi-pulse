@@ -16,7 +16,7 @@
   <img src="https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white" alt="Swift 6">
   <img src="https://img.shields.io/badge/SwiftUI-native-0A84FF" alt="SwiftUI">
   <a href="https://github.com/riku-mono/wifi-pulse/actions/workflows/l10n.yml"><img src="https://github.com/riku-mono/wifi-pulse/actions/workflows/l10n.yml/badge.svg" alt="Localization"></a>
-  <img src="https://img.shields.io/badge/license-proprietary-lightgrey" alt="License: proprietary">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue" alt="License: Apache-2.0"></a>
 </p>
 
 > [!NOTE]
@@ -130,4 +130,7 @@ wifi-pulse/
 
 ## ライセンス
 
-All rights reserved. [LICENSE](LICENSE) を参照。
+ソースコードは [Apache License 2.0](LICENSE)。
+
+ただし「Wi-Fi Pulse」の名前とアプリアイコンは対象外で、© riku-mono, All rights reserved。
+フォークを配るときは、名前とアイコンを自分のものに変えてください。詳しくは [TRADEMARKS.md](TRADEMARKS.md)（日本語の要約あり）と [NOTICE](NOTICE)。

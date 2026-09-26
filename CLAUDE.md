@@ -15,6 +15,7 @@ Wi-Fi Pulse: Mac の Wi-Fi とネットワークを常時計測・診断する m
 - `scripts/unregister-dev-builds.sh` — 開発用ビルドを LaunchServices の登録から外す
 - `.github/workflows/l10n.yml` — カバレッジの CI（Ubuntu）
 - `.github/ISSUE_TEMPLATE/`・`pull_request_template.md` — Issue・PR のテンプレート。`CONTRIBUTING.md`・`SECURITY.md`
+- `LICENSE`（Apache-2.0）・`NOTICE`・`TRADEMARKS.md` — コードは Apache-2.0、名前とアイコン（`AppIcon.icon`・`assets/`）は All rights reserved、`oui.tsv` は IEEE のデータ
 - `assets/` — README・LP 用のアプリアイコンの画像（`AppIcon.icon` を `ictool` で書き出したもの）
 
 ## ビルド・実行

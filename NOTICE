@@ -1,0 +1,16 @@
+Wi-Fi Pulse
+Copyright 2026 riku-mono
+
+The source code in this repository is licensed under the Apache License,
+Version 2.0 (see LICENSE), with the following exceptions:
+
+1. Name and icon — all rights reserved
+   The name "Wi-Fi Pulse" and the app icon, including
+   apps/macos/WiFiPulse/Resources/AppIcon.icon and the images in assets/,
+   are not licensed under the Apache License. Section 6 of the License does
+   not grant permission to use them. See TRADEMARKS.md.
+
+2. OUI vendor table
+   apps/macos/WiFiPulse/Resources/oui.tsv is derived from the IEEE
+   Registration Authority's public MA-L listing. It is not covered by the
+   Apache License and remains subject to the IEEE's terms.
