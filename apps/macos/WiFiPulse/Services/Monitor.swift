@@ -93,6 +93,10 @@ final class Monitor {
     private(set) var pathStatus = String(localized: "Checking connection")
     /// 保存された1分集計が更新されるたびに増える（時間帯グラフの再読み込み用）
     private(set) var minuteRevision = 0
+    /// いまのネットワークの識別子。切り替わったときだけ変わる
+    private(set) var network: String?
+    /// これまでに計測したネットワーク
+    private(set) var networks: [String: KnownNetwork] = [:]
 
     let devices = DeviceScanner()
 
@@ -112,8 +116,11 @@ final class Monitor {
     func start() {
         guard !isRunning else { return }
         isRunning = true
+        networks = DataStore.readJSON(DataStore.networks, as: [String: KnownNetwork].self) ?? [:]
         Task {
             env = await NetworkEnvironment.resolve()
+            network = env.networkID
+            registerNetwork()
             restartPingers()
             devices.start(monitor: self)
             loops.append(Task { await tickLoop() })
@@ -125,19 +132,69 @@ final class Monitor {
             case .unsatisfied: String(localized: "Not connected")
             default: String(localized: "Checking connection")
             }
-            Task { @MainActor in await self?.networkChanged(text) }
+            let at = Date()
+            Task { @MainActor in await self?.networkChanged(text, at: at) }
         }
         pathMonitor.start(queue: DispatchQueue(label: "WiFiPulse.path"))
     }
 
-    private func networkChanged(_ status: String) async {
+    private func networkChanged(_ status: String, at: Date) async {
         if pathStatus != status { pathStatus = status }
         guard isRunning else { return }
-        let fresh = await NetworkEnvironment.resolve()
+        var fresh = await NetworkEnvironment.resolve()
+        // ARP が一時的に引けなくても、ゲートウェイが同じならルーターは変わっていないとみなす
+        if fresh.routerMAC.isEmpty, fresh.gateway == env.gateway { fresh.routerMAC = env.routerMAC }
         if fresh != env {
             env = fresh
+            // 切断中（識別子なし）は区切らない。一瞬切れて同じネットワークに戻っても履歴は続ける
+            if let id = fresh.networkID, id != network {
+                if network == "ip:\(fresh.gateway)" {
+                    // ルーターの MAC が後から取れた（ローカルネットワークの許可など）。同じネットワークとして続ける
+                    network = id
+                    registerNetwork()
+                } else {
+                    switchNetwork(to: id, at: at)
+                }
+            }
             restartPingers()
         }
+    }
+
+    /// 前のネットワークの計測を新しいネットワークに混ぜない。
+    /// 変化に気づいた時点（`at`）より前の生データは前のネットワークの分として書き出し、履歴からも外す。
+    private func switchNetwork(to id: String, at boundary: Date) {
+        let old = network
+        let before = minuteBuffer.filter { $0.date < boundary }
+        // 数秒だけの切れ端は1分集計として意味が無いので捨てる
+        if before.count >= Self.minimumPartialMinute { flushMinute(before, network: old) }
+        minuteBuffer.removeAll { $0.date < boundary }
+        history.removeAll { $0.date < boundary }
+        dns.removeAll()
+        network = id
+        registerNetwork()
+        revision &+= 1
+    }
+
+    static let minimumPartialMinute = 10
+
+    private func registerNetwork() {
+        guard let id = network, networks[id]?.gateway != env.gateway else { return }
+        var n = networks[id] ?? KnownNetwork(id: id, gateway: env.gateway, first: Date().epochMs)
+        n.gateway = env.gateway
+        networks[id] = n
+        saveNetworks()
+    }
+
+    private func saveNetworks() {
+        let snapshot = networks
+        Task.detached(priority: .utility) { DataStore.writeJSON(snapshot, to: DataStore.networks) }
+    }
+
+    /// 設定で記録を消したとき。いまのネットワークだけ残す
+    func recordsDeleted() {
+        networks = networks.filter { $0.key == network }
+        saveNetworks()
+        minuteRevision += 1
     }
 
     private func restartPingers() {
@@ -201,7 +258,7 @@ final class Monitor {
 
         minuteBuffer.append(t)
         if minuteBuffer.count >= 60 {
-            flushMinute(minuteBuffer)
+            flushMinute(minuteBuffer, network: network)
             minuteBuffer.removeAll(keepingCapacity: true)
         }
 
@@ -228,9 +285,14 @@ final class Monitor {
         if title != networkTitle { networkTitle = title }
         let c = ConnectionInfo(ssid: raw.link?.ssid, bssid: raw.link?.bssid, band: raw.link?.band, channel: raw.link?.channel)
         if c != connection { connection = c }
+        // SSID は位置情報の許可があるときだけ取れる。取れたらネットワークの表示名にする
+        if let id = network, let ssid = c.ssid, !ssid.isEmpty, networks[id] != nil, networks[id]?.ssid != ssid {
+            networks[id]?.ssid = ssid
+            saveNetworks()
+        }
     }
 
-    private func flushMinute(_ ts: [Tick]) {
+    private func flushMinute(_ ts: [Tick], network: String?) {
         func pct(_ kp: KeyPath<Tick, Pinger.Batch>, _ q: Double) -> Double? {
             percentile(ts.flatMap { $0[keyPath: kp].rtts }.sorted(), q)
         }
@@ -249,7 +311,9 @@ final class Monitor {
             v450: pct(\.v4, 0.5), v495: pct(\.v4, 0.95), v650: pct(\.v6, 0.5),
             lgw: loss(\.gw), lv4: loss(\.v4),
             rx: (ts.reduce(0) { $0 + $1.rx } / Double(ts.count)).rounded(),
-            tx: (ts.reduce(0) { $0 + $1.tx } / Double(ts.count)).rounded()
+            tx: (ts.reduce(0) { $0 + $1.tx } / Double(ts.count)).rounded(),
+            net: network,
+            bssid: links.last { $0.bssid != nil }?.bssid
         )
         Task.detached(priority: .utility) { DataStore.append(row, to: DataStore.minutes) }
         minuteRevision += 1

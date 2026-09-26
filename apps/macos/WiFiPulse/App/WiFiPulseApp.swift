@@ -59,7 +59,7 @@ struct AppCommands: Commands {
     var body: some Commands {
         CommandMenu("Measure") {
             Button("Measure Speed") {
-                Task { await model.speedTest.run(interface: model.monitor.env.interface) }
+                Task { await model.speedTest.run(env: model.monitor.env) }
             }
             .keyboardShortcut("t", modifiers: [.command, .shift])
             .disabled(model.speedTest.isRunning)

@@ -81,6 +81,7 @@ private struct LanguageSection: View {
 }
 
 private struct DataSettings: View {
+    @Environment(AppModel.self) private var model
     @AppStorage(DataStore.folderKey) private var folderPath = ""
     @State private var picking = false
     @State private var confirmDelete = false
@@ -121,7 +122,10 @@ private struct DataSettings: View {
             if case .success(let url) = result { folderPath = url.path(percentEncoded: false) }
         }
         .confirmationDialog("Delete all measurement records?", isPresented: $confirmDelete) {
-            Button("Delete", role: .destructive) { DataStore.deleteRecords() }
+            Button("Delete", role: .destructive) {
+                DataStore.deleteRecords()
+                model.monitor.recordsDeleted()
+            }
         } message: {
             Text("This can’t be undone.")
         }

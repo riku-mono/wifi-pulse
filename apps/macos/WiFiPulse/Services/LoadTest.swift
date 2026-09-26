@@ -175,7 +175,7 @@ final class LoadTest {
         let worst = verdict.values.map(\.grade).max { (order.firstIndex(of: $0) ?? 9) < (order.firstIndex(of: $1) ?? 9) }
         let rec = LoadTestRecord(t: started.epochMs, iface: env.interface, gw: env.gateway, target: target,
                                  duration: duration, streams: streams, phases: phases,
-                                 verdict: verdict, worst_grade: worst ?? "?")
+                                 verdict: verdict, worst_grade: worst ?? "?", net: env.networkID)
         DataStore.append(rec, to: DataStore.loadtests)
         history.append(rec)
         result = rec

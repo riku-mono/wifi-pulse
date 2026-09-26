@@ -15,6 +15,8 @@ nonisolated struct Device: Codable, Identifiable, Hashable, Sendable {
     var vendor_ja: String?
     var online: Bool?
     var name: String?
+    /// 最後に見えたネットワークの識別子（`NetworkEnvironment.networkID`）
+    var net: String?
 
     var displayName: String { name ?? mdns ?? vendor_ja ?? vendor ?? (random == true ? String(localized: "Device with a Private Address") : String(localized: "Unknown Device")) }
     var lastSeen: Date { Date(epochMs: last) }
@@ -112,6 +114,7 @@ final class DeviceScanner {
                 var d = registry[mac] ?? Device(mac: mac, first: now, last: now)
                 d.ip = ip
                 d.last = now
+                d.net = env.networkID
                 if d.vendor == nil {
                     d.vendor = await OUI.shared.vendor(for: mac)
                     d.random = OUI.isRandomized(mac)
