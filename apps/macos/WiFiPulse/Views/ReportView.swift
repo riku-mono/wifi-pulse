@@ -119,7 +119,7 @@ struct ReportView: View {
         .onChange(of: records.minutes.count) { copied = false }
     }
 
-    private var effectiveScope: NetworkFilter { scope ?? NetworkFilter(model.monitor.network) }
+    private var effectiveScope: NetworkFilter { scope ?? model.monitor.network.map(NetworkFilter.network) ?? .all }
 
     private func name(_ id: String) -> String {
         model.monitor.networks[id]?.displayName ?? String(localized: "Unknown Network")
@@ -128,7 +128,6 @@ struct ReportView: View {
     private var scopeName: String {
         switch effectiveScope {
         case .all: String(localized: "All Networks")
-        case .unknown: String(localized: "Network Not Recorded")
         case .network(let id): name(id)
         }
     }
@@ -147,11 +146,10 @@ struct ReportView: View {
                 ForEach(others) { Text($0.displayName).tag(NetworkFilter?.some(.network($0.id))) }
             }
             Divider()
-            Text("Network Not Recorded").tag(NetworkFilter?.some(.unknown))
             Text("All Networks").tag(NetworkFilter?.some(.all))
         }
         .fixedSize()
-        .help("Records are kept separately for each network (router). Records made before this was tracked are under “Network Not Recorded”.")
+        .help("Records are kept separately for each network (router).")
     }
 
     private var coverage: some View {

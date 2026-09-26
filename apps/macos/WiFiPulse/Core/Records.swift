@@ -92,16 +92,11 @@ nonisolated struct KnownNetwork: Codable, Sendable, Identifiable, Hashable {
 /// レポートなどで、どのネットワークの記録を見るか
 nonisolated enum NetworkFilter: Hashable, Sendable {
     case all
-    /// ネットワークを記録する前の記録・接続していなかったときの記録
-    case unknown
     case network(String)
-
-    init(_ id: String?) { self = id.map(Self.network) ?? .unknown }
 
     func includes(_ net: String?) -> Bool {
         switch self {
         case .all: true
-        case .unknown: net == nil
         case .network(let id): net == id
         }
     }

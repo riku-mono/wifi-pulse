@@ -2657,16 +2657,6 @@
         }
       }
     },
-    "Network Not Recorded" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ネットワーク不明（以前の記録）"
-          }
-        }
-      }
-    },
     "Network at %@" : {
       "localizations" : {
         "ja" : {
@@ -3393,12 +3383,12 @@
         }
       }
     },
-    "Records are kept separately for each network (router). Records made before this was tracked are under “Network Not Recorded”." : {
+    "Records are kept separately for each network (router)." : {
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "記録はネットワーク（ルーター）ごとに分けています。この機能より前の記録は「ネットワーク不明（以前の記録）」にあります。"
+            "value" : "記録はネットワーク（ルーター）ごとに分けています。"
           }
         }
       }
