@@ -2,6 +2,19 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_airplay._tcp</string>
+		<string>_companion-link._tcp</string>
+		<string>_googlecast._tcp</string>
+		<string>_hap._tcp</string>
+		<string>_raop._tcp</string>
+		<string>_spotify-connect._tcp</string>
+		<string>_ipp._tcp</string>
+		<string>_ipps._tcp</string>
+		<string>_pdl-datastream._tcp</string>
+		<string>_smb._tcp</string>
+	</array>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Used to measure latency to your router and to list devices on your local network.</string>
 	<key>NSLocationUsageDescription</key>

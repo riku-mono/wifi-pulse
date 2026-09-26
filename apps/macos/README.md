@@ -26,6 +26,7 @@ Xcode のファイルシステム同期グループを使っているので、`W
 |---|---|---|---|
 | `Monitor` | CoreWLAN・`getifaddrs`・`Pinger` ×3・`dig` | 1秒（DNS は10秒） | 常時 |
 | `DeviceScanner` | UDP スイープ・ARP 表（sysctl）・mDNS 逆引き | 20秒 | 常時 |
+| `Bonjour` | `NWBrowser`（AirPlay・プリンターなど10種、4秒だけ探す） | 掃引のたび＋2分ごと | 掃引のとき・「LAN の機器」を開いている間 |
 | `ProcessMonitor` | `nettop`（疑似端末経由） | 2秒 | 「アプリの通信」を開いている間 |
 | `NeighborScanner` | CoreWLAN スキャン | 手動／自動（30秒〜） | 「周辺の Wi-Fi」 |
 | `SpeedTest` / `LoadTest` / `WiFiEvents` | `networkQuality`・URLSession・`log show` | 手動 | ボタンを押したとき |
