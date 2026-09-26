@@ -73,7 +73,7 @@ struct MenuBarSummary: View {
         let s = live
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 12) {
-                ScoreRing(score: s.score, level: s.level, lineWidth: 5)
+                ScoreRing(score: s.score, level: s.level, lineWidth: 5, progress: s.pause?.progress)
                     .frame(width: 48, height: 48)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(s.verdict)
@@ -97,7 +97,8 @@ struct MenuBarSummary: View {
                 row("wifi", "Signal", s.link.map { "\($0.rssi) dBm · \($0.bandLabel) ch\($0.channel ?? 0)" } ?? "—", Level.rssi(s.link?.rssi))
                 row("wifi.router", "Router", String(localized: "\(Fmt.ms(s.w30.gw.p50)) ms (p95 \(Fmt.ms(s.w30.gw.p95)))"), Level.gateway(s.w30.gw.p95))
                 row("globe.asia.australia", "Internet", String(localized: "\(Fmt.ms(s.w30.v4.p50)) ms (p95 \(Fmt.ms(s.w30.v4.p95)))"), Level.internet(s.w30.v4.p95))
-                row("waveform", "Loss", "\(Fmt.pct(s.w60.worstLoss))%", Level.loss(s.w60.worstLoss))
+                // 窓が空（起動直後・慣らし運転中）なら 0% と ✓ を出さない
+                row("waveform", "Loss", s.w60.isEmpty ? "—" : "\(Fmt.pct(s.w60.worstLoss))%", s.w60.isEmpty ? .none : Level.loss(s.w60.worstLoss))
                 row("arrow.up.arrow.down", "Traffic", "↓\(Fmt.mbps(s.rx)) ↑\(Fmt.mbps(s.tx)) Mbps", .none)
             }
             .font(.callout)

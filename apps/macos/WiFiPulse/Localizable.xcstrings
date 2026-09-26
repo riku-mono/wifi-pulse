@@ -1732,6 +1732,16 @@
         }
       }
     },
+    "Getting Ready" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "計測を準備中"
+          }
+        }
+      }
+    },
     "Good" : {
       "localizations" : {
         "ja" : {
@@ -2344,16 +2354,6 @@
         }
       }
     },
-    "macOS didn’t return any devices on this network. Local network access may not be allowed, or macOS may be hiding the device list from this build of the app." : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "macOS からこのネットワークの機器が返ってきませんでした。ローカルネットワークへのアクセスが許可されていないか、macOS がこのビルドのアプリに機器の一覧を見せていない可能性があります。"
-          }
-        }
-      }
-    },
     "Location" : {
       "localizations" : {
         "ja" : {
@@ -2370,6 +2370,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "機器を探しています…"
+          }
+        }
+      }
+    },
+    "Looking for devices on your network. The score resumes shortly." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ネットワーク上の機器を探しています。まもなくスコアの表示に戻ります。"
           }
         }
       }
@@ -3785,6 +3795,16 @@
         }
       }
     },
+    "Scanning for Devices" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "機器を探しています"
+          }
+        }
+      }
+    },
     "Scanning nearby networks…" : {
       "localizations" : {
         "ja" : {
@@ -4846,6 +4866,16 @@
         }
       }
     },
+    "Waiting a few seconds after launch so start-up activity doesn’t affect the score." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "起動直後の乱れがスコアに入らないよう、数秒待っています。"
+          }
+        }
+      }
+    },
     "Waiting for the first data…" : {
       "localizations" : {
         "ja" : {
@@ -5231,6 +5261,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "mDNS 名"
+          }
+        }
+      }
+    },
+    "macOS didn’t return any devices on this network. Local network access may not be allowed, or macOS may be hiding the device list from this build of the app." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "macOS からこのネットワークの機器が返ってきませんでした。ローカルネットワークへのアクセスが許可されていないか、macOS がこのビルドのアプリに機器の一覧を見せていない可能性があります。"
           }
         }
       }

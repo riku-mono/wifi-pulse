@@ -43,12 +43,12 @@ private struct HeroCard: View {
         let band = Analysis.timeBand(s.date == .distantPast ? Date() : s.date)
         Card {
             HStack(alignment: .center, spacing: 28) {
-                ScoreRing(score: s.score, level: s.level)
+                ScoreRing(score: s.score, level: s.level, progress: s.pause?.progress)
                     .frame(width: 150, height: 150)
                 VStack(alignment: .leading, spacing: 12) {
                     Text(s.verdict)
                         .font(.system(.largeTitle, design: .rounded, weight: .bold))
-                    Text(Analysis.sentence(s.w60, short: s.w30, link: s.link))
+                    Text(s.pause?.detail ?? Analysis.sentence(s.w60, short: s.w30, link: s.link))
                         .font(.title3)
                         .foregroundStyle(.secondary)
                     HStack(alignment: .firstTextBaseline, spacing: 10) {
