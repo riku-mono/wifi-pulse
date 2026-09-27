@@ -103,7 +103,7 @@ final class DeviceScanner {
     func start(monitor: Monitor) {
         guard loop == nil else { return }
         self.monitor = monitor
-        registry = DataStore.readJSON(DataStore.devices, as: [String: Device].self) ?? [:]
+        registry = Self.unescapingNames(DataStore.readJSON(DataStore.devices, as: [String: Device].self) ?? [:])
         names = DataStore.readJSON(DataStore.deviceNames, as: [String: String].self) ?? [:]
         loop = Task { await run() }
     }
@@ -136,6 +136,16 @@ final class DeviceScanner {
     private func saveNames() {
         let snapshot = names
         Task.detached(priority: .utility) { DataStore.writeJSON(snapshot, to: DataStore.deviceNames) }
+    }
+
+    /// #16 で直す前に保存した mDNS 名（`Doorbell\032Repeater` など）のエスケープを戻す。
+    /// 名前がある機器には問い合わせ直さないので、読み込むときに直す
+    nonisolated static func unescapingNames(_ registry: [String: Device]) -> [String: Device] {
+        registry.mapValues { d in
+            var d = d
+            if let name = d.mdns, name.contains("\\") { d.mdns = unescapeDNS(name) }
+            return d
+        }
     }
 
     /// Bonjour で見つかった機器を registry に入れる。ARP 表に同じ IP があればその MAC の登録に、

@@ -97,6 +97,14 @@ struct DeviceBonjourMergeTests {
         #expect(kind(Device(mac: "ip:1", first: 0, last: 0, model: "AudioAccessory5,1", services: ["airplay"])) == "speaker")
     }
 
+    /// 古い記録に残ったエスケープ（`\032` は空白）を読み込むときに戻す
+    @Test func unescapesStoredMDNSNames() {
+        let old = [Self.mac: Device(mac: Self.mac, first: 0, last: 0, mdns: #"Doorbell\032Repeater-0A01"#)]
+        #expect(DeviceScanner.unescapingNames(old)[Self.mac]?.mdns == "Doorbell Repeater-0A01")
+        let plain = [Self.mac: Device(mac: Self.mac, first: 0, last: 0, mdns: "Living-Room")]
+        #expect(DeviceScanner.unescapingNames(plain)[Self.mac]?.mdns == "Living-Room")
+    }
+
     @Test func decodesDevicesWithoutBonjourFields() throws {
         let json = #"{"aa:bb:cc:00:00:01":{"first":1,"last":2,"mac":"aa:bb:cc:00:00:01"}}"#
         let d = try JSONDecoder().decode([String: Device].self, from: Data(json.utf8))
