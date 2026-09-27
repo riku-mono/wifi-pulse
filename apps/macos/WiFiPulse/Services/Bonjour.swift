@@ -148,11 +148,17 @@ nonisolated enum Bonjour {
         return v
     }
 
+    /// LAN の機器の IPv4 アドレス。この Mac 自身のサービスはループバック（127.x）に解決されることがあり、
+    /// リンクローカル（169.254.x）も LAN の機器一覧の対象ではないので除く
     static func ipv4(_ host: NWEndpoint.Host) -> String? {
         guard case .ipv4(let a) = host else { return nil }
         let b = [UInt8](a.rawValue)
-        guard b.count == 4 else { return nil }
+        guard b.count == 4, isLANAddress(b) else { return nil }
         return b.map(String.init).joined(separator: ".")
+    }
+
+    static func isLANAddress(_ b: [UInt8]) -> Bool {
+        b.count == 4 && b[0] != 127 && !(b[0] == 169 && b[1] == 254) && b[0] != 0 && b[0] < 224
     }
 
     /// ローカルネットワークの許可が無いときの拒否（kDNSServiceErr_PolicyDenied）
