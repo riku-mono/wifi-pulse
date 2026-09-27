@@ -65,6 +65,9 @@ struct ContentView: View {
                     }
                 }
             }
+            // フォーカスを取らない。取ると選択中の行がアクセント色の背景で強調され、アイコンが白くなる。
+            // 取らなければ灰色の背景で、アイコンの色は選択外と同じまま（ミュージック・App Store と同じ）
+            .focusable(false)
             .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 280)
             .safeAreaInset(edge: .bottom) { SidebarStatus() }
         } detail: {
@@ -114,17 +117,12 @@ private struct SidebarRow: View {
         .badge(badge)
     }
 
-    /// 選択外のアイコンは色を明示する。既定の色のままだとサイドバーの vibrancy で合成され、
-    /// Mission Control の縮小中に透明になってちらつく（macOS 27。#23）。
-    /// 色は標準に合わせ、アクティブならアクセントカラー、非アクティブなら灰色。
-    /// 選択中の行は標準のまま（選択の背景の上で白になる）。
-    @ViewBuilder private var icon: some View {
-        let image = Image(systemName: item.systemImage)
-        if model.selection == item {
-            image
-        } else {
-            image.foregroundStyle(Color(nsColor: appearsActive ? .controlAccentColor : .secondaryLabelColor))
-        }
+    /// アイコンは選択中も含めて色を明示する（ミュージック・App Store と同じ）。既定の色のままだと
+    /// サイドバーの vibrancy で合成され、Mission Control の縮小中に透明になってちらつく（macOS 27。#23）。
+    /// 色は HIG に合わせ、アクティブならアクセントカラー、非アクティブなら灰色。
+    private var icon: some View {
+        Image(systemName: item.systemImage)
+            .foregroundStyle(Color(nsColor: appearsActive ? .controlAccentColor : .secondaryLabelColor))
     }
 
     private var badge: Text? {
