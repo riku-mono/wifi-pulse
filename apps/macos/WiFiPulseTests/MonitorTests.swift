@@ -86,6 +86,16 @@ struct ExclusionTests {
         #expect(!Exclusion.wifiScan.pausesJudgement)
     }
 
+    /// スリープなどで秒が大きく空いたら、1分の集計をそこで区切る（#48）
+    @Test func breaksMinuteAcrossAGap() {
+        func at(_ s: Double) -> Date { Self.start.addingTimeInterval(s) }
+        #expect(!Monitor.breaksMinute(after: nil, next: at(0)))
+        #expect(!Monitor.breaksMinute(after: at(0), next: at(1)))
+        #expect(!Monitor.breaksMinute(after: at(0), next: at(Monitor.maxTickGap)))
+        #expect(Monitor.breaksMinute(after: at(0), next: at(Monitor.maxTickGap + 1)))
+        #expect(Monitor.breaksMinute(after: at(0), next: at(36 * 60)))
+    }
+
     /// 測定が終わってからも `tail` 秒は印を付け続ける
     @Test func selfLoadMarkerKeepsTheTail() {
         var m = SelfLoadMarker()

@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import Network
 import Observation
@@ -20,7 +21,7 @@ nonisolated struct Tick: Identifiable, Sendable {
 
 /// その秒の計測をスコア・判定・1分集計から外す理由。
 nonisolated enum Exclusion: Sendable, Hashable {
-    /// 起動直後の慣らし運転（窓に十分なサンプルが溜まるまで判定しない）。
+    /// 起動・スリープからの復帰の直後の慣らし運転（窓に十分なサンプルが溜まるまで判定しない）。
     /// この秒は履歴にも入れない（どの画面のグラフも、スコアと同じく慣らし運転の後から描く）
     case warmup
     /// LAN の掃引。約1000個の宛先へ ARP のブロードキャストが飛び、ルーター宛ての ping が
@@ -73,7 +74,7 @@ struct JudgementPause: Equatable {
 
     var detail: String {
         switch reason {
-        case .warmup: String(localized: "Waiting a few seconds after launch so start-up activity doesn’t affect the score.")
+        case .warmup: String(localized: "Waiting a few seconds after launch or waking from sleep so start-up activity doesn’t affect the score.")
         case .lanScan: String(localized: "Looking for devices on your network. The score resumes shortly.")
         case .speedTest: String(localized: "The score is paused while the speed test fills your connection, and resumes a few seconds after it ends.")
         case .loadTest: String(localized: "The score is paused while the load test fills your connection, and resumes a few seconds after it ends.")
@@ -182,6 +183,8 @@ final class Monitor {
     /// 起動後、判定を始めるまでの秒数。掃引（起動の直後に走り、約3秒で終わる）とその後の乱れが収まり、
     /// 窓にルーター宛て 50 発ほどが溜まるまで
     static let warmupSeconds: TimeInterval = 10
+    /// 前の秒とこれ以上空いたら、1分の集計をそこで区切る（スリープなど。空白をまたいで1分をつながない）
+    nonisolated static let maxTickGap: TimeInterval = 5
 
     private(set) var env = NetworkEnvironment()
     private(set) var live = LiveSnapshot()
@@ -211,6 +214,8 @@ final class Monitor {
     @ObservationIgnored private var loops: [Task<Void, Never>] = []
     @ObservationIgnored private let pathMonitor = NWPathMonitor()
     @ObservationIgnored private var warmupEnd: Date?
+    /// スリープ中（復帰して ping を取り直すまで、来た秒は捨てる）
+    @ObservationIgnored private var isAsleep = false
     @ObservationIgnored private var selfLoadMarker = SelfLoadMarker()
     /// 経路の変化を処理している数（その間は `network` がまだ前のネットワークを指していることがある）
     @ObservationIgnored private var resolvingPath = 0
@@ -238,6 +243,13 @@ final class Monitor {
             devices.start(monitor: self)
             loops.append(Task { await tickLoop() })
             loops.append(Task { await dnsLoop() })
+        }
+        let center = NSWorkspace.shared.notificationCenter
+        center.addObserver(forName: NSWorkspace.willSleepNotification, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated { self?.willSleep() }
+        }
+        center.addObserver(forName: NSWorkspace.didWakeNotification, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated { self?.didWake() }
         }
         pathMonitor.pathUpdateHandler = { [weak self] path in
             let text = switch path.status {
@@ -387,6 +399,30 @@ final class Monitor {
         pingersStarted = Date()
     }
 
+    /// スリープの前後は Mac の状態で、回線の実力ではない（復帰の直後は Wi-Fi のつなぎ直しで数百 ms・ロスが出る。#48）。
+    /// 入るときに途中の1分を書き出して区切り、ping を止める
+    private func willSleep() {
+        isAsleep = true
+        flushMinute(minuteBuffer, network: network)
+        minuteBuffer.removeAll(keepingCapacity: true)
+        pingers.values.forEach { $0.stop() }
+    }
+
+    /// 復帰したら ping を取り直し、起動直後と同じ慣らし運転を挟む
+    private func didWake() {
+        guard isAsleep else { return }
+        LinkReader.shared.invalidate()
+        restartPingers()
+        warmupEnd = Date().addingTimeInterval(Self.warmupSeconds)
+        isAsleep = false
+    }
+
+    /// 次の秒の前で1分の集計を区切るか（前の秒と大きく空いたとき）
+    nonisolated static func breaksMinute(after last: Date?, next: Date) -> Bool {
+        guard let last else { return false }
+        return next.timeIntervalSince(last) > maxTickGap
+    }
+
     /// 設定で宛先が変わったとき
     func applyTargets() { if isRunning { restartPingers() } }
 
@@ -418,6 +454,7 @@ final class Monitor {
     }
 
     private func apply(_ raw: RawSample) {
+        guard !isAsleep else { return }
         var rx = 0.0, tx = 0.0
         if let cur = raw.counters {
             if let prev = previousCounters {
@@ -445,6 +482,10 @@ final class Monitor {
             // 1秒ごとに先頭を消すと O(n) なので、まとめて消す
             if history.count > Self.historySeconds + 300 { history.removeFirst(history.count - Self.historySeconds) }
 
+            if Self.breaksMinute(after: minuteBuffer.last?.date, next: t.date) {
+                flushMinute(minuteBuffer, network: network)
+                minuteBuffer.removeAll(keepingCapacity: true)
+            }
             minuteBuffer.append(t)
             if minuteBuffer.count >= 60 {
                 flushMinute(minuteBuffer, network: network)

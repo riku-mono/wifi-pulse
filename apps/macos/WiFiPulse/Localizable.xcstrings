@@ -5149,12 +5149,12 @@
         }
       }
     },
-    "Waiting a few seconds after launch so start-up activity doesn’t affect the score." : {
+    "Waiting a few seconds after launch or waking from sleep so start-up activity doesn’t affect the score." : {
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "起動直後の乱れがスコアに入らないよう、数秒待っています。"
+            "value" : "起動やスリープからの復帰の直後の乱れがスコアに入らないよう、数秒待っています。"
           }
         }
       }
