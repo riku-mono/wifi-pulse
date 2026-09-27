@@ -177,6 +177,8 @@ final class Monitor {
     @ObservationIgnored private let pathMonitor = NWPathMonitor()
     @ObservationIgnored private var warmupEnd: Date?
     @ObservationIgnored private var selfLoadMarker = SelfLoadMarker()
+    /// 経路の変化を処理している数（その間は `network` がまだ前のネットワークを指していることがある）
+    @ObservationIgnored private var resolvingPath = 0
     /// このアプリがいま回線に負荷をかけているか（速度測定・負荷試験）。`AppModel` が設定する
     @ObservationIgnored var selfLoad: () -> Exclusion? = { nil }
 
@@ -215,6 +217,8 @@ final class Monitor {
     private func networkChanged(_ status: String, at: Date) async {
         if pathStatus != status { pathStatus = status }
         guard isRunning else { return }
+        resolvingPath += 1
+        defer { resolvingPath -= 1 }
         let fresh = Self.carryRouterMAC(await NetworkEnvironment.resolve(), from: env)
         guard fresh != env else { return }
         env = fresh
@@ -234,6 +238,14 @@ final class Monitor {
             switchNetwork(to: id, at: at)
         }
         restartPingers()
+    }
+
+    /// いまの SSID をいまのネットワークの登録に入れるか。
+    /// Wi-Fi を切り替えると SSID は次の秒から新しいものになるが、`network` が新しい識別子になるのは経路を取り直してから。
+    /// その間に書くと前のネットワークの SSID を上書きしてしまうので、SSID の無い登録にだけ、つながっていて経路の変化を処理していないときに入れる
+    nonisolated static func shouldRecordSSID(_ ssid: String, into entry: KnownNetwork?, gateway: String, resolvingPath: Bool) -> Bool {
+        guard let entry, !ssid.isEmpty, !gateway.isEmpty, !resolvingPath else { return false }
+        return entry.ssid?.isEmpty ?? true
     }
 
     /// ARP が一時的に引けなくても、ゲートウェイが同じならルーターは変わっていないとみなす
@@ -427,7 +439,8 @@ final class Monitor {
         let c = ConnectionInfo(ssid: raw.link?.ssid, bssid: raw.link?.bssid, band: raw.link?.band, channel: raw.link?.channel)
         if c != connection { connection = c }
         // SSID は位置情報の許可があるときだけ取れる。取れたらネットワークの表示名にする
-        if let id = network, let ssid = c.ssid, !ssid.isEmpty, networks[id] != nil, networks[id]?.ssid != ssid {
+        if let id = network, let ssid = c.ssid,
+           Self.shouldRecordSSID(ssid, into: networks[id], gateway: env.gateway, resolvingPath: resolvingPath > 0) {
             networks[id]?.ssid = ssid
             if networks.autoMerge() { minuteRevision += 1 }
             saveNetworks()

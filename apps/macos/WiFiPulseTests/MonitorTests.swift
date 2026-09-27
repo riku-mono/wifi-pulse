@@ -174,6 +174,32 @@ struct NetworkSwitchTests {
     }
 }
 
+struct SSIDRecordingTests {
+    static let home = KnownNetwork(id: "aa:aa:aa:aa:aa:01", ssid: "Home", gateway: "192.168.1.1", first: 0)
+    static let unnamed = KnownNetwork(id: "aa:aa:aa:aa:aa:01", gateway: "192.168.1.1", first: 0)
+
+    /// 切り替えの途中で新しい SSID が見えても、前のネットワークの SSID は上書きしない（#36）
+    @Test func neverOverwrites() {
+        #expect(!Monitor.shouldRecordSSID("iPhone", into: Self.home, gateway: "192.168.1.1", resolvingPath: false))
+    }
+
+    /// SSID が後から取れたら入れる（位置情報の許可など）
+    @Test func fillsAMissingSSID() {
+        #expect(Monitor.shouldRecordSSID("Home", into: Self.unnamed, gateway: "192.168.1.1", resolvingPath: false))
+        var empty = Self.unnamed
+        empty.ssid = ""
+        #expect(Monitor.shouldRecordSSID("Home", into: empty, gateway: "192.168.1.1", resolvingPath: false))
+    }
+
+    /// 切れている間・経路の変化を処理している間は入れない（`network` がまだ前のネットワークのことがある）
+    @Test func waitsWhileSwitching() {
+        #expect(!Monitor.shouldRecordSSID("iPhone", into: Self.unnamed, gateway: "", resolvingPath: false))
+        #expect(!Monitor.shouldRecordSSID("iPhone", into: Self.unnamed, gateway: "192.168.1.1", resolvingPath: true))
+        #expect(!Monitor.shouldRecordSSID("", into: Self.unnamed, gateway: "192.168.1.1", resolvingPath: false))
+        #expect(!Monitor.shouldRecordSSID("Home", into: nil, gateway: "192.168.1.1", resolvingPath: false))
+    }
+}
+
 struct SerialTaskTests {
     /// やり直しを続けても、前の処理が止まり切るまで次は始まらない（PR #10 のクラッシュの再発防止）
     @Test func neverOverlaps() async {
