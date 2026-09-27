@@ -1502,12 +1502,12 @@
         }
       }
     },
-    "Each scan pauses your own traffic for a few hundred milliseconds, so use auto-scan only when needed" : {
+    "Each scan slows your own connection for a few seconds, so use auto-scan only when needed" : {
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "スキャン中は自分の通信も数百ms止まるため、自動スキャンは必要なときだけ使ってください"
+            "value" : "スキャン中は自分の通信も数秒間遅くなるため、自動スキャンは必要なときだけ使ってください"
           }
         }
       }
@@ -3997,12 +3997,32 @@
         }
       }
     },
+    "Scanning Nearby Wi-Fi" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "周辺の Wi-Fi をスキャンしています"
+          }
+        }
+      }
+    },
     "Scanning for Devices" : {
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "機器を探しています"
+          }
+        }
+      }
+    },
+    "Scanning for nearby Wi-Fi networks. The score resumes shortly." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "周辺の Wi-Fi ネットワークをスキャンしています。まもなくスコアの表示に戻ります。"
           }
         }
       }

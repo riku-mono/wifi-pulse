@@ -67,9 +67,20 @@ final class AppModel {
             .info("launch language=\(AppLanguage.current, privacy: .public) override=\(AppLanguage.override ?? "-", privacy: .public) system=\(AppLanguage.systemChoice, privacy: .public)")
         selection = UserDefaults.standard.string(forKey: "selectedView").flatMap(SidebarItem.init(rawValue:)) ?? .overview
         AppAppearance.apply(AppAppearance.stored())
-        monitor.selfLoad = { [speedTest, loadTest] in
-            speedTest.isRunning ? .speedTest : loadTest.isRunning ? .loadTest : nil
+        // このアプリ自身が乱した計測は、スコア・判定・記録に入れない（#21・#43）
+        monitor.selfLoad = { [speedTest, loadTest, neighbors] in
+            speedTest.isRunning ? .speedTest : loadTest.isRunning ? .loadTest : neighbors.isScanning ? .wifiScan : nil
         }
+        // 速度測定・負荷試験の結果を下げないよう、その間はスキャン・掃引を始めず、始める前に終わるのを待つ
+        let testing = { [speedTest, loadTest] in speedTest.isRunning || loadTest.isRunning }
+        neighbors.isBlocked = testing
+        monitor.devices.isBlocked = testing
+        let quiet = { [neighbors, devices = monitor.devices] in
+            await neighbors.waitUntilIdle()
+            await devices.waitUntilIdle()
+        }
+        speedTest.waitForQuiet = quiet
+        loadTest.waitForQuiet = quiet
         monitor.start()
     }
 }
@@ -90,6 +101,7 @@ struct AppCommands: Commands {
                 Task { await model.neighbors.scan() }
             }
             .keyboardShortcut("r", modifiers: [.command, .shift])
+            .disabled(model.speedTest.isRunning || model.loadTest.isRunning)
 
             Button("Find Local Devices") {
                 model.monitor.devices.requestSweep()

@@ -86,13 +86,14 @@ struct NeighborsView: View {
                 } label: {
                     Label("View Options", systemImage: scanner.autoInterval == .off ? "timer" : "timer.circle.fill")
                 }
-                .help("Each scan pauses your own traffic for a few hundred milliseconds, so use auto-scan only when needed")
+                .help("Each scan slows your own connection for a few seconds, so use auto-scan only when needed")
                 Button {
                     Task { await scanner.scan() }
                 } label: {
                     Label("Scan", systemImage: "arrow.clockwise")
                 }
-                .disabled(scanner.isScanning)
+                // 速度測定・負荷試験の最中はスキャンしない（結果が下がる）
+                .disabled(scanner.isScanning || model.speedTest.isRunning || model.loadTest.isRunning)
                 .help("Scan for nearby access points (at least 15 seconds apart)")
                 Button {
                     showInspector.toggle()

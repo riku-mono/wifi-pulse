@@ -29,12 +29,15 @@ nonisolated enum Exclusion: Sendable, Hashable {
     /// このアプリの速度測定・負荷試験。自分で回線を埋めているので、その間の遅延・ロスは普段の状態ではない
     case speedTest
     case loadTest
+    /// 周辺の Wi-Fi のスキャン。電波が他のチャンネルを回る約5秒の間、ルーター・インターネット宛ての
+    /// 遅延が 70〜150 ms に跳ねる（家の Wi-Fi で 8〜13 ms から。ロスは無し）
+    case wifiScan
 
     /// 判定を止めて理由を表示するか。数秒で終わるものは黙って外し、スコアは残りの秒から出す
-    var pausesJudgement: Bool { self != .lanScan }
+    var pausesJudgement: Bool { self != .lanScan && self != .wifiScan }
 }
 
-/// 自分でかけた負荷（速度測定・負荷試験）の印。終わってからも `tail` 秒は付け続ける
+/// 自分でかけた負荷（速度測定・負荷試験・周辺の Wi-Fi のスキャン）の印。終わってからも `tail` 秒は付け続ける
 /// （回線やルーターのキューが引くまで遅延が高いまま残ることがある。家の Wi-Fi では `networkQuality` の間
 /// 100〜250 ms・終わった次の秒に 10 ms 前後へ戻ったが、キューの深いルーターを見込んで余裕を取る）
 nonisolated struct SelfLoadMarker {
@@ -64,6 +67,7 @@ struct JudgementPause: Equatable {
         case .lanScan: String(localized: "Scanning for Devices")
         case .speedTest: String(localized: "Speed Test Running")
         case .loadTest: String(localized: "Load Test Running")
+        case .wifiScan: String(localized: "Scanning Nearby Wi-Fi")
         }
     }
 
@@ -73,6 +77,7 @@ struct JudgementPause: Equatable {
         case .lanScan: String(localized: "Looking for devices on your network. The score resumes shortly.")
         case .speedTest: String(localized: "The score is paused while the speed test fills your connection, and resumes a few seconds after it ends.")
         case .loadTest: String(localized: "The score is paused while the load test fills your connection, and resumes a few seconds after it ends.")
+        case .wifiScan: String(localized: "Scanning for nearby Wi-Fi networks. The score resumes shortly.")
         }
     }
 }
@@ -211,7 +216,7 @@ final class Monitor {
     @ObservationIgnored private var resolvingPath = 0
     @ObservationIgnored private var gatewayProbe = GatewayProbe()
     @ObservationIgnored private var pingersStarted = Date.distantPast
-    /// このアプリがいま回線に負荷をかけているか（速度測定・負荷試験）。`AppModel` が設定する
+    /// このアプリがいま計測を乱しているか（速度測定・負荷試験・周辺の Wi-Fi のスキャン）。`AppModel` が設定する
     @ObservationIgnored var selfLoad: () -> Exclusion? = { nil }
 
     var inet4Target: String { UserDefaults.standard.string(forKey: "inet4Target") ?? "1.1.1.1" }

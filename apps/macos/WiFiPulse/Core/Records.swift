@@ -25,7 +25,7 @@ nonisolated struct MinuteRow: Codable, Sendable, Identifiable {
     var net: String?
     /// その1分でつながっていたアクセスポイント（位置情報の許可があるときだけ）
     var bssid: String?
-    /// 集計から除いた秒数（このアプリの速度測定・負荷試験・LAN の掃引の間）。除いた秒が無ければ nil（項目ごと書かない）。
+    /// 集計から除いた秒数（このアプリの速度測定・負荷試験・LAN の掃引・周辺の Wi-Fi のスキャンの間）。除いた秒が無ければ nil（項目ごと書かない）。
     /// 値はそれ以外の秒だけから出しているので、時間帯の集計にはそのまま使える
     var self_s: Int?
 
