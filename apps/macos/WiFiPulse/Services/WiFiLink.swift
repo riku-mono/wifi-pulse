@@ -2,7 +2,7 @@ import CoreLocation
 import CoreWLAN
 import Foundation
 
-/// CoreWLAN から取るリンク情報（1秒ごと）。
+/// CoreWLAN から取るリンク情報（1秒ごと。`LinkReader` が読む）。
 nonisolated struct LinkSample: Hashable, Sendable {
     var powerOn: Bool
     var rssi: Int
@@ -40,8 +40,8 @@ nonisolated struct LinkSample: Hashable, Sendable {
 }
 
 nonisolated enum WiFiLink {
-    static func sample() -> LinkSample? {
-        guard let iface = CWWiFiClient.shared().interface() else { return nil }
+    /// 全項目を読む（項目ごとに XPC の往復がある）
+    static func sample(_ iface: CWInterface) -> LinkSample {
         var s = LinkSample(
             powerOn: iface.powerOn(),
             rssi: iface.rssiValue(),
