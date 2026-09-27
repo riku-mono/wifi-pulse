@@ -22,6 +22,15 @@ struct BonjourTests {
         #expect(Bonjour.model(type: "_ipp._tcp", txt: ["ty": "Printer"]) == nil)
     }
 
+    @Test func lanAddressesOnly() {
+        #expect(Bonjour.isLANAddress([192, 168, 1, 10]))
+        #expect(Bonjour.isLANAddress([10, 0, 0, 5]))
+        #expect(!Bonjour.isLANAddress([127, 0, 0, 1]))
+        #expect(!Bonjour.isLANAddress([169, 254, 3, 4]))
+        #expect(!Bonjour.isLANAddress([224, 0, 0, 251]))
+        #expect(!Bonjour.isLANAddress([0, 0, 0, 0]))
+    }
+
     @Test func shortType() {
         #expect(Bonjour.shortType("_airplay._tcp") == "airplay")
         #expect(Bonjour.shortType("_companion-link._tcp") == "companion-link")
@@ -98,11 +107,14 @@ struct DeviceBonjourMergeTests {
     }
 
     /// 古い記録に残ったエスケープ（`\032` は空白）を読み込むときに戻す
-    @Test func unescapesStoredMDNSNames() {
+    @Test func repairsStoredDevices() {
         let old = [Self.mac: Device(mac: Self.mac, first: 0, last: 0, mdns: #"Doorbell\032Repeater-0A01"#)]
-        #expect(DeviceScanner.unescapingNames(old)[Self.mac]?.mdns == "Doorbell Repeater-0A01")
+        #expect(DeviceScanner.repaired(old)[Self.mac]?.mdns == "Doorbell Repeater-0A01")
         let plain = [Self.mac: Device(mac: Self.mac, first: 0, last: 0, mdns: "Living-Room")]
-        #expect(DeviceScanner.unescapingNames(plain)[Self.mac]?.mdns == "Living-Room")
+        #expect(DeviceScanner.repaired(plain)[Self.mac]?.mdns == "Living-Room")
+        // この Mac 自身がループバックで登録されたものは除く
+        let loopback = ["ip:127.0.0.1": Device(mac: "ip:127.0.0.1", ip: "127.0.0.1", first: 0, last: 0)]
+        #expect(DeviceScanner.repaired(loopback).isEmpty)
     }
 
     @Test func decodesDevicesWithoutBonjourFields() throws {

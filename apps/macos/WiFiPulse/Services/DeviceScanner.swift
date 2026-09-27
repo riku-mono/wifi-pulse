@@ -103,7 +103,7 @@ final class DeviceScanner {
     func start(monitor: Monitor) {
         guard loop == nil else { return }
         self.monitor = monitor
-        registry = Self.unescapingNames(DataStore.readJSON(DataStore.devices, as: [String: Device].self) ?? [:])
+        registry = Self.repaired(DataStore.readJSON(DataStore.devices, as: [String: Device].self) ?? [:])
         names = DataStore.readJSON(DataStore.deviceNames, as: [String: String].self) ?? [:]
         loop = Task { await run() }
     }
@@ -138,10 +138,11 @@ final class DeviceScanner {
         Task.detached(priority: .utility) { DataStore.writeJSON(snapshot, to: DataStore.deviceNames) }
     }
 
-    /// #16 で直す前に保存した mDNS 名（`Doorbell\032Repeater` など）のエスケープを戻す。
+    /// 読み込んだ登録を直す。#16 で直す前に保存した mDNS 名（`Doorbell\032Repeater` など）のエスケープを戻す。
     /// 名前がある機器には問い合わせ直さないので、読み込むときに直す
-    nonisolated static func unescapingNames(_ registry: [String: Device]) -> [String: Device] {
-        registry.mapValues { d in
+    /// あわせて、ループバックに解決された登録（`ip:127.0.0.1`。この Mac 自身）を除く
+    nonisolated static func repaired(_ registry: [String: Device]) -> [String: Device] {
+        registry.filter { !($0.key.hasPrefix(Device.ipKeyPrefix) && $0.value.ip?.hasPrefix("127.") == true) }.mapValues { d in
             var d = d
             if let name = d.mdns, name.contains("\\") { d.mdns = unescapeDNS(name) }
             return d
@@ -177,7 +178,8 @@ final class DeviceScanner {
             guard let ip = old.ip, let mac = arp[ip], var d = registry[mac] else { continue }
             if d.service == nil { d.service = old.service }
             if d.model == nil { d.model = old.model }
-            d.services = Array(Set(d.services ?? []).union(old.services ?? [])).sorted()
+            let services = Set(d.services ?? []).union(old.services ?? [])
+            d.services = services.isEmpty ? nil : services.sorted()
             d.first = min(d.first, old.first)
             if let name = names.removeValue(forKey: key), names[mac] == nil {
                 names[mac] = name
