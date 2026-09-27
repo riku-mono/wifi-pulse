@@ -173,6 +173,44 @@ struct DeviceScannerTests {
         s.split(separator: ".").reduce(0) { $0 << 8 | UInt32($1)! }
     }
 
+    /// sysctl(NET_RT_FLAGS) が返す1件ぶん（`rt_msghdr` ＋ `sockaddr_inarp` ＋ `sockaddr_dl`）
+    static func arpMessage(ip: [UInt8], mac: [UInt8]?, name: String = "en0", family: Int32 = AF_INET) -> [UInt8] {
+        var sin = [UInt8](repeating: 0, count: 16)
+        sin[0] = 16
+        sin[1] = UInt8(family)
+        sin.replaceSubrange(4..<8, with: ip)
+        let nameBytes = Array(name.utf8)
+        var dl: [UInt8] = [0, UInt8(AF_LINK), 4, 0, 6, UInt8(nameBytes.count), UInt8(mac?.count ?? 0), 0]
+        dl += nameBytes + (mac ?? [])
+        dl[0] = UInt8(dl.count)
+        while dl.count % 4 != 0 { dl.append(0) }
+        var header = [UInt8](repeating: 0, count: MemoryLayout<rt_msghdr>.size)
+        let length = UInt16(header.count + sin.count + dl.count)
+        header[0] = UInt8(length & 0xFF)
+        header[1] = UInt8(length >> 8)
+        return header + sin + dl
+    }
+
+    @Test func parsesTheARPTable() {
+        let buf = Self.arpMessage(ip: [192, 168, 1, 1], mac: [0xaa, 0xbb, 0xcc, 0x01, 0x02, 0x03])
+            + Self.arpMessage(ip: [192, 168, 1, 20], mac: nil)  // 未解決（MAC が無い）
+            + Self.arpMessage(ip: [192, 168, 1, 30], mac: [1, 2, 3, 4], name: "bridge0")  // MAC が6バイトでない
+            + Self.arpMessage(ip: [0, 0, 0, 0], mac: [1, 2, 3, 4, 5, 6], family: AF_INET6)
+            + Self.arpMessage(ip: [10, 0, 0, 7], mac: [0x02, 0, 0, 0, 0, 0x0f], name: "en10")
+        #expect(DeviceScanner.parseARP(buf) == [
+            "192.168.1.1": "aa:bb:cc:01:02:03",
+            "10.0.0.7": "02:00:00:00:00:0f",
+        ])
+    }
+
+    /// 途中で切れたバッファや長さ0の項目で止まる（範囲の外を読まない）
+    @Test func stopsOnTruncatedARPData() {
+        let one = Self.arpMessage(ip: [192, 168, 1, 1], mac: [0xaa, 0xbb, 0xcc, 0x01, 0x02, 0x03])
+        #expect(DeviceScanner.parseARP(Array(one.dropLast(8))).isEmpty)
+        #expect(DeviceScanner.parseARP(one + [UInt8](repeating: 0, count: MemoryLayout<rt_msghdr>.size)) == ["192.168.1.1": "aa:bb:cc:01:02:03"])
+        #expect(DeviceScanner.parseARP([]).isEmpty)
+    }
+
     @Test func sweepsA24() {
         let t = DeviceScanner.sweepTargets(ip: Self.ip("192.168.1.10"), netmask: Self.ip("255.255.255.0"))
         #expect(t.count == 253)

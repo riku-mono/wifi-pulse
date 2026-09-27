@@ -115,3 +115,169 @@ struct ExclusionTests {
         #expect(series.points.contains { $0.date >= Self.start.addingTimeInterval(10) && $0.date <= Self.start.addingTimeInterval(14) })
     }
 }
+
+struct NetworkSwitchTests {
+    static func env(gateway: String, mac: String = "") -> NetworkEnvironment {
+        var e = NetworkEnvironment()
+        e.gateway = gateway
+        e.routerMAC = mac
+        return e
+    }
+
+    @Test func staysOnTheSameNetwork() {
+        #expect(Monitor.transition(from: "aa:aa:aa:aa:aa:01", to: Self.env(gateway: "192.168.1.1", mac: "aa:aa:aa:aa:aa:01")) == .stay)
+    }
+
+    /// 切断中（ゲートウェイが無い）は区切らない
+    @Test func staysWhileDisconnected() {
+        #expect(Monitor.transition(from: "aa:aa:aa:aa:aa:01", to: NetworkEnvironment()) == .stay)
+    }
+
+    /// `ip:…` だったネットワークのルーターの MAC が後から取れたら、同じネットワークとして続ける
+    @Test func identifiesTheRouterLater() {
+        #expect(Monitor.transition(from: "ip:192.168.1.1", to: Self.env(gateway: "192.168.1.1", mac: "aa:aa:aa:aa:aa:01"))
+                == .identified("aa:aa:aa:aa:aa:01"))
+    }
+
+    @Test func switchesToAnotherNetwork() {
+        #expect(Monitor.transition(from: "aa:aa:aa:aa:aa:01", to: Self.env(gateway: "10.0.0.1", mac: "bb:bb:bb:bb:bb:02"))
+                == .switched("bb:bb:bb:bb:bb:02"))
+        // ゲートウェイが違えば `ip:…` からでも別のネットワーク
+        #expect(Monitor.transition(from: "ip:192.168.1.1", to: Self.env(gateway: "10.0.0.1")) == .switched("ip:10.0.0.1"))
+        #expect(Monitor.transition(from: nil, to: Self.env(gateway: "10.0.0.1")) == .switched("ip:10.0.0.1"))
+    }
+
+    /// ARP が一時的に引けなくても、ゲートウェイが同じならルーターの MAC を引き継ぐ（別のネットワークと見なさない）
+    @Test func carriesTheRouterMACWhenARPBlinks() {
+        let old = Self.env(gateway: "192.168.1.1", mac: "aa:aa:aa:aa:aa:01")
+        let blink = Monitor.carryRouterMAC(Self.env(gateway: "192.168.1.1"), from: old)
+        #expect(blink.routerMAC == "aa:aa:aa:aa:aa:01")
+        #expect(Monitor.transition(from: "aa:aa:aa:aa:aa:01", to: blink) == .stay)
+        // ゲートウェイが変わったら引き継がない
+        #expect(Monitor.carryRouterMAC(Self.env(gateway: "10.0.0.1"), from: old).routerMAC.isEmpty)
+    }
+
+    /// 変化に気づいた時点より前は前のネットワークの分として書き出し、10秒未満の切れ端は捨てる
+    @Test func splitsTheMinuteAtTheBoundary() throws {
+        let ticks = (0..<40).map { ExclusionTests.tick($0, gw: 8) }
+        let boundary = ExclusionTests.start.addingTimeInterval(25)
+        let (before, after) = Monitor.split(ticks, at: boundary)
+        #expect(before.count == 25)
+        #expect(after.count == 15)
+        #expect(after.first?.date == boundary)
+        let row = try #require(Monitor.minuteRow(before, network: "old"))
+        #expect(row.net == "old")
+        #expect(row.n == 25)
+
+        let (short, _) = Monitor.split(ticks, at: ExclusionTests.start.addingTimeInterval(9))
+        #expect(Monitor.minuteRow(short, network: "old") == nil)
+    }
+}
+
+struct SSIDRecordingTests {
+    static let home = KnownNetwork(id: "aa:aa:aa:aa:aa:01", ssid: "Home", gateway: "192.168.1.1", first: 0)
+    static let unnamed = KnownNetwork(id: "aa:aa:aa:aa:aa:01", gateway: "192.168.1.1", first: 0)
+
+    /// 切り替えの途中で新しい SSID が見えても、前のネットワークの SSID は上書きしない（#36）
+    @Test func neverOverwrites() {
+        #expect(!Monitor.shouldRecordSSID("iPhone", into: Self.home, gateway: "192.168.1.1", resolvingPath: false))
+    }
+
+    /// SSID が後から取れたら入れる（位置情報の許可など）
+    @Test func fillsAMissingSSID() {
+        #expect(Monitor.shouldRecordSSID("Home", into: Self.unnamed, gateway: "192.168.1.1", resolvingPath: false))
+        var empty = Self.unnamed
+        empty.ssid = ""
+        #expect(Monitor.shouldRecordSSID("Home", into: empty, gateway: "192.168.1.1", resolvingPath: false))
+    }
+
+    /// 切れている間・経路の変化を処理している間は入れない（`network` がまだ前のネットワークのことがある）
+    @Test func waitsWhileSwitching() {
+        #expect(!Monitor.shouldRecordSSID("iPhone", into: Self.unnamed, gateway: "", resolvingPath: false))
+        #expect(!Monitor.shouldRecordSSID("iPhone", into: Self.unnamed, gateway: "192.168.1.1", resolvingPath: true))
+        #expect(!Monitor.shouldRecordSSID("", into: Self.unnamed, gateway: "192.168.1.1", resolvingPath: false))
+        #expect(!Monitor.shouldRecordSSID("Home", into: nil, gateway: "192.168.1.1", resolvingPath: false))
+    }
+}
+
+struct SerialTaskTests {
+    /// やり直しを続けても、前の処理が止まり切るまで次は始まらない（PR #10 のクラッシュの再発防止）
+    @Test func neverOverlaps() async {
+        let loop = SerialTask()
+        var active = 0, maxActive = 0
+        var order: [Int] = []
+        for i in 0..<5 {
+            loop.restart {
+                active += 1
+                maxActive = max(maxActive, active)
+                // 止められても await の後ろは走る（DeviceScanner の registry への書き込みと同じ）
+                for _ in 0..<5 { await Task.yield() }
+                order.append(i)
+                active -= 1
+            }
+        }
+        await loop.wait()
+        #expect(maxActive == 1)
+        #expect(order == [0, 1, 2, 3, 4])
+    }
+}
+
+struct GatewayProbeTests {
+    static let silent = Pinger.Batch(rtts: [], lost: 5)
+    static let internet = Pinger.Batch(rtts: [30, 31])
+
+    /// テザリング: ルーター宛ては一度も返らず、インターネット宛ては返る → 応答しないとみなす（#35）
+    @Test func silentGateway() {
+        var p = GatewayProbe()
+        for _ in 0..<4 { p.record(gw: Self.silent, internet: Self.internet) }
+        #expect(!p.isSilent)  // まだ20発
+        p.record(gw: Self.silent, internet: Self.internet)
+        #expect(p.isSilent)
+    }
+
+    /// 一度でも返ったルーターの途切れは本当のロス
+    @Test func answeredOnceMeansRealLoss() {
+        var p = GatewayProbe()
+        p.record(gw: .init(rtts: [8], lost: 4), internet: Self.internet)
+        for _ in 0..<10 { p.record(gw: Self.silent, internet: Self.internet) }
+        #expect(!p.isSilent)
+    }
+
+    /// インターネット宛ても返らないなら、つながっていない（ロスのまま）
+    @Test func everythingLostIsNotSilence() {
+        var p = GatewayProbe()
+        for _ in 0..<10 { p.record(gw: Self.silent, internet: .init(rtts: [], lost: 2)) }
+        #expect(!p.isSilent)
+    }
+
+    /// 外した秒はルーター宛てのロスを数えず、スコアはインターネット宛てと電波だけで出る
+    @Test func strippedTicksDoNotCountAsLoss() throws {
+        let ticks = (0..<30).map { i in
+            GatewayProbe.stripping(Tick(date: ExclusionTests.start.addingTimeInterval(Double(i)), link: nil,
+                                        gw: Self.silent, v4: Self.internet, v6: .init(), rx: 0, tx: 0))
+        }
+        let w = Monitor.windowStats(ticks, seconds: 30)
+        #expect(w.gw.n == 0 && w.gw.lost == 0)
+        #expect(w.worstLoss == 0)
+        #expect(Analysis.score(w, link: nil) == 100)
+        #expect(Analysis.bottleneck(w, link: nil).level == .good)
+        let row = try #require(Monitor.minuteRow(ticks, network: "ip:192.0.0.1"))
+        #expect(row.lgw == nil)
+    }
+
+    /// 返ったものが入っている秒はそのまま
+    @Test func strippingKeepsReplies() {
+        let t = Tick(date: ExclusionTests.start, link: nil, gw: .init(rtts: [8], lost: 1), v4: Self.internet, v6: .init(), rx: 0, tx: 0)
+        #expect(GatewayProbe.stripping(t).gw.lost == 1)
+    }
+
+    /// #35 より前の記録（ルーター宛て 100%・遅延なし・インターネットは返った）はロスとして数えない
+    @Test func oldSilentMinutesAreNotRouterLoss() {
+        func row(lgw: Double?, gw50: Double?, v450: Double?) -> MinuteRow {
+            MinuteRow(t: 0, hour: 0, wd: 0, n: 60, gw50: gw50, v450: v450, lgw: lgw, rx: 0, tx: 0)
+        }
+        #expect(row(lgw: 1, gw50: nil, v450: 33).routerLoss == nil)
+        #expect(row(lgw: 1, gw50: nil, v450: nil).routerLoss == 1)  // 何も返らない = 切断
+        #expect(row(lgw: 0.02, gw50: 8, v450: 12).routerLoss == 0.02)
+    }
+}

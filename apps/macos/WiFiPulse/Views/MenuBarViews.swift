@@ -95,7 +95,11 @@ struct MenuBarSummary: View {
             // 判定の記号と表示する p95 は同じ窓（直近30秒）から出す
             Grid(alignment: .leading, horizontalSpacing: 8, verticalSpacing: 6) {
                 row("wifi", "Signal", s.link.map { "\($0.rssi) dBm · \($0.bandLabel) ch\($0.channel ?? 0)" } ?? "—", Level.rssi(s.link?.rssi))
-                row("wifi.router", "Router", String(localized: "\(Fmt.ms(s.w30.gw.p50)) ms (p95 \(Fmt.ms(s.w30.gw.p95)))"), Level.gateway(s.w30.gw.p95))
+                if s.gatewaySilent {
+                    row("wifi.router", "Router", String(localized: "No ping response"), .none)
+                } else {
+                    row("wifi.router", "Router", String(localized: "\(Fmt.ms(s.w30.gw.p50)) ms (p95 \(Fmt.ms(s.w30.gw.p95)))"), Level.gateway(s.w30.gw.p95))
+                }
                 row("globe.asia.australia", "Internet", String(localized: "\(Fmt.ms(s.w30.v4.p50)) ms (p95 \(Fmt.ms(s.w30.v4.p95)))"), Level.internet(s.w30.v4.p95))
                 // 窓が空（起動直後・慣らし運転中）なら 0% と ✓ を出さない
                 row("waveform", "Loss", s.w60.isEmpty ? "—" : "\(Fmt.pct(s.w60.worstLoss))%", s.w60.isEmpty ? .none : Level.loss(s.w60.worstLoss))

@@ -57,6 +57,7 @@ xcodebuild -project WiFiPulse.xcodeproj -scheme WiFiPulse -configuration Debug -
 
 ### ネットワーク
 - LAN の無いリンクがある。iPhone のテザリングでは `192.0.0.2/32`・`NOARP`・ゲートウェイ `192.0.0.1` になり、サブネットの外へ UDP を送ると `sendto` がカーネル内で回り続けて CPU 100% になる。LAN 宛ての送信はインターフェースのサブネットとフラグを見てから（`DeviceScanner.sweepTargets`）。
+- テザリングのゲートウェイ（`192.0.0.1`）は ping に一度も応答しない。インターネット宛ては返るので、ロスではなく「応答しない」として扱う（`GatewayProbe`。スコア・判定・記録からルーター宛てを外す）。
 
 ## 作業環境の制約（この Mac で Claude Code を使うとき）
 
@@ -68,4 +69,4 @@ xcodebuild -project WiFiPulse.xcodeproj -scheme WiFiPulse -configuration Debug -
 
 - main に直接コミットしない。ブランチ → PR（タイトル・本文は日本語、コミットメッセージは英語。形は `.github/pull_request_template.md`）。
 - README は英語が既定で、日本語は `README.ja.md`。内容を変えたら両方を直す。
-- 残りの作業は GitHub の Issue: #2 テスト（残りは `Monitor.switchNetwork`）、#4 CI（macOS でビルド・テスト）、#5 署名・公証・配布（Developer Program 加入待ち）。
+- 残りの作業は GitHub の Issue: #4 CI（macOS でビルド・テスト）、#5 署名・公証・配布（Developer Program 加入待ち）。

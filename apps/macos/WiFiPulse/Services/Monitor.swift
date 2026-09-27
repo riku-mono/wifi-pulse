@@ -7,7 +7,8 @@ nonisolated struct Tick: Identifiable, Sendable {
     var id: Date { date }
     let date: Date
     let link: LinkSample?
-    let gw: Pinger.Batch
+    /// ルーターが ping に応答しない（`GatewayProbe.isSilent`）ときは空にする（ロスとして数えない）
+    var gw: Pinger.Batch
     let v4: Pinger.Batch
     let v6: Pinger.Batch
     /// Wi-Fiインターフェースの受信・送信（bps）
@@ -83,6 +84,33 @@ nonisolated struct DNSSample: Identifiable, Hashable, Sendable {
 }
 
 /// 直近 N 秒の集計。
+/// ルーターが ping に応答するか。iPhone のテザリング（ゲートウェイ 192.0.0.1）などは ping に一度も答えないが、
+/// インターネット宛ては返ってくる。ルーターを通らずにインターネットへは届かないので、これはロスではなく「応答しない」。
+/// ping をやり直すたび（経路が変わったとき）に作り直す
+nonisolated struct GatewayProbe: Equatable, Sendable {
+    /// これだけ続けて失われ、その間に一度も返らなければ「応答しない」とみなす（0.2 秒間隔で約5秒）
+    static let silentAfter = 25
+
+    private(set) var answered = false
+    private(set) var lost = 0
+    private(set) var internetAnswered = false
+
+    var isSilent: Bool { !answered && internetAnswered && lost >= Self.silentAfter }
+
+    mutating func record(gw: Pinger.Batch, internet: Pinger.Batch) {
+        if !gw.rtts.isEmpty { answered = true }
+        lost += gw.lost
+        if !internet.rtts.isEmpty { internetAnswered = true }
+    }
+
+    /// 応答しないルーター宛ての結果を外した1秒
+    static func stripping(_ t: Tick) -> Tick {
+        var t = t
+        if t.gw.rtts.isEmpty { t.gw = Pinger.Batch() }
+        return t
+    }
+}
+
 nonisolated struct WindowStats: Equatable, Sendable {
     var seconds: Int
     var gw: PingStats
@@ -118,6 +146,8 @@ struct LiveSnapshot: Equatable {
     var tx: Double = 0
     /// 判定を止めている間だけ入る（スコアは nil）
     var pause: JudgementPause?
+    /// ルーターが ping に応答しない（テザリングなど）。ルーターの遅延は「—」になる
+    var gatewaySilent = false
 }
 
 /// 接続先（SSID・チャンネル）。変化したときだけ更新する。
@@ -177,6 +207,10 @@ final class Monitor {
     @ObservationIgnored private let pathMonitor = NWPathMonitor()
     @ObservationIgnored private var warmupEnd: Date?
     @ObservationIgnored private var selfLoadMarker = SelfLoadMarker()
+    /// 経路の変化を処理している数（その間は `network` がまだ前のネットワークを指していることがある）
+    @ObservationIgnored private var resolvingPath = 0
+    @ObservationIgnored private var gatewayProbe = GatewayProbe()
+    @ObservationIgnored private var pingersStarted = Date.distantPast
     /// このアプリがいま回線に負荷をかけているか（速度測定・負荷試験）。`AppModel` が設定する
     @ObservationIgnored var selfLoad: () -> Exclusion? = { nil }
 
@@ -215,37 +249,70 @@ final class Monitor {
     private func networkChanged(_ status: String, at: Date) async {
         if pathStatus != status { pathStatus = status }
         guard isRunning else { return }
-        var fresh = await NetworkEnvironment.resolve()
-        // ARP が一時的に引けなくても、ゲートウェイが同じならルーターは変わっていないとみなす
-        if fresh.routerMAC.isEmpty, fresh.gateway == env.gateway { fresh.routerMAC = env.routerMAC }
-        if fresh != env {
-            env = fresh
-            // 切断中（識別子なし）は区切らない。一瞬切れて同じネットワークに戻っても履歴は続ける
-            if let id = fresh.networkID, id != network {
-                if let old = network, old == "ip:\(fresh.gateway)" {
-                    // ルーターの MAC が後から取れた（ローカルネットワークの許可など）。同じネットワークとして続ける
-                    network = id
-                    registerNetwork()
-                    if networks[old]?.keepSeparate != true, !networks.same(old, id) {
-                        networks.merge(old, into: id)
-                        saveNetworks()
-                        minuteRevision += 1
-                    }
-                } else {
-                    switchNetwork(to: id, at: at)
-                }
+        resolvingPath += 1
+        defer { resolvingPath -= 1 }
+        let fresh = Self.carryRouterMAC(await NetworkEnvironment.resolve(), from: env)
+        guard fresh != env else { return }
+        env = fresh
+        switch Self.transition(from: network, to: fresh) {
+        case .stay:
+            break
+        case .identified(let id):
+            let old = network!
+            network = id
+            registerNetwork()
+            if networks[old]?.keepSeparate != true, !networks.same(old, id) {
+                networks.merge(old, into: id)
+                saveNetworks()
+                minuteRevision += 1
             }
-            restartPingers()
+        case .switched(let id):
+            switchNetwork(to: id, at: at)
         }
+        restartPingers()
+    }
+
+    /// いまの SSID をいまのネットワークの登録に入れるか。
+    /// Wi-Fi を切り替えると SSID は次の秒から新しいものになるが、`network` が新しい識別子になるのは経路を取り直してから。
+    /// その間に書くと前のネットワークの SSID を上書きしてしまうので、SSID の無い登録にだけ、つながっていて経路の変化を処理していないときに入れる
+    nonisolated static func shouldRecordSSID(_ ssid: String, into entry: KnownNetwork?, gateway: String, resolvingPath: Bool) -> Bool {
+        guard let entry, !ssid.isEmpty, !gateway.isEmpty, !resolvingPath else { return false }
+        return entry.ssid?.isEmpty ?? true
+    }
+
+    /// ARP が一時的に引けなくても、ゲートウェイが同じならルーターは変わっていないとみなす
+    nonisolated static func carryRouterMAC(_ fresh: NetworkEnvironment, from old: NetworkEnvironment) -> NetworkEnvironment {
+        var fresh = fresh
+        if fresh.routerMAC.isEmpty, fresh.gateway == old.gateway { fresh.routerMAC = old.routerMAC }
+        return fresh
+    }
+
+    nonisolated enum NetworkTransition: Equatable {
+        /// 記録を区切らない（同じネットワーク・切断中）
+        case stay
+        /// `ip:<ゲートウェイ>` だったネットワークのルーターの MAC が取れた。同じネットワークとして続ける
+        case identified(String)
+        /// 別のネットワークに移った
+        case switched(String)
+    }
+
+    /// 経路が変わったとき、記録をどう扱うか
+    nonisolated static func transition(from network: String?, to fresh: NetworkEnvironment) -> NetworkTransition {
+        // 切断中（識別子なし）は区切らない。一瞬切れて同じネットワークに戻っても履歴は続ける
+        guard let id = fresh.networkID, id != network else { return .stay }
+        // ルーターの MAC が後から取れた（ローカルネットワークの許可など）
+        if network == "ip:\(fresh.gateway)" { return .identified(id) }
+        return .switched(id)
     }
 
     /// 前のネットワークの計測を新しいネットワークに混ぜない。
     /// 変化に気づいた時点（`at`）より前の生データは前のネットワークの分として書き出し、履歴からも外す。
     private func switchNetwork(to id: String, at boundary: Date) {
         let old = network
-        flushMinute(minuteBuffer.filter { $0.date < boundary }, network: old)
-        minuteBuffer.removeAll { $0.date < boundary }
-        history.removeAll { $0.date < boundary }
+        let (before, after) = Self.split(minuteBuffer, at: boundary)
+        flushMinute(before, network: old)
+        minuteBuffer = after
+        history = Self.split(history, at: boundary).after
         dns.removeAll()
         network = id
         registerNetwork()
@@ -253,6 +320,11 @@ final class Monitor {
     }
 
     nonisolated static let minimumPartialMinute = 10
+
+    /// 変化に気づいた時点より前（前のネットワークの分）と後に分ける
+    nonisolated static func split(_ ticks: [Tick], at boundary: Date) -> (before: [Tick], after: [Tick]) {
+        (ticks.filter { $0.date < boundary }, ticks.filter { $0.date >= boundary })
+    }
 
     private func registerNetwork() {
         guard let id = network, networks[id]?.gateway != env.gateway else { return }
@@ -306,6 +378,8 @@ final class Monitor {
         ]
         pingers.values.forEach { $0.start() }
         previousCounters = nil
+        gatewayProbe = GatewayProbe()
+        pingersStarted = Date()
     }
 
     /// 設定で宛先が変わったとき
@@ -351,8 +425,16 @@ final class Monitor {
             previousCounters = cur
         }
 
+        let wasSilent = gatewayProbe.isSilent
+        gatewayProbe.record(gw: raw.gw, internet: raw.v4)
+        if gatewayProbe.isSilent, !wasSilent {
+            // 気づくまでの数秒ぶんもロスとして残さない
+            history = history.map { $0.date >= pingersStarted ? GatewayProbe.stripping($0) : $0 }
+            minuteBuffer = minuteBuffer.map { $0.date >= pingersStarted ? GatewayProbe.stripping($0) : $0 }
+        }
         let excluded = exclusion(at: raw.date)
-        let t = Tick(date: raw.date, link: raw.link, gw: raw.gw, v4: raw.v4, v6: raw.v6, rx: rx, tx: tx, excluded: excluded)
+        var t = Tick(date: raw.date, link: raw.link, gw: raw.gw, v4: raw.v4, v6: raw.v6, rx: rx, tx: tx, excluded: excluded)
+        if gatewayProbe.isSilent { t = GatewayProbe.stripping(t) }
         if excluded != .warmup {
             history.append(t)
             // 1秒ごとに先頭を消すと O(n) なので、まとめて消す
@@ -376,6 +458,7 @@ final class Monitor {
         s.bottleneck = Analysis.bottleneck(s.w60, link: s.link)
         s.rx = rx
         s.tx = tx
+        s.gatewaySilent = gatewayProbe.isSilent
         if let excluded, excluded.pausesJudgement {
             // スコアの代わりに、何を待っているか（慣らし運転なら進み具合も）を出す
             let progress = excluded == .warmup ? warmupEnd.map { Self.progress(at: raw.date, end: $0, length: Self.warmupSeconds) } : nil
@@ -399,7 +482,8 @@ final class Monitor {
         let c = ConnectionInfo(ssid: raw.link?.ssid, bssid: raw.link?.bssid, band: raw.link?.band, channel: raw.link?.channel)
         if c != connection { connection = c }
         // SSID は位置情報の許可があるときだけ取れる。取れたらネットワークの表示名にする
-        if let id = network, let ssid = c.ssid, !ssid.isEmpty, networks[id] != nil, networks[id]?.ssid != ssid {
+        if let id = network, let ssid = c.ssid,
+           Self.shouldRecordSSID(ssid, into: networks[id], gateway: env.gateway, resolvingPath: resolvingPath > 0) {
             networks[id]?.ssid = ssid
             if networks.autoMerge() { minuteRevision += 1 }
             saveNetworks()
