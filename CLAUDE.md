@@ -68,4 +68,4 @@ xcodebuild -project WiFiPulse.xcodeproj -scheme WiFiPulse -configuration Debug -
 
 - main に直接コミットしない。ブランチ → PR（タイトル・本文は日本語、コミットメッセージは英語。形は `.github/pull_request_template.md`）。
 - README は英語が既定で、日本語は `README.ja.md`。内容を変えたら両方を直す。
-- 残りの作業は GitHub の Issue: #2 テスト（残りは `Monitor.switchNetwork`）、#4 CI（macOS でビルド・テスト）、#5 署名・公証・配布（Developer Program 加入待ち）。
+- 残りの作業は GitHub の Issue: #4 CI（macOS でビルド・テスト）、#5 署名・公証・配布（Developer Program 加入待ち）。
