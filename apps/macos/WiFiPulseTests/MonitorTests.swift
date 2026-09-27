@@ -115,3 +115,83 @@ struct ExclusionTests {
         #expect(series.points.contains { $0.date >= Self.start.addingTimeInterval(10) && $0.date <= Self.start.addingTimeInterval(14) })
     }
 }
+
+struct NetworkSwitchTests {
+    static func env(gateway: String, mac: String = "") -> NetworkEnvironment {
+        var e = NetworkEnvironment()
+        e.gateway = gateway
+        e.routerMAC = mac
+        return e
+    }
+
+    @Test func staysOnTheSameNetwork() {
+        #expect(Monitor.transition(from: "aa:aa:aa:aa:aa:01", to: Self.env(gateway: "192.168.1.1", mac: "aa:aa:aa:aa:aa:01")) == .stay)
+    }
+
+    /// 切断中（ゲートウェイが無い）は区切らない
+    @Test func staysWhileDisconnected() {
+        #expect(Monitor.transition(from: "aa:aa:aa:aa:aa:01", to: NetworkEnvironment()) == .stay)
+    }
+
+    /// `ip:…` だったネットワークのルーターの MAC が後から取れたら、同じネットワークとして続ける
+    @Test func identifiesTheRouterLater() {
+        #expect(Monitor.transition(from: "ip:192.168.1.1", to: Self.env(gateway: "192.168.1.1", mac: "aa:aa:aa:aa:aa:01"))
+                == .identified("aa:aa:aa:aa:aa:01"))
+    }
+
+    @Test func switchesToAnotherNetwork() {
+        #expect(Monitor.transition(from: "aa:aa:aa:aa:aa:01", to: Self.env(gateway: "10.0.0.1", mac: "bb:bb:bb:bb:bb:02"))
+                == .switched("bb:bb:bb:bb:bb:02"))
+        // ゲートウェイが違えば `ip:…` からでも別のネットワーク
+        #expect(Monitor.transition(from: "ip:192.168.1.1", to: Self.env(gateway: "10.0.0.1")) == .switched("ip:10.0.0.1"))
+        #expect(Monitor.transition(from: nil, to: Self.env(gateway: "10.0.0.1")) == .switched("ip:10.0.0.1"))
+    }
+
+    /// ARP が一時的に引けなくても、ゲートウェイが同じならルーターの MAC を引き継ぐ（別のネットワークと見なさない）
+    @Test func carriesTheRouterMACWhenARPBlinks() {
+        let old = Self.env(gateway: "192.168.1.1", mac: "aa:aa:aa:aa:aa:01")
+        let blink = Monitor.carryRouterMAC(Self.env(gateway: "192.168.1.1"), from: old)
+        #expect(blink.routerMAC == "aa:aa:aa:aa:aa:01")
+        #expect(Monitor.transition(from: "aa:aa:aa:aa:aa:01", to: blink) == .stay)
+        // ゲートウェイが変わったら引き継がない
+        #expect(Monitor.carryRouterMAC(Self.env(gateway: "10.0.0.1"), from: old).routerMAC.isEmpty)
+    }
+
+    /// 変化に気づいた時点より前は前のネットワークの分として書き出し、10秒未満の切れ端は捨てる
+    @Test func splitsTheMinuteAtTheBoundary() throws {
+        let ticks = (0..<40).map { ExclusionTests.tick($0, gw: 8) }
+        let boundary = ExclusionTests.start.addingTimeInterval(25)
+        let (before, after) = Monitor.split(ticks, at: boundary)
+        #expect(before.count == 25)
+        #expect(after.count == 15)
+        #expect(after.first?.date == boundary)
+        let row = try #require(Monitor.minuteRow(before, network: "old"))
+        #expect(row.net == "old")
+        #expect(row.n == 25)
+
+        let (short, _) = Monitor.split(ticks, at: ExclusionTests.start.addingTimeInterval(9))
+        #expect(Monitor.minuteRow(short, network: "old") == nil)
+    }
+}
+
+struct SerialTaskTests {
+    /// やり直しを続けても、前の処理が止まり切るまで次は始まらない（PR #10 のクラッシュの再発防止）
+    @Test func neverOverlaps() async {
+        let loop = SerialTask()
+        var active = 0, maxActive = 0
+        var order: [Int] = []
+        for i in 0..<5 {
+            loop.restart {
+                active += 1
+                maxActive = max(maxActive, active)
+                // 止められても await の後ろは走る（DeviceScanner の registry への書き込みと同じ）
+                for _ in 0..<5 { await Task.yield() }
+                order.append(i)
+                active -= 1
+            }
+        }
+        await loop.wait()
+        #expect(maxActive == 1)
+        #expect(order == [0, 1, 2, 3, 4])
+    }
+}

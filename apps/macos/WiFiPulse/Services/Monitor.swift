@@ -215,37 +215,60 @@ final class Monitor {
     private func networkChanged(_ status: String, at: Date) async {
         if pathStatus != status { pathStatus = status }
         guard isRunning else { return }
-        var fresh = await NetworkEnvironment.resolve()
-        // ARP が一時的に引けなくても、ゲートウェイが同じならルーターは変わっていないとみなす
-        if fresh.routerMAC.isEmpty, fresh.gateway == env.gateway { fresh.routerMAC = env.routerMAC }
-        if fresh != env {
-            env = fresh
-            // 切断中（識別子なし）は区切らない。一瞬切れて同じネットワークに戻っても履歴は続ける
-            if let id = fresh.networkID, id != network {
-                if let old = network, old == "ip:\(fresh.gateway)" {
-                    // ルーターの MAC が後から取れた（ローカルネットワークの許可など）。同じネットワークとして続ける
-                    network = id
-                    registerNetwork()
-                    if networks[old]?.keepSeparate != true, !networks.same(old, id) {
-                        networks.merge(old, into: id)
-                        saveNetworks()
-                        minuteRevision += 1
-                    }
-                } else {
-                    switchNetwork(to: id, at: at)
-                }
+        let fresh = Self.carryRouterMAC(await NetworkEnvironment.resolve(), from: env)
+        guard fresh != env else { return }
+        env = fresh
+        switch Self.transition(from: network, to: fresh) {
+        case .stay:
+            break
+        case .identified(let id):
+            let old = network!
+            network = id
+            registerNetwork()
+            if networks[old]?.keepSeparate != true, !networks.same(old, id) {
+                networks.merge(old, into: id)
+                saveNetworks()
+                minuteRevision += 1
             }
-            restartPingers()
+        case .switched(let id):
+            switchNetwork(to: id, at: at)
         }
+        restartPingers()
+    }
+
+    /// ARP が一時的に引けなくても、ゲートウェイが同じならルーターは変わっていないとみなす
+    nonisolated static func carryRouterMAC(_ fresh: NetworkEnvironment, from old: NetworkEnvironment) -> NetworkEnvironment {
+        var fresh = fresh
+        if fresh.routerMAC.isEmpty, fresh.gateway == old.gateway { fresh.routerMAC = old.routerMAC }
+        return fresh
+    }
+
+    nonisolated enum NetworkTransition: Equatable {
+        /// 記録を区切らない（同じネットワーク・切断中）
+        case stay
+        /// `ip:<ゲートウェイ>` だったネットワークのルーターの MAC が取れた。同じネットワークとして続ける
+        case identified(String)
+        /// 別のネットワークに移った
+        case switched(String)
+    }
+
+    /// 経路が変わったとき、記録をどう扱うか
+    nonisolated static func transition(from network: String?, to fresh: NetworkEnvironment) -> NetworkTransition {
+        // 切断中（識別子なし）は区切らない。一瞬切れて同じネットワークに戻っても履歴は続ける
+        guard let id = fresh.networkID, id != network else { return .stay }
+        // ルーターの MAC が後から取れた（ローカルネットワークの許可など）
+        if network == "ip:\(fresh.gateway)" { return .identified(id) }
+        return .switched(id)
     }
 
     /// 前のネットワークの計測を新しいネットワークに混ぜない。
     /// 変化に気づいた時点（`at`）より前の生データは前のネットワークの分として書き出し、履歴からも外す。
     private func switchNetwork(to id: String, at boundary: Date) {
         let old = network
-        flushMinute(minuteBuffer.filter { $0.date < boundary }, network: old)
-        minuteBuffer.removeAll { $0.date < boundary }
-        history.removeAll { $0.date < boundary }
+        let (before, after) = Self.split(minuteBuffer, at: boundary)
+        flushMinute(before, network: old)
+        minuteBuffer = after
+        history = Self.split(history, at: boundary).after
         dns.removeAll()
         network = id
         registerNetwork()
@@ -253,6 +276,11 @@ final class Monitor {
     }
 
     nonisolated static let minimumPartialMinute = 10
+
+    /// 変化に気づいた時点より前（前のネットワークの分）と後に分ける
+    nonisolated static func split(_ ticks: [Tick], at boundary: Date) -> (before: [Tick], after: [Tick]) {
+        (ticks.filter { $0.date < boundary }, ticks.filter { $0.date >= boundary })
+    }
 
     private func registerNetwork() {
         guard let id = network, networks[id]?.gateway != env.gateway else { return }

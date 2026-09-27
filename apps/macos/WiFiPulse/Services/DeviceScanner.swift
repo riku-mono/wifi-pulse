@@ -85,7 +85,7 @@ final class DeviceScanner {
     @ObservationIgnored private var registry: [String: Device] = [:]
     @ObservationIgnored private var names: [String: String] = [:]
     @ObservationIgnored private weak var monitor: Monitor?
-    @ObservationIgnored private var loop: Task<Void, Never>?
+    @ObservationIgnored private let loop = SerialTask()
     @ObservationIgnored private var sweepRequested = true
     @ObservationIgnored private var lastNameLookup = Date.distantPast
     @ObservationIgnored private var lastBrowse = Date.distantPast
@@ -101,11 +101,11 @@ final class DeviceScanner {
     static let bonjourOnlineWindow: TimeInterval = 300
 
     func start(monitor: Monitor) {
-        guard loop == nil else { return }
+        guard !loop.hasStarted else { return }
         self.monitor = monitor
         registry = Self.repaired(DataStore.readJSON(DataStore.devices, as: [String: Device].self) ?? [:])
         names = DataStore.readJSON(DataStore.deviceNames, as: [String: String].self) ?? [:]
-        loop = Task { await run() }
+        loop.restart { [weak self] in await self?.run() }
     }
 
     func requestSweep() {
@@ -117,12 +117,7 @@ final class DeviceScanner {
     private func wake() {
         guard monitor != nil else { return }
         // 前のループが止まってから始める（2つのループが await をはさんで registry を同時に書き換えないように）
-        let previous = loop
-        previous?.cancel()
-        loop = Task {
-            await previous?.value
-            await run()
-        }
+        loop.restart { [weak self] in await self?.run() }
     }
 
     func rename(_ mac: String, to name: String) {
@@ -351,21 +346,29 @@ final class DeviceScanner {
         guard sysctl(&mib, u_int(mib.count), nil, &size, nil, 0) == 0, size > 0 else { return [:] }
         var buf = [UInt8](repeating: 0, count: size)
         guard sysctl(&mib, u_int(mib.count), &buf, &size, nil, 0) == 0 else { return [:] }
+        return parseARP(Array(buf.prefix(size)))
+    }
+
+    /// sysctl が返す経路メッセージ（`rt_msghdr` ＋ `sockaddr_inarp` ＋ `sockaddr_dl`）の並びから IP → MAC を取り出す。
+    /// IPv4 でないもの・リンク層のアドレスが無いもの・MAC が6バイトでないもの（未解決の項目など）は飛ばす
+    nonisolated static func parseARP(_ buf: [UInt8]) -> [String: String] {
+        let size = buf.count
         var table: [String: String] = [:]
         buf.withUnsafeBytes { raw in
             var offset = 0
             while offset + MemoryLayout<rt_msghdr>.size <= size {
-                let msgLen = Int(raw.load(fromByteOffset: offset, as: UInt16.self))
+                let msgLen = Int(raw.loadUnaligned(fromByteOffset: offset, as: UInt16.self))
                 guard msgLen > 0 else { break }
                 defer { offset += msgLen }
                 let sinOffset = offset + MemoryLayout<rt_msghdr>.size
+                guard offset + msgLen <= size, sinOffset + 8 <= offset + msgLen else { continue }
                 let sinLen = Int(raw[sinOffset])
                 guard raw[sinOffset + 1] == UInt8(AF_INET) else { continue }
                 let addr = raw.loadUnaligned(fromByteOffset: sinOffset + 4, as: UInt32.self)
                 let dlOffset = sinOffset + (sinLen > 0 ? (1 + ((sinLen - 1) | 3)) : 4)
                 guard dlOffset + 8 <= offset + msgLen, raw[dlOffset + 1] == UInt8(AF_LINK) else { continue }
                 let nlen = Int(raw[dlOffset + 5]), alen = Int(raw[dlOffset + 6])
-                guard alen == 6 else { continue }
+                guard alen == 6, dlOffset + 8 + nlen + 6 <= offset + msgLen else { continue }
                 let mac = (0..<6).map { String(format: "%02x", raw[dlOffset + 8 + nlen + $0]) }.joined(separator: ":")
                 let host = UInt32(bigEndian: addr)
                 let ip = [24, 16, 8, 0].map { String(host >> UInt32($0) & 0xFF) }.joined(separator: ".")
