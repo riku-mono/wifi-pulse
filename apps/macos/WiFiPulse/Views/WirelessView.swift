@@ -138,19 +138,21 @@ private struct SignalChart: View, Equatable {
         let date: Date
         let rssi: Double
         let noise: Double
+        // LinePlot の系列名（別々の LinePlot でも、系列名が無いと1本の線としてつながる）
+        var signalSeries: String { "Signal" }
+        var noiseSeries: String { "Noise" }
     }
     let points: [Point]
 
     var body: some View {
         Chart {
-            ForEach(points) { p in
-                AreaMark(x: .value("Time", p.date), yStart: .value("Noise", p.noise), yEnd: .value("Signal", p.rssi))
-                    .foregroundStyle(.tint.opacity(0.15))
-                LineMark(x: .value("Time", p.date), y: .value("dBm", p.rssi), series: .value("Series", "Signal"))
-                    .foregroundStyle(.tint)
-                LineMark(x: .value("Time", p.date), y: .value("dBm", p.noise), series: .value("Series", "Noise"))
-                    .foregroundStyle(.secondary)
-            }
+            // 点ごとのマークではなく、まとめて描く Plot を使う（#46）
+            AreaPlot(points, x: .value("Time", \.date), yStart: .value("Noise", \.noise), yEnd: .value("Signal", \.rssi))
+                .foregroundStyle(.tint.opacity(0.15))
+            LinePlot(points, x: .value("Time", \.date), y: .value("dBm", \.rssi), series: .value("Series", \.signalSeries))
+                .foregroundStyle(.tint)
+            LinePlot(points, x: .value("Time", \.date), y: .value("dBm", \.noise), series: .value("Series", \.noiseSeries))
+                .foregroundStyle(.secondary)
             RuleMark(y: .value("Guide", -70))
                 .foregroundStyle(.orange.opacity(0.6))
                 .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 4]))
