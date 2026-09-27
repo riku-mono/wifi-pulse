@@ -48,8 +48,8 @@ xcodebuild -project WiFiPulse.xcodeproj -scheme WiFiPulse -configuration Debug -
 ### パフォーマンス — 詳細は apps/macos/README.md
 - 毎秒の計測は `Monitor.live`（`LiveSnapshot`）に1回だけ組み立てる。履歴は `@ObservationIgnored` に置き、グラフは `revision` を読む。
 - 常に表示される部分（メニューバー・サブタイトル・サイドバー）は、変化したときだけ更新されるプロパティ（`menu`・`networkTitle`・`connection`）を読む。
-- グラフは `Equatable` なビューに分けて間引く。常時動くアニメーション・シンボルエフェクトは使わない。
-- UI を変えたら **Release ビルドで CPU を測って比べる**（各画面を開いて30秒平均。`ps -o time=` の CPU 時間の差分から出すと確実。目安: 概要 1.3%、アプリの通信 2.8%＋nettop 0.6%）。
+- グラフは `Equatable` なビューに分けて間引く。毎秒描き直すグラフは点ごとの `LineMark` ではなく `LinePlot`（まとめて描く API）を使う。常時動くアニメーション・シンボルエフェクトは使わない。
+- UI を変えたら **Release ビルドで CPU を測って比べる**（各画面を開いて30秒平均。`ps -o time=` の CPU 時間の差分から出すと確実。目安: 概要 1.8%、アプリの通信 2.8%＋nettop 0.6%）。
 
 ### 外部プロセス
 - `nettop` は **疑似端末（pty）** につなぐ（パイプだと16KB単位でまとめて届き、行の途中で切れる）。

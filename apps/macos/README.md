@@ -55,7 +55,9 @@ defaults write me.riku-mono.WiFiPulse selectedView overview   # 起動時に開�
 top -l 16 -s 2 -stats pid,command,cpu -pid $(pgrep -x WiFiPulse)
 ```
 
-2026-09 時点の目安（Apple Silicon）: 概要 1.3%、遅延（60分表示）1.7%、周辺の Wi-Fi 0.6%、アプリの通信 2.8%＋nettop 0.6%。
+2026-09 時点の目安（Apple Silicon）: 概要 1.8%、遅延（60分表示）1.7%、周辺の Wi-Fi 0.6%、アプリの通信 2.8%＋nettop 0.6%。
+
+概要の内訳（#14）: 直近2分のグラフを外すと 1.2〜1.3%。グラフは点ごとの `LineMark` だと約 1% かかり、`LinePlot` にして約 0.5% になった。毎秒描き直すグラフは `LinePlot` などのまとめて描く API を使う。測っている間に Mac を操作すると 10〜20% の山が出るので、触らずに測る。
 
 ## データ形式
 
