@@ -93,6 +93,8 @@ final class DeviceScanner {
     @ObservationIgnored private var isBusy = false
     /// Bonjour で最後に見えた日時（registry のキーごと）。ARP に出ない機器のオンライン判定に使う
     @ObservationIgnored private var bonjourSeen: [String: Date] = [:]
+    /// いま掃引してはいけないか（速度測定・負荷試験の最中。結果が下がる）。頼まれた掃引は次の周期へ回す。`AppModel` が設定する
+    @ObservationIgnored var isBlocked: () -> Bool = { false }
 
     static let cycle: Duration = .seconds(20)
     /// 画面を開いている間に Bonjour で探す間隔（掃引のときは間隔によらず探す）
@@ -106,6 +108,11 @@ final class DeviceScanner {
         registry = Self.repaired(DataStore.readJSON(DataStore.devices, as: [String: Device].self) ?? [:])
         names = DataStore.readJSON(DataStore.deviceNames, as: [String: String].self) ?? [:]
         loop.restart { [weak self] in await self?.run() }
+    }
+
+    /// 進行中の掃引が終わるまで待つ
+    func waitUntilIdle() async {
+        while isSweeping { try? await Task.sleep(for: .milliseconds(200)) }
     }
 
     func requestSweep() {
@@ -191,7 +198,7 @@ final class DeviceScanner {
         while !Task.isCancelled {
             guard let monitor else { return }
             let env = monitor.env
-            let sweeping = sweepRequested && !env.gateway.isEmpty
+            let sweeping = sweepRequested && !env.gateway.isEmpty && !isBlocked()
             let browsing = !env.gateway.isEmpty && (sweeping || (isViewing && Date().timeIntervalSince(lastBrowse) > Self.browseInterval))
             // Bonjour は掃引と並べて探す（掃引の3秒の待ちと重なる）
             isBusy = true

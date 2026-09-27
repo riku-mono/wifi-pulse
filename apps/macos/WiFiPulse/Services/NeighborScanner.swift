@@ -133,11 +133,13 @@ final class NeighborScanner {
     @ObservationIgnored private var store: [String: AccessPoint] = [:]
     @ObservationIgnored private var autoTask: Task<Void, Never>?
     @ObservationIgnored private var lastRequest = Date.distantPast
+    /// いまスキャンしてはいけないか（速度測定・負荷試験の最中。結果が下がる）。`AppModel` が設定する
+    @ObservationIgnored var isBlocked: () -> Bool = { false }
 
-    /// スキャン自体が数百msの通信停止を起こすので、最短15秒あける
+    /// スキャン自体が数秒の遅延の悪化を起こすので、最短15秒あける
     @discardableResult
     func scan() async -> Bool {
-        guard !isScanning, Date().timeIntervalSince(lastRequest) >= 15 else { return false }
+        guard !isScanning, !isBlocked(), Date().timeIntervalSince(lastRequest) >= 15 else { return false }
         lastRequest = Date()
         isScanning = true
         defer { isScanning = false }
@@ -155,6 +157,11 @@ final class NeighborScanner {
             scanCount += 1
             return true
         }
+    }
+
+    /// 進行中のスキャンが終わるまで待つ
+    func waitUntilIdle() async {
+        while isScanning { try? await Task.sleep(for: .milliseconds(200)) }
     }
 
     /// 前回のスキャンに写っていた AP（`includeStale` なら10分以内に見えたもの）

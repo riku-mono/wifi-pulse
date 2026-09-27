@@ -11,6 +11,8 @@ final class SpeedTest {
     private(set) var state: State = .idle
     private(set) var history: [SpeedTestRecord] = []
     private(set) var latest: SpeedTestRecord?
+    /// 始める前に、このアプリの他の処理（周辺の Wi-Fi のスキャン・LAN の掃引）が終わるのを待つ。`AppModel` が設定する
+    @ObservationIgnored var waitForQuiet: () async -> Void = {}
 
     init() {
         reload()
@@ -26,6 +28,7 @@ final class SpeedTest {
     func run(env: NetworkEnvironment) async {
         guard !isRunning else { return }
         state = .running(started: Date())
+        await waitForQuiet()
         let out = await Shell.run("/usr/bin/networkQuality", ["-s", "-c", "-I", env.interface], timeout: 150)
         guard let data = out.data(using: .utf8),
               let j = try? JSONSerialization.jsonObject(with: data) as? [String: Any],

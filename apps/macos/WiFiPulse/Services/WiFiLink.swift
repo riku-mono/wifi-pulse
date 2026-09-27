@@ -39,24 +39,6 @@ nonisolated struct LinkSample: Hashable, Sendable {
     }
 }
 
-nonisolated struct NeighborNetwork: Identifiable, Hashable, Sendable {
-    var id: String { "\(bssid ?? ssid ?? "?")-\(channel)" }
-    var ssid: String?
-    var bssid: String?
-    var channel: Int
-    var band: String
-    var width: Int
-    var rssi: Int
-    var noise: Int
-}
-
-nonisolated struct ScanResult: Sendable {
-    var date: Date
-    var duration: TimeInterval
-    var networks: [NeighborNetwork]
-    var error: String?
-}
-
 nonisolated enum WiFiLink {
     static func sample() -> LinkSample? {
         guard let iface = CWWiFiClient.shared().interface() else { return nil }
@@ -76,33 +58,6 @@ nonisolated enum WiFiLink {
             s.width = widthMHz(ch.channelWidth)
         }
         return s
-    }
-
-    /// 近隣APのスキャン。数秒ブロックし、その間は自分の通信も数百ms止まるので乱用しない。
-    static func scan() async -> ScanResult {
-        await withCheckedContinuation { cont in
-            DispatchQueue.global(qos: .userInitiated).async {
-                let started = Date()
-                guard let iface = CWWiFiClient.shared().interface() else {
-                    cont.resume(returning: ScanResult(date: started, duration: 0, networks: [], error: String(localized: "No Wi-Fi interface found")))
-                    return
-                }
-                do {
-                    let nets = try iface.scanForNetworks(withSSID: nil)
-                    let list: [NeighborNetwork] = nets.compactMap { n in
-                        guard let ch = n.wlanChannel else { return nil }
-                        return NeighborNetwork(ssid: n.ssid, bssid: n.bssid, channel: ch.channelNumber,
-                                               band: bandName(ch.channelBand), width: widthMHz(ch.channelWidth),
-                                               rssi: n.rssiValue, noise: n.noiseMeasurement)
-                    }
-                    cont.resume(returning: ScanResult(date: started, duration: Date().timeIntervalSince(started),
-                                                      networks: list.sorted { $0.rssi > $1.rssi }))
-                } catch {
-                    cont.resume(returning: ScanResult(date: started, duration: Date().timeIntervalSince(started),
-                                                      networks: [], error: error.localizedDescription))
-                }
-            }
-        }
     }
 
     static func phyName(_ m: CWPHYMode) -> String {

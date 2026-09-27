@@ -64,6 +64,8 @@ final class LoadTest {
     private(set) var error: String?
 
     @ObservationIgnored private var task: Task<Void, Never>?
+    /// 始める前に、このアプリの他の処理（周辺の Wi-Fi のスキャン・LAN の掃引）が終わるのを待つ。`AppModel` が設定する
+    @ObservationIgnored var waitForQuiet: () async -> Void = {}
 
     init() {
         history = DataStore.load(DataStore.loadtests, as: LoadTestRecord.self)
@@ -100,6 +102,7 @@ final class LoadTest {
 
     private func run(env: NetworkEnvironment) async {
         isRunning = true
+        await waitForQuiet()
         error = nil
         live = []
         plan = makePlan()

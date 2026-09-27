@@ -77,12 +77,13 @@ struct ExclusionTests {
         #expect(Monitor.progress(at: Self.start.addingTimeInterval(-5), end: end, length: 10) == 0)
     }
 
-    /// 数秒で終わる掃引だけは表示を止めない
+    /// 数秒で終わる掃引・スキャンは表示を止めない
     @Test func pausesJudgement() {
         #expect(Exclusion.warmup.pausesJudgement)
         #expect(Exclusion.speedTest.pausesJudgement)
         #expect(Exclusion.loadTest.pausesJudgement)
         #expect(!Exclusion.lanScan.pausesJudgement)
+        #expect(!Exclusion.wifiScan.pausesJudgement)
     }
 
     /// 測定が終わってからも `tail` 秒は印を付け続ける
@@ -97,6 +98,10 @@ struct ExclusionTests {
         #expect(m.mark(nil, at: at(20 + SelfLoadMarker.tail)) == nil)
         #expect(m.mark(.loadTest, at: at(40)) == .loadTest)
         #expect(m.mark(nil, at: at(41)) == .loadTest)
+        // 周辺の Wi-Fi のスキャンは終わって約1秒は遅延が高いまま残る
+        #expect(m.mark(.wifiScan, at: at(60)) == .wifiScan)
+        #expect(m.mark(nil, at: at(61)) == .wifiScan)
+        #expect(m.mark(nil, at: at(60 + SelfLoadMarker.tail)) == nil)
     }
 
     /// 帯は続いている秒ごとにまとめる（`Tick.date` はその1秒の終わりなので、1秒前から始める）
