@@ -30,6 +30,13 @@ nonisolated struct MinuteRow: Codable, Sendable, Identifiable {
     var self_s: Int?
 
     var date: Date { Date(epochMs: t) }
+
+    /// ルーター宛てのロス。ルーターが ping に応答しない（1分ずっと失われ、インターネット宛ては返った）記録は nil。
+    /// #35 より前の記録には、テザリングなどでこの形の 100% が入っている
+    var routerLoss: Double? {
+        if lgw == 1, gw50 == nil, v450 != nil { return nil }
+        return lgw
+    }
 }
 
 /// 速度測定（speedtests.jsonl）

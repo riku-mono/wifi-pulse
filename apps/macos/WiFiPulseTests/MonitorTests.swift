@@ -221,3 +221,63 @@ struct SerialTaskTests {
         #expect(order == [0, 1, 2, 3, 4])
     }
 }
+
+struct GatewayProbeTests {
+    static let silent = Pinger.Batch(rtts: [], lost: 5)
+    static let internet = Pinger.Batch(rtts: [30, 31])
+
+    /// テザリング: ルーター宛ては一度も返らず、インターネット宛ては返る → 応答しないとみなす（#35）
+    @Test func silentGateway() {
+        var p = GatewayProbe()
+        for _ in 0..<4 { p.record(gw: Self.silent, internet: Self.internet) }
+        #expect(!p.isSilent)  // まだ20発
+        p.record(gw: Self.silent, internet: Self.internet)
+        #expect(p.isSilent)
+    }
+
+    /// 一度でも返ったルーターの途切れは本当のロス
+    @Test func answeredOnceMeansRealLoss() {
+        var p = GatewayProbe()
+        p.record(gw: .init(rtts: [8], lost: 4), internet: Self.internet)
+        for _ in 0..<10 { p.record(gw: Self.silent, internet: Self.internet) }
+        #expect(!p.isSilent)
+    }
+
+    /// インターネット宛ても返らないなら、つながっていない（ロスのまま）
+    @Test func everythingLostIsNotSilence() {
+        var p = GatewayProbe()
+        for _ in 0..<10 { p.record(gw: Self.silent, internet: .init(rtts: [], lost: 2)) }
+        #expect(!p.isSilent)
+    }
+
+    /// 外した秒はルーター宛てのロスを数えず、スコアはインターネット宛てと電波だけで出る
+    @Test func strippedTicksDoNotCountAsLoss() throws {
+        let ticks = (0..<30).map { i in
+            GatewayProbe.stripping(Tick(date: ExclusionTests.start.addingTimeInterval(Double(i)), link: nil,
+                                        gw: Self.silent, v4: Self.internet, v6: .init(), rx: 0, tx: 0))
+        }
+        let w = Monitor.windowStats(ticks, seconds: 30)
+        #expect(w.gw.n == 0 && w.gw.lost == 0)
+        #expect(w.worstLoss == 0)
+        #expect(Analysis.score(w, link: nil) == 100)
+        #expect(Analysis.bottleneck(w, link: nil).level == .good)
+        let row = try #require(Monitor.minuteRow(ticks, network: "ip:192.0.0.1"))
+        #expect(row.lgw == nil)
+    }
+
+    /// 返ったものが入っている秒はそのまま
+    @Test func strippingKeepsReplies() {
+        let t = Tick(date: ExclusionTests.start, link: nil, gw: .init(rtts: [8], lost: 1), v4: Self.internet, v6: .init(), rx: 0, tx: 0)
+        #expect(GatewayProbe.stripping(t).gw.lost == 1)
+    }
+
+    /// #35 より前の記録（ルーター宛て 100%・遅延なし・インターネットは返った）はロスとして数えない
+    @Test func oldSilentMinutesAreNotRouterLoss() {
+        func row(lgw: Double?, gw50: Double?, v450: Double?) -> MinuteRow {
+            MinuteRow(t: 0, hour: 0, wd: 0, n: 60, gw50: gw50, v450: v450, lgw: lgw, rx: 0, tx: 0)
+        }
+        #expect(row(lgw: 1, gw50: nil, v450: 33).routerLoss == nil)
+        #expect(row(lgw: 1, gw50: nil, v450: nil).routerLoss == 1)  // 何も返らない = 切断
+        #expect(row(lgw: 0.02, gw50: 8, v450: 12).routerLoss == 0.02)
+    }
+}

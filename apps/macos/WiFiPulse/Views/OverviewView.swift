@@ -98,8 +98,11 @@ private struct TilesGrid: View {
                        level: Level.internet(s.w30.v4.p95))
             MetricTile(title: "To the Router", systemImage: "wifi.router",
                        value: Fmt.ms(s.w30.gw.p50), unit: "ms",
-                       caption: "p95 \(Fmt.ms(s.w30.gw.p95)) ms · \(m.env.gateway.isEmpty ? "—" : m.env.gateway)",
-                       level: Level.gateway(s.w30.gw.p95))
+                       // テザリングなどでルーターが ping に答えないときは、ロスではないことを書く
+                       caption: s.gatewaySilent
+                           ? String(localized: "Doesn’t answer ping · \(m.env.gateway)")
+                           : "p95 \(Fmt.ms(s.w30.gw.p95)) ms · \(m.env.gateway.isEmpty ? "—" : m.env.gateway)",
+                       level: s.gatewaySilent ? .none : Level.gateway(s.w30.gw.p95))
             MetricTile(title: "Stability", systemImage: "waveform",
                        value: stab,
                        caption: String(localized: "Loss \(Fmt.pct(s.w60.worstLoss))% · Jitter \(Fmt.ms(s.w60.v4.jitter)) ms"),

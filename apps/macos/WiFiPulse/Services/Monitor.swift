@@ -7,7 +7,8 @@ nonisolated struct Tick: Identifiable, Sendable {
     var id: Date { date }
     let date: Date
     let link: LinkSample?
-    let gw: Pinger.Batch
+    /// ルーターが ping に応答しない（`GatewayProbe.isSilent`）ときは空にする（ロスとして数えない）
+    var gw: Pinger.Batch
     let v4: Pinger.Batch
     let v6: Pinger.Batch
     /// Wi-Fiインターフェースの受信・送信（bps）
@@ -83,6 +84,33 @@ nonisolated struct DNSSample: Identifiable, Hashable, Sendable {
 }
 
 /// 直近 N 秒の集計。
+/// ルーターが ping に応答するか。iPhone のテザリング（ゲートウェイ 192.0.0.1）などは ping に一度も答えないが、
+/// インターネット宛ては返ってくる。ルーターを通らずにインターネットへは届かないので、これはロスではなく「応答しない」。
+/// ping をやり直すたび（経路が変わったとき）に作り直す
+nonisolated struct GatewayProbe: Equatable, Sendable {
+    /// これだけ続けて失われ、その間に一度も返らなければ「応答しない」とみなす（0.2 秒間隔で約5秒）
+    static let silentAfter = 25
+
+    private(set) var answered = false
+    private(set) var lost = 0
+    private(set) var internetAnswered = false
+
+    var isSilent: Bool { !answered && internetAnswered && lost >= Self.silentAfter }
+
+    mutating func record(gw: Pinger.Batch, internet: Pinger.Batch) {
+        if !gw.rtts.isEmpty { answered = true }
+        lost += gw.lost
+        if !internet.rtts.isEmpty { internetAnswered = true }
+    }
+
+    /// 応答しないルーター宛ての結果を外した1秒
+    static func stripping(_ t: Tick) -> Tick {
+        var t = t
+        if t.gw.rtts.isEmpty { t.gw = Pinger.Batch() }
+        return t
+    }
+}
+
 nonisolated struct WindowStats: Equatable, Sendable {
     var seconds: Int
     var gw: PingStats
@@ -118,6 +146,8 @@ struct LiveSnapshot: Equatable {
     var tx: Double = 0
     /// 判定を止めている間だけ入る（スコアは nil）
     var pause: JudgementPause?
+    /// ルーターが ping に応答しない（テザリングなど）。ルーターの遅延は「—」になる
+    var gatewaySilent = false
 }
 
 /// 接続先（SSID・チャンネル）。変化したときだけ更新する。
@@ -179,6 +209,8 @@ final class Monitor {
     @ObservationIgnored private var selfLoadMarker = SelfLoadMarker()
     /// 経路の変化を処理している数（その間は `network` がまだ前のネットワークを指していることがある）
     @ObservationIgnored private var resolvingPath = 0
+    @ObservationIgnored private var gatewayProbe = GatewayProbe()
+    @ObservationIgnored private var pingersStarted = Date.distantPast
     /// このアプリがいま回線に負荷をかけているか（速度測定・負荷試験）。`AppModel` が設定する
     @ObservationIgnored var selfLoad: () -> Exclusion? = { nil }
 
@@ -346,6 +378,8 @@ final class Monitor {
         ]
         pingers.values.forEach { $0.start() }
         previousCounters = nil
+        gatewayProbe = GatewayProbe()
+        pingersStarted = Date()
     }
 
     /// 設定で宛先が変わったとき
@@ -391,8 +425,16 @@ final class Monitor {
             previousCounters = cur
         }
 
+        let wasSilent = gatewayProbe.isSilent
+        gatewayProbe.record(gw: raw.gw, internet: raw.v4)
+        if gatewayProbe.isSilent, !wasSilent {
+            // 気づくまでの数秒ぶんもロスとして残さない
+            history = history.map { $0.date >= pingersStarted ? GatewayProbe.stripping($0) : $0 }
+            minuteBuffer = minuteBuffer.map { $0.date >= pingersStarted ? GatewayProbe.stripping($0) : $0 }
+        }
         let excluded = exclusion(at: raw.date)
-        let t = Tick(date: raw.date, link: raw.link, gw: raw.gw, v4: raw.v4, v6: raw.v6, rx: rx, tx: tx, excluded: excluded)
+        var t = Tick(date: raw.date, link: raw.link, gw: raw.gw, v4: raw.v4, v6: raw.v6, rx: rx, tx: tx, excluded: excluded)
+        if gatewayProbe.isSilent { t = GatewayProbe.stripping(t) }
         if excluded != .warmup {
             history.append(t)
             // 1秒ごとに先頭を消すと O(n) なので、まとめて消す
@@ -416,6 +458,7 @@ final class Monitor {
         s.bottleneck = Analysis.bottleneck(s.w60, link: s.link)
         s.rx = rx
         s.tx = tx
+        s.gatewaySilent = gatewayProbe.isSilent
         if let excluded, excluded.pausesJudgement {
             // スコアの代わりに、何を待っているか（慣らし運転なら進み具合も）を出す
             let progress = excluded == .warmup ? warmupEnd.map { Self.progress(at: raw.date, end: $0, length: Self.warmupSeconds) } : nil

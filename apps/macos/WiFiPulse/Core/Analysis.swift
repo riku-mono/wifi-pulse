@@ -213,7 +213,7 @@ enum Report {
                 f.append(.init(severity: 2, title: String(localized: "Spikes up to \(r1(vmax)) ms on the Internet line"),
                                detail: String(localized: "Wi-Fi is fine; the delay is at your ISP or further along the route."), advice: nil))
             }
-            if let lgw = median(r.minutes.compactMap(\.lgw)), lgw > 0.002 {
+            if let lgw = median(r.minutes.compactMap(\.routerLoss)), lgw > 0.002 {
                 f.append(.init(severity: 3, title: String(localized: "Packet loss on the Wi-Fi segment: \(Fmt.pct(lgw))%"),
                                detail: String(localized: "Wireless conditions are poor and packets are lost on the way to the router."),
                                advice: String(localized: "Move closer to the router, reduce obstacles, or switch to a less congested channel.")))

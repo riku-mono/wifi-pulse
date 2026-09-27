@@ -57,6 +57,7 @@ xcodebuild -project WiFiPulse.xcodeproj -scheme WiFiPulse -configuration Debug -
 
 ### ネットワーク
 - LAN の無いリンクがある。iPhone のテザリングでは `192.0.0.2/32`・`NOARP`・ゲートウェイ `192.0.0.1` になり、サブネットの外へ UDP を送ると `sendto` がカーネル内で回り続けて CPU 100% になる。LAN 宛ての送信はインターフェースのサブネットとフラグを見てから（`DeviceScanner.sweepTargets`）。
+- テザリングのゲートウェイ（`192.0.0.1`）は ping に一度も応答しない。インターネット宛ては返るので、ロスではなく「応答しない」として扱う（`GatewayProbe`。スコア・判定・記録からルーター宛てを外す）。
 
 ## 作業環境の制約（この Mac で Claude Code を使うとき）
 
