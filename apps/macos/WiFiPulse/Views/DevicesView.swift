@@ -23,64 +23,80 @@ struct DevicesView: View {
                 ContentUnavailableView {
                     Label(scanner.isSweeping ? "Looking for Devices…" : "No Devices Found", systemImage: "network")
                 } description: {
-                    Text(scanner.arpWorks
+                    Text(scanner.bonjourDenied
+                         ? "Local network access isn’t allowed for Wi-Fi Pulse. Allow it in System Settings to list devices on this network."
+                         : scanner.arpWorks
                          ? "Sends one probe to each address on your local network and lists the devices that respond."
                          : "macOS didn’t return any devices on this network. Local network access may not be allowed, or macOS may be hiding the device list from this build of the app.")
                 } actions: {
                     Button("Find") { scanner.requestSweep() }
                         .buttonStyle(.glassProminent)
                         .disabled(scanner.isSweeping)
-                    if !scanner.arpWorks {
+                    if !scanner.arpWorks || scanner.bonjourDenied {
                         Button("Open Local Network Settings") {
                             NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_LocalNetwork")!)
                         }
                     }
                 }
             } else {
-                Table(list, selection: $selection) {
-                    TableColumn("") { d in
-                        Image(systemName: d.symbol)
-                            .foregroundStyle(d.online == true ? AnyShapeStyle(.tint) : AnyShapeStyle(.tertiary))
-                            .accessibilityLabel(d.kindLabel)
+                VStack(spacing: 0) {
+                    if !scanner.arpWorks {
+                        // ARP 表が読めないときは、Bonjour でサービスを公開している機器だけが並ぶ
+                        Label("Only devices that announce themselves over Bonjour are listed. macOS isn’t returning the full device list to this build of the app.",
+                              systemImage: "info.circle")
+                            .font(.callout)
+                            .foregroundStyle(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
                     }
-                    .width(24)
-                    TableColumn("Name") { d in
-                        VStack(alignment: .leading, spacing: 1) {
-                            Text(d.displayName).fontWeight(d.name != nil ? .semibold : .regular)
-                            if d.ip == model.monitor.env.gateway {
-                                Text("Router for this network").font(.caption).foregroundStyle(.secondary)
-                            } else if d.ip == model.monitor.env.selfIP {
-                                Text("This Mac").font(.caption).foregroundStyle(.secondary)
+                    Table(list, selection: $selection) {
+                        TableColumn("") { d in
+                            Image(systemName: d.symbol)
+                                .foregroundStyle(d.online == true ? AnyShapeStyle(.tint) : AnyShapeStyle(.tertiary))
+                                .accessibilityLabel(d.kindLabel)
+                        }
+                        .width(24)
+                        TableColumn("Name") { d in
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text(d.displayName).fontWeight(d.name != nil ? .semibold : .regular)
+                                if d.ip == model.monitor.env.gateway {
+                                    Text("Router for this network").font(.caption).foregroundStyle(.secondary)
+                                } else if d.ip == model.monitor.env.selfIP {
+                                    Text("This Mac").font(.caption).foregroundStyle(.secondary)
+                                }
                             }
                         }
-                    }
-                    TableColumn("IP Address") { Text($0.ip ?? "—").monospacedDigit() }
-                        .width(min: 100, ideal: 120)
-                    TableColumn("Manufacturer") { d in
-                        Text(d.vendor_ja ?? d.vendor ?? (d.random == true ? String(localized: "Private Address") : String(localized: "Unknown")))
-                            .foregroundStyle(d.vendor == nil ? .secondary : .primary)
-                    }
-                    TableColumn("Type") { Text($0.kindLabel) }
-                        .width(min: 70, ideal: 90)
-                    TableColumn("Status") { d in
-                        if d.online == true {
-                            Label("Online", systemImage: "circle.fill").foregroundStyle(.green).labelStyle(.titleAndIcon).imageScale(.small)
-                        } else {
-                            Text(d.lastSeen, format: .relative(presentation: .named)).foregroundStyle(.secondary)
+                        TableColumn("IP Address") { Text($0.ip ?? "—").monospacedDigit() }
+                            .width(min: 100, ideal: 120)
+                        TableColumn("Manufacturer") { d in
+                            Text(d.vendor_ja ?? d.vendor ?? (d.random == true ? String(localized: "Private Address") : String(localized: "Unknown")))
+                                .foregroundStyle(d.vendor == nil ? .secondary : .primary)
                         }
+                        TableColumn("Type") { Text($0.kindLabel) }
+                            .width(min: 70, ideal: 90)
+                        TableColumn("Status") { d in
+                            if d.online == true {
+                                Label("Online", systemImage: "circle.fill").foregroundStyle(.green).labelStyle(.titleAndIcon).imageScale(.small)
+                            } else {
+                                Text(d.lastSeen, format: .relative(presentation: .named)).foregroundStyle(.secondary)
+                            }
+                        }
+                        .width(min: 90, ideal: 110)
                     }
-                    .width(min: 90, ideal: 110)
-                }
-                .contextMenu(forSelectionType: Device.ID.self) { ids in
-                    if let mac = ids.first {
-                        Button("Copy MAC Address") {
-                            NSPasteboard.general.clearContents()
-                            NSPasteboard.general.setString(mac, forType: .string)
+                    .contextMenu(forSelectionType: Device.ID.self) { ids in
+                        if let mac = ids.first, all.first(where: { $0.id == mac })?.hasMAC == true {
+                            Button("Copy MAC Address") {
+                                NSPasteboard.general.clearContents()
+                                NSPasteboard.general.setString(mac, forType: .string)
+                            }
                         }
                     }
                 }
             }
         }
+        .onAppear { scanner.isViewing = true }
+        .onDisappear { scanner.isViewing = false }
         .navigationTitle("Devices")
         .searchable(text: $search, placement: .toolbar, prompt: "Name, IP, Manufacturer")
         .inspector(isPresented: $showInspector) {
@@ -139,9 +155,24 @@ private struct DeviceInspector: View {
                 }
                 Section("Details") {
                     LabeledContent("IP Address", value: d.ip ?? "—")
-                    LabeledContent("MAC Address") { Text(d.mac).font(.callout.monospaced()).textSelection(.enabled) }
+                    LabeledContent("MAC Address") {
+                        if d.hasMAC {
+                            Text(d.mac).font(.callout.monospaced()).textSelection(.enabled)
+                        } else {
+                            Text("Unknown").foregroundStyle(.secondary)
+                        }
+                    }
                     LabeledContent("Manufacturer (OUI)", value: d.vendor ?? String(localized: "Unknown"))
                     LabeledContent("mDNS Name", value: d.mdns ?? "—")
+                    if let service = d.service {
+                        LabeledContent("Bonjour Name", value: service)
+                    }
+                    if let model = d.model {
+                        LabeledContent("Model", value: model)
+                    }
+                    if let services = d.services, !services.isEmpty {
+                        LabeledContent("Services") { Text(verbatim: services.joined(separator: ", ")) }
+                    }
                     LabeledContent("First Seen", value: d.firstSeen.formatted(date: .abbreviated, time: .shortened))
                     LabeledContent("Last Seen", value: d.lastSeen.formatted(date: .abbreviated, time: .shortened))
                 }

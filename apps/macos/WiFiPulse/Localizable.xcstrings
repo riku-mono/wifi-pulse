@@ -757,6 +757,16 @@
         }
       }
     },
+    "Bonjour Name" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bonjour の名前"
+          }
+        }
+      }
+    },
     "Both the Wi-Fi segment and the Internet line are healthy." : {
       "localizations" : {
         "ja" : {
@@ -2426,6 +2436,16 @@
         }
       }
     },
+    "Local network access isn’t allowed for Wi-Fi Pulse. Allow it in System Settings to list devices on this network." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wi-Fi Pulse にローカルネットワークへのアクセスが許可されていません。このネットワークの機器を一覧にするには、システム設定で許可してください。"
+          }
+        }
+      }
+    },
     "Location" : {
       "localizations" : {
         "ja" : {
@@ -2635,6 +2655,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "軽度〜中程度のバッファブロートあり"
+          }
+        }
+      }
+    },
+    "Model" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "機種"
           }
         }
       }
@@ -3161,6 +3191,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "オンライン"
+          }
+        }
+      }
+    },
+    "Only devices that announce themselves over Bonjour are listed. macOS isn’t returning the full device list to this build of the app." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bonjour で自身を公開している機器だけを表示しています。macOS がこのビルドのアプリに機器の一覧の全体を返していません。"
           }
         }
       }
@@ -4093,6 +4133,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "系列"
+          }
+        }
+      }
+    },
+    "Services" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サービス"
           }
         }
       }

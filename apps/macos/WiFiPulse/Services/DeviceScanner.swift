@@ -17,8 +17,18 @@ nonisolated struct Device: Codable, Identifiable, Hashable, Sendable {
     var name: String?
     /// 最後に見えたネットワークの識別子（`NetworkEnvironment.networkID`）
     var net: String?
+    /// Bonjour のサービス名（「リビングルーム」「Brother DCP-J928N」など）
+    var service: String?
+    /// Bonjour の TXT レコードの機種（`AppleTV14,1` など）
+    var model: String?
+    /// Bonjour で見つかったサービスの種類（`airplay`・`ipp` など）
+    var services: [String]?
 
-    var displayName: String { name ?? mdns ?? vendor_ja ?? vendor ?? (random == true ? String(localized: "Device with a Private Address") : String(localized: "Unknown Device")) }
+    /// Bonjour だけで見つかり、MAC アドレスが分からない機器は `ip:<IP アドレス>` をキーにする
+    static let ipKeyPrefix = "ip:"
+    var hasMAC: Bool { !mac.hasPrefix(Self.ipKeyPrefix) }
+
+    var displayName: String { name ?? service ?? mdns ?? vendor_ja ?? vendor ?? (random == true ? String(localized: "Device with a Private Address") : String(localized: "Unknown Device")) }
     var lastSeen: Date { Date(epochMs: last) }
     var firstSeen: Date { Date(epochMs: first) }
 
@@ -55,7 +65,8 @@ nonisolated struct Device: Codable, Identifiable, Hashable, Sendable {
     }
 }
 
-/// ARP テーブル・OUI（オフライン）・mDNS 逆引きで LAN の機器一覧を作る。
+/// ARP テーブル・Bonjour・OUI（オフライン）・mDNS 逆引きで LAN の機器一覧を作る。
+/// ARP 表は署名によって空に見えることがある（#5）ので、Bonjour でサービスを公開している機器も加える。
 @Observable
 final class DeviceScanner {
     private(set) var devices: [Device] = []
@@ -63,6 +74,13 @@ final class DeviceScanner {
     private(set) var lastUpdate: Date?
     private(set) var arpWorks = true
     private(set) var onlineCount = 0
+    /// Bonjour で探すことを拒否された（ローカルネットワークの許可が無い）
+    private(set) var bonjourDenied = false
+    /// LAN の機器の画面を開いているか。開いている間だけ Bonjour で定期的に探す
+    @ObservationIgnored var isViewing = false {
+        // 探している最中なら止めずに、その結果を使う（止めると途中までしか見つからない）
+        didSet { if isViewing, !oldValue, !isBusy, Date().timeIntervalSince(lastBrowse) > Self.browseInterval { wake() } }
+    }
 
     @ObservationIgnored private var registry: [String: Device] = [:]
     @ObservationIgnored private var names: [String: String] = [:]
@@ -70,19 +88,34 @@ final class DeviceScanner {
     @ObservationIgnored private var loop: Task<Void, Never>?
     @ObservationIgnored private var sweepRequested = true
     @ObservationIgnored private var lastNameLookup = Date.distantPast
+    @ObservationIgnored private var lastBrowse = Date.distantPast
+    /// 掃引・Bonjour・ARP の読み取りの最中（周期の待ちの間は false）
+    @ObservationIgnored private var isBusy = false
+    /// Bonjour で最後に見えた日時（registry のキーごと）。ARP に出ない機器のオンライン判定に使う
+    @ObservationIgnored private var bonjourSeen: [String: Date] = [:]
 
     static let cycle: Duration = .seconds(20)
+    /// 画面を開いている間に Bonjour で探す間隔（掃引のときは間隔によらず探す）
+    static let browseInterval: TimeInterval = 120
+    /// Bonjour で最後に見えてから、この秒数まではオンラインとみなす
+    static let bonjourOnlineWindow: TimeInterval = 300
 
     func start(monitor: Monitor) {
         guard loop == nil else { return }
         self.monitor = monitor
-        registry = DataStore.readJSON(DataStore.devices, as: [String: Device].self) ?? [:]
+        registry = Self.unescapingNames(DataStore.readJSON(DataStore.devices, as: [String: Device].self) ?? [:])
         names = DataStore.readJSON(DataStore.deviceNames, as: [String: String].self) ?? [:]
         loop = Task { await run() }
     }
 
     func requestSweep() {
         sweepRequested = true
+        wake()
+    }
+
+    /// 待たずに次の周期を始める
+    private func wake() {
+        guard monitor != nil else { return }
         // 前のループが止まってから始める（2つのループが await をはさんで registry を同時に書き換えないように）
         let previous = loop
         previous?.cancel()
@@ -96,20 +129,82 @@ final class DeviceScanner {
         let trimmed = String(name.trimmingCharacters(in: .whitespacesAndNewlines).prefix(40))
         if trimmed.isEmpty { names.removeValue(forKey: mac) } else { names[mac] = trimmed }
         registry[mac]?.name = names[mac]
+        saveNames()
+        publish()
+    }
+
+    private func saveNames() {
         let snapshot = names
         Task.detached(priority: .utility) { DataStore.writeJSON(snapshot, to: DataStore.deviceNames) }
-        publish()
+    }
+
+    /// #16 で直す前に保存した mDNS 名（`Doorbell\032Repeater` など）のエスケープを戻す。
+    /// 名前がある機器には問い合わせ直さないので、読み込むときに直す
+    nonisolated static func unescapingNames(_ registry: [String: Device]) -> [String: Device] {
+        registry.mapValues { d in
+            var d = d
+            if let name = d.mdns, name.contains("\\") { d.mdns = unescapeDNS(name) }
+            return d
+        }
+    }
+
+    /// Bonjour で見つかった機器を registry に入れる。ARP 表に同じ IP があればその MAC の登録に、
+    /// 無ければ `ip:<IP>` の登録に入れる。入れた登録のキーを返す
+    nonisolated static func mergeBonjour(_ found: [String: BonjourDevice], arp: [String: String],
+                                         into registry: inout [String: Device], net: String?, now: Int64) -> [String] {
+        var keys: [String] = []
+        for (ip, b) in found {
+            let key = arp[ip] ?? Device.ipKeyPrefix + ip
+            var d = registry[key] ?? Device(mac: key, first: now, last: now)
+            d.ip = ip
+            d.last = now
+            d.net = net
+            if let name = b.name { d.service = name }
+            if let model = b.model { d.model = model }
+            d.services = Array(Set(d.services ?? []).union(b.services)).sorted()
+            registry[key] = d
+            keys.append(key)
+        }
+        return keys
+    }
+
+    /// `ip:<IP>` の登録のうち、ARP 表でその IP の MAC が分かったものを MAC の登録に移す（付けた名前も移す）。
+    /// 移した `ip:…` のキーを返す
+    nonisolated static func adoptIPEntries(arp: [String: String], registry: inout [String: Device],
+                                           names: inout [String: String]) -> [String] {
+        var moved: [String] = []
+        for (key, old) in registry where !old.hasMAC {
+            guard let ip = old.ip, let mac = arp[ip], var d = registry[mac] else { continue }
+            if d.service == nil { d.service = old.service }
+            if d.model == nil { d.model = old.model }
+            d.services = Array(Set(d.services ?? []).union(old.services ?? [])).sorted()
+            d.first = min(d.first, old.first)
+            if let name = names.removeValue(forKey: key), names[mac] == nil {
+                names[mac] = name
+                d.name = name
+            }
+            registry[mac] = d
+            registry.removeValue(forKey: key)
+            moved.append(key)
+        }
+        return moved
     }
 
     private func run() async {
         while !Task.isCancelled {
             guard let monitor else { return }
             let env = monitor.env
-            if sweepRequested, !env.gateway.isEmpty {
+            let sweeping = sweepRequested && !env.gateway.isEmpty
+            let browsing = !env.gateway.isEmpty && (sweeping || (isViewing && Date().timeIntervalSince(lastBrowse) > Self.browseInterval))
+            // Bonjour は掃引と並べて探す（掃引の3秒の待ちと重なる）
+            isBusy = true
+            async let bonjour: Bonjour.Result? = browsing ? Bonjour.discover() : nil
+            if sweeping {
                 sweepRequested = false
                 isSweeping = true
                 await Self.sweep(interface: env.interface)
             }
+            let found = await bonjour
             let arp = await Self.arpTable()
             if arpWorks != !arp.isEmpty { arpWorks = !arp.isEmpty }
             let now = Date().epochMs
@@ -126,13 +221,30 @@ final class DeviceScanner {
                 registry[mac] = d
                 online.insert(mac)
             }
+            // Bonjour だけで見つけていた機器の MAC が分かったら、MAC の登録に移す
+            let adopted = Self.adoptIPEntries(arp: arp, registry: &registry, names: &names)
+            if !adopted.isEmpty {
+                adopted.forEach { bonjourSeen.removeValue(forKey: $0) }
+                saveNames()
+            }
+            if let found {
+                // 途中で止められた探索は、見つかった分だけ使って次の周期でもう一度探す
+                if !Task.isCancelled { lastBrowse = Date() }
+                if bonjourDenied != found.denied { bonjourDenied = found.denied }
+                for key in Self.mergeBonjour(found.devices, arp: arp, into: &registry, net: env.networkID, now: now) {
+                    bonjourSeen[key] = Date()
+                }
+            }
+            bonjourSeen = bonjourSeen.filter { Date().timeIntervalSince($0.value) < Self.bonjourOnlineWindow && registry[$0.key] != nil }
+            online.formUnion(bonjourSeen.keys)
             // 見つかった機器はすぐ出す（mDNS名の逆引きを待つと、掃引のあと数秒「見つかりません」になる）
             update(online: online, env: env)
             isSweeping = false
             // mDNS名の逆引きは重いので2分に1回
             if Date().timeIntervalSince(lastNameLookup) > 120 {
                 lastNameLookup = Date()
-                for mac in online where registry[mac]?.mdns == nil {
+                // Bonjour の名前がある機器は問い合わせない（dig を起動する数を減らす）
+                for mac in online where registry[mac]?.mdns == nil && registry[mac]?.service == nil {
                     if let ip = registry[mac]?.ip {
                         // 待っている間に registry へ書き込みが続かないよう、結果を受け取ってから入れる
                         let name = await Self.mdnsName(ip, gateway: env.gateway)
@@ -143,6 +255,7 @@ final class DeviceScanner {
             }
             let snapshot = registry
             Task.detached(priority: .utility) { DataStore.writeJSON(snapshot, to: DataStore.devices) }
+            isBusy = false
             try? await Task.sleep(for: Self.cycle)
         }
     }
@@ -350,7 +463,18 @@ final class DeviceScanner {
         ("viera", "media"), ("roku", "media"), ("firetv", "media"),
     ]
 
-    private static func classify(_ d: Device, env: NetworkEnvironment) -> (String?, String) {
+    /// Bonjour のサービスの種類から分かる機器の種類（名前・機種から分かればそちらを優先）
+    private static let serviceHints: [(String, String)] = [
+        ("ipp", "printer"), ("ipps", "printer"), ("pdl-datastream", "printer"),
+        ("googlecast", "media"), ("hap", "iot"), ("airplay", "media"), ("spotify-connect", "speaker"), ("raop", "speaker"),
+    ]
+    /// TXT レコードの機種の先頭（`AppleTV14,1` → media など）
+    private static let modelHints: [(String, String)] = [
+        ("appletv", "media"), ("audioaccessory", "speaker"), ("iphone", "phone"), ("ipad", "tablet"),
+        ("macbook", "pc"), ("macmini", "pc"), ("imac", "pc"), ("macpro", "pc"), ("mac", "pc"), ("chromecast", "media"),
+    ]
+
+    static func classify(_ d: Device, env: NetworkEnvironment) -> (String?, String) {
         let hay = "\(d.vendor ?? "") \(d.mdns ?? "")".lowercased()
         var label = d.vendor
         var kind = "unknown"
@@ -358,8 +482,12 @@ final class DeviceScanner {
             label = rule.1
             kind = rule.2
         }
-        let mdns = (d.mdns ?? "").lowercased()
-        if let hint = nameHints.first(where: { mdns.contains($0.0) }) { kind = hint.1 }
+        let services = Set(d.services ?? [])
+        if let hint = serviceHints.first(where: { services.contains($0.0) }) { kind = hint.1 }
+        let names = "\(d.mdns ?? "") \(d.service ?? "")".lowercased()
+        if let hint = nameHints.first(where: { names.contains($0.0) }) { kind = hint.1 }
+        let model = (d.model ?? "").lowercased()
+        if let hint = modelHints.first(where: { model.hasPrefix($0.0) }) { kind = hint.1 }
         if kind == "apple" { kind = "unknown" }
         if d.ip == env.gateway { kind = "router" } else if d.ip == env.selfIP { kind = "pc" }
         return (label, kind)
