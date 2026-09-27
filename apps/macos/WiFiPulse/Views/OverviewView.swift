@@ -218,6 +218,19 @@ struct LatencyLineChart: View, Equatable {
         return (lo / 1.3)...max(hi * 1.3, lo / 1.3 * 2)
     }
 
+    /// 線の点。ルーター・インターネットの順に並べる（凡例の順）
+    private struct Point {
+        let date: Date
+        let ms: Double
+        let series: String
+    }
+
+    private var points: [Point] {
+        let router = SeriesName.router, internet = SeriesName.internet
+        return samples.compactMap { s in s.router.map { Point(date: s.date, ms: max(0.1, $0), series: router) } }
+            + samples.compactMap { s in s.internet.map { Point(date: s.date, ms: max(0.1, $0), series: internet) } }
+    }
+
     var body: some View {
         Chart {
             ForEach(LatencySeries.spans(samples.filter(\.excluded).map(\.date)), id: \.lowerBound) { r in
@@ -225,20 +238,14 @@ struct LatencyLineChart: View, Equatable {
                 RectangleMark(xStart: .value("Time", r.lowerBound), xEnd: .value("Time", r.upperBound))
                     .foregroundStyle(Color.primary.opacity(0.08))
             }
-            ForEach(samples) { s in
-                if let v = s.router {
-                    LineMark(x: .value("Time", s.date), y: .value("ms", max(0.1, v)), series: .value("Target", SeriesName.router))
-                        .foregroundStyle(by: .value("Target", SeriesName.router))
-                }
-                if let v = s.internet {
-                    LineMark(x: .value("Time", s.date), y: .value("ms", max(0.1, v)), series: .value("Target", SeriesName.internet))
-                        .foregroundStyle(by: .value("Target", SeriesName.internet))
-                }
-                if s.lost {
-                    RuleMark(x: .value("Time", s.date))
-                        .foregroundStyle(.red.opacity(0.5))
-                        .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 3]))
-                }
+            // 毎秒描き直すので、点ごとの LineMark ではなくまとめて描く LinePlot を使う
+            // （LineMark だとこのグラフだけで概要画面の CPU が約 1% 増える。#14）
+            LinePlot(points, x: .value("Time", \.date), y: .value("ms", \.ms), series: .value("Target", \.series))
+                .foregroundStyle(by: .value("Target", \.series))
+            ForEach(samples.filter(\.lost)) { s in
+                RuleMark(x: .value("Time", s.date))
+                    .foregroundStyle(.red.opacity(0.5))
+                    .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 3]))
             }
         }
         .chartForegroundStyleScale([SeriesName.router: SeriesColor.router, SeriesName.internet: SeriesColor.inet4])
