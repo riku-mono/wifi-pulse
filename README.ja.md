@@ -118,7 +118,7 @@ wifi-pulse/
 
 ## ロードマップ
 
-- [ ] 残りのユニットテスト: ネットワークの切り替え（[#2](https://github.com/riku-mono/wifi-pulse/issues/2)）
+- [x] 残りのユニットテスト: ネットワークの切り替え（[#2](https://github.com/riku-mono/wifi-pulse/issues/2)）
 - [x] アプリアイコン（[#3](https://github.com/riku-mono/wifi-pulse/issues/3)）
 - [ ] CI: macOS でのビルドとテスト（[#4](https://github.com/riku-mono/wifi-pulse/issues/4)）
 - [ ] Developer ID 署名・公証・自動アップデート（[#5](https://github.com/riku-mono/wifi-pulse/issues/5)）

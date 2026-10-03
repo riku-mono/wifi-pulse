@@ -4,8 +4,7 @@
 
 Please **don't open a public issue**.
 
-- Once the repository is public: use GitHub's [private vulnerability reporting](https://github.com/riku-mono/wifi-pulse/security/advisories/new).
-- Until then: contact the maintainer, [@riku-mono](https://github.com/riku-mono), privately on GitHub.
+Use GitHub's [private vulnerability reporting](https://github.com/riku-mono/wifi-pulse/security/advisories/new) (**Security** tab → **Report a vulnerability**).
 
 English or Japanese is fine. We'll acknowledge your report and keep you updated on the fix.
 
