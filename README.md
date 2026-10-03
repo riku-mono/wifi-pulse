@@ -118,7 +118,7 @@ wifi-pulse/
 
 ## Roadmap
 
-- [ ] Remaining unit tests: network switching ([#2](https://github.com/riku-mono/wifi-pulse/issues/2))
+- [x] Remaining unit tests: network switching ([#2](https://github.com/riku-mono/wifi-pulse/issues/2))
 - [x] App icon ([#3](https://github.com/riku-mono/wifi-pulse/issues/3))
 - [ ] CI: build and test on macOS ([#4](https://github.com/riku-mono/wifi-pulse/issues/4))
 - [ ] Developer ID signing, notarization and automatic updates ([#5](https://github.com/riku-mono/wifi-pulse/issues/5))
