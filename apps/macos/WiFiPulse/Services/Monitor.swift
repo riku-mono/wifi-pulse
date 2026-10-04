@@ -411,7 +411,6 @@ final class Monitor {
     /// 復帰したら ping を取り直し、起動直後と同じ慣らし運転を挟む
     private func didWake() {
         guard isAsleep else { return }
-        LinkReader.shared.invalidate()
         restartPingers()
         warmupEnd = Date().addingTimeInterval(Self.warmupSeconds)
         isAsleep = false
