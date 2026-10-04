@@ -153,19 +153,16 @@ private struct LatencyBandChart: View, Equatable {
                 RectangleMark(xStart: .value("Time", r.lowerBound), xEnd: .value("Time", r.upperBound))
                     .foregroundStyle(Color.primary.opacity(0.08))
             }
-            ForEach(series.points) { p in
-                AreaMark(x: .value("Time", p.date), yStart: .value("Median", p.p50), yEnd: .value("Max", p.max),
-                         series: .value("Target", p.series))
-                    .foregroundStyle(by: .value("Target", p.series))
-                    .opacity(0.18)
-                LineMark(x: .value("Time", p.date), y: .value("ms", p.p50), series: .value("Target", p.series))
-                    .foregroundStyle(by: .value("Target", p.series))
-            }
-            ForEach(series.losses, id: \.self) { d in
-                RuleMark(x: .value("Loss", d))
-                    .foregroundStyle(.red.opacity(0.45))
-                    .lineStyle(StrokeStyle(lineWidth: 1))
-            }
+            // 点ごとのマークではなく、まとめて描く Plot を使う（毎秒描き直すので CPU が大きく違う。#14・#46）
+            AreaPlot(series.points, x: .value("Time", \.date), yStart: .value("Median", \.p50), yEnd: .value("Max", \.max),
+                     series: .value("Target", \.series))
+                .foregroundStyle(by: .value("Target", \.series))
+                .opacity(0.18)
+            LinePlot(series.points, x: .value("Time", \.date), y: .value("ms", \.p50), series: .value("Target", \.series))
+                .foregroundStyle(by: .value("Target", \.series))
+            RulePlot(series.losses, x: .value("Loss", \.self))
+                .foregroundStyle(.red.opacity(0.45))
+                .lineStyle(StrokeStyle(lineWidth: 1))
         }
         .chartXScale(domain: series.domain)
         .chartForegroundStyleScale([SeriesName.router: SeriesColor.router, SeriesName.ipv4: SeriesColor.inet4, SeriesName.ipv6: SeriesColor.inet6])
