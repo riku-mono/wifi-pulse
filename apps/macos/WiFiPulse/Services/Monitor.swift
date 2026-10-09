@@ -415,6 +415,8 @@ final class Monitor {
     /// 復帰したら ping を取り直し、起動直後と同じ慣らし運転を挟む
     private func didWake() {
         guard isAsleep else { return }
+        // 復帰の間に別のネットワークにつながっているかもしれないので、Wi-Fi の情報を全部読み直す
+        LinkReader.shared.invalidate()
         restartPingers()
         warmupEnd = Date().addingTimeInterval(Self.warmupSeconds)
         isAsleep = false
