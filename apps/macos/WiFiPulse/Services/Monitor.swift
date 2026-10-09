@@ -258,6 +258,8 @@ final class Monitor {
             default: String(localized: "Checking connection")
             }
             let at = Date()
+            // SSID などをキャッシュしているので、経路が変わったら次の秒で全項目を取り直す
+            LinkReader.shared.invalidate()
             Task { @MainActor in await self?.networkChanged(text, at: at) }
         }
         pathMonitor.start(queue: DispatchQueue(label: "WiFiPulse.path"))
@@ -271,6 +273,8 @@ final class Monitor {
         let fresh = Self.carryRouterMAC(await NetworkEnvironment.resolve(), from: env)
         guard fresh != env else { return }
         env = fresh
+        // 経路を取り直している間に読んだ SSID が前のネットワークのものかもしれないので、もう一度取り直す
+        LinkReader.shared.invalidate()
         switch Self.transition(from: network, to: fresh) {
         case .stay:
             break
@@ -411,6 +415,8 @@ final class Monitor {
     /// 復帰したら ping を取り直し、起動直後と同じ慣らし運転を挟む
     private func didWake() {
         guard isAsleep else { return }
+        // 復帰の間に別のネットワークにつながっているかもしれないので、Wi-Fi の情報を全部読み直す
+        LinkReader.shared.invalidate()
         restartPingers()
         warmupEnd = Date().addingTimeInterval(Self.warmupSeconds)
         isAsleep = false
@@ -446,7 +452,7 @@ final class Monitor {
 
     @concurrent
     nonisolated static func collect(interface: String, pingers: [String: Pinger]) async -> RawSample {
-        RawSample(date: Date(), link: WiFiLink.sample(), counters: InterfaceCounters.read(interface),
+        RawSample(date: Date(), link: LinkReader.shared.sample(), counters: InterfaceCounters.read(interface),
                   gw: pingers["gw"]?.drain() ?? .init(),
                   v4: pingers["v4"]?.drain() ?? .init(),
                   v6: pingers["v6"]?.drain() ?? .init())
